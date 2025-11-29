@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>管理画面（オーナー用）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #111;
+      line-height: 1.6;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===== ログイン画面 ===== */
+    .login-wrap {
+      max-width: 360px;
+      margin: 80px auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 18px 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .login-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .login-sub {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 14px;
+    }
+    .login-wrap label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .login-wrap input[type="text"],
+.login-wrap input[type="password"] {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+.login-wrap input[type="text"]:focus,
+.login-wrap input[type="password"]:focus {
+  border-color: #111;
+}
+
+    .login-wrap input[type="password"]:focus {
+      border-color: #111;
+    }
+    .login-btn-row {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .login-btn {
+      background: #111;
+      color: #fff;
+      border-radius: 999px;
+      border: none;
+      padding: 7px 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .login-error {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #c00;
+      min-height: 16px;
+    }
+    .login-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    /* ===== 左サイドバー（タイミー風） ===== */
+    .sidebar {
+      width: 230px;
+      background: #f7f7f8;
+      border-right: 1px solid #ddd;
+      padding: 12px 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+    }
+
+    .sidebar-header {
+      padding: 4px 8px 6px;
+    }
+    .sidebar-store {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .sidebar-role {
+      font-size: 11px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    /* ★ オーナーID / 端末名入力欄 */
+    .sidebar-owner-id {
+      margin-top: 8px;
+      padding: 4px 2px 2px;
+    }
+    .sidebar-owner-id label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .sidebar-owner-id input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    .sidebar-owner-id input:focus {
+      border-color: #111;
+    }
+    .sidebar-owner-id .hint {
+      font-size: 10px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .sidebar-nav button {
+      text-align: left;
+      border-radius: 6px;
+      border: none;
+      padding: 7px 10px;
+      font-size: 13px;
+      background: transparent;
+      cursor: pointer;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-nav button span.badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #eee;
+      color: #666;
+      margin-left: 4px;
+    }
+
+    .sidebar-nav button:hover {
+      background: #e9eefc;
+    }
+
+    .sidebar-nav button.active {
+      background: #1a73e8;
+      color: #fff;
+    }
+    .sidebar-nav button.active span.badge {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 10px;
+      color: #999;
+      padding: 0 8px;
+    }
+
+    /* サイドバー アイコン付きラベル */
+    .sidebar-nav button .label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+    .sidebar-nav button .label-icon {
+      width: 18px;
+      text-align: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .sidebar-nav button .label-text {
+      flex: 1;
+    }
+
+    /* ===== 右メインエリア ===== */
+    .main {
+      flex: 1;
+      padding: 16px 20px 24px;
+    }
+
+    .main-header {
+      margin-bottom: 12px;
+    }
+    .main-header-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .main-header-sub {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .view-panel { display: none; }
+    .view-panel.active { display: block; }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 16px 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .card h2 {
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+    .card-sub {
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #111;
+    }
+
+    select {
+      padding: 4px 8px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    /* A/Bタスク textareaを縦長に */
+    #tasksAInput,
+    #tasksBInput {
+      min-height: 220px;
+    }
+
+    .row { margin-bottom: 10px; }
+
+    .hint {
+      font-size: 11px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 13px;
+      border-radius: 999px;
+      border: none;
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #111;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #eee;
+      color: #333;
+    }
+    .btn-danger {
+      background: #f44;
+      color: #fff;
+    }
+
+    .status {
+      font-size: 12px;
+      min-height: 18px;
+      margin-top: 2px;
+    }
+    .status.ok { color: #007700; }
+    .status.err { color: #cc0000; }
+
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 10px 0;
+    }
+
+    /* ownerNews list */
+    .news-list {
+      list-style: none;
+      font-size: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .news-item {
+      border-bottom: 1px solid #eee;
+      padding: 6px 0;
+      display: flex;
+      gap: 8px;
+    }
+    .news-main { flex: 1; }
+    .news-title { font-weight: 600; margin-bottom: 2px; }
+    .news-body { font-size: 12px; }
+    .news-meta {
+      font-size: 10px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .news-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .slot-note {
+      font-size: 11px;
+      color: #666;
+      margin-top: -2px;
+      margin-bottom: 6px;
+    }
+
+    /* 引き継ぎメモ テンプレ preview */
+    .handover-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      padding: 6px 4px;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px dashed #ddd;
+    }
+    .handover-preview-chip {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #ddd;
+      white-space: nowrap;
+    }
+
+    /* スタッフログ table */
+    .log-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
+      margin-bottom: 10px;
+    }
+    .log-filters .field {
+      min-width: 160px;
+      max-width: 220px;
+      flex: 1;
+    }
+
+    table.log-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .log-table th,
+    .log-table td {
+      border-bottom: 1px solid #eee;
+      padding: 4px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .log-table th {
+      background: #fafafa;
+      font-weight: 600;
+    }
+    .log-empty {
+      font-size: 12px;
+      color: #777;
+      margin-top: 6px;
+    }
+
+    /* シフト表プレビュー画像 */
+    #shiftImagePreview {
+      max-width: 100%;
+      max-height: 400px;
+      display: none;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+
+    /* ===== Analytics（グラフ） ===== */
+    .analytics-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .analytics-controls .field {
+      min-width: 160px;
+      max-width: 220px;
+      flex: 1;
+    }
+
+    .summary-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 12px;
+    }
+    .summary-card {
+      flex: 0 0 160px;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .summary-title {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+    .summary-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .summary-note {
+      font-size: 10px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .analytics-chart-wrap {
+      width: 100%;
+      height: 260px;
+      margin-top: 6px;
+      margin-bottom: 10px;
+      padding: 4px;
+    }
+
+    .subsection-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .analytics-table th:nth-child(1) { width: 160px; }
+    .analytics-table th:nth-child(2) { width: 80px; }
+
+    /* === モバイル用トップバー & ハンバーガー === */
+    .mobile-topbar {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        background: #111;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        z-index: 2000;
+      }
+
+      .mobile-topbar-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-left: 8px;
+      }
+
+      .mobile-menu-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        border: none;
+        background: #333;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        padding: 0;
+        margin-right: 6px;
+        cursor: pointer;
+      }
+
+      .layout {
+        flex-direction: column;
+        padding-top: 52px;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 70%;
+        max-width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease-out;
+        z-index: 2100;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+      }
+
+      .main {
+        padding: 12px 12px 20px;
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 2050;
+        display: none;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ① ログイン画面 -->
+  <div id="ownerLogin" class="login-wrap">
+    <div class="login-title">管理者 ログイン</div>
+    <div class="login-sub">
+      管理画面に入るためのパスワードを入力してください。
+    </div>
+
+
+
+<label for="storeIdInput">店舗ID</label>
+<input
+  id="storeIdInput"
+  type="text"
+  placeholder="例：nambucho"
+  autocomplete="off"
+/>
+
+    
+    <label for="ownerPasswordInput">パスワード</label>
+    <input
+      id="ownerPasswordInput"
+      type="password"
+      placeholder="パスワード"
+      autocomplete="current-password"
+    />
+
+    <div class="login-btn-row">
+      <button id="ownerLoginBtn" class="login-btn" type="button">ログイン</button>
+    </div>
+
+    <p id="ownerLoginError" class="login-error"></p>
+
+    <p class="login-note">
+      ※ログイン状態は同じ端末・同じブラウザで約15時間維持されます。<br>
+      ※時間が経つと自動的にログアウトされます。
+    </p>
+  </div>
+
+  <!-- ② 本体アプリ（ログイン後に表示） -->
+  <div id="ownerApp" style="display:none;">
+    <!-- ★モバイル用トップバー -->
+    <div class="mobile-topbar">
+      <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      <div class="mobile-topbar-title">管理画面</div>
+    </div>
+
+    <!-- ★サイドバーの後ろの黒背景 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="layout">
+      <!-- ================= 左メニュー ================= -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-role">管理画面</div>
+
+          <!-- ★ オーナー/店長 ID / 端末名 -->
+          <div class="sidebar-owner-id">
+            <label for="ownerIdInput">オーナーID / 端末名</label>
+            <input
+              id="ownerIdInput"
+              type="text"
+              placeholder="例: オーナーiPhone / 事務所PC"
+            />
+            <div class="hint">※この端末の名前。ログの管理メモ用。</div>
+          </div>
+        </div>
+
+ <nav class="sidebar-nav">
+  <button type="button" data-view="news" class="active">
+    <span class="label">
+      <span class="label-icon">🛎</span>
+      <span class="label-text">お知らせ管理</span>
+    </span>
+  </button>
+
+  <!-- ★ 追加：お知らせセンター（notice.html を開く用） -->
+  <button type="button" data-view="notice-center">
+    <span class="label">
+      <span class="label-icon">📢</span>
+      <span class="label-text">お知らせセンター</span>
+    </span>
+  </button>
+
+  <button type="button" data-view="tasks">
+    <span class="label">
+      <span class="label-icon">📝</span>
+      <span class="label-text">時間帯ごとのタスク編集</span>
+    </span>
+  </button>
+
+  <button type="button" data-view="handover">
+    <span class="label">
+      <span class="label-icon">📒</span>
+      <span class="label-text">引き継ぎメモ（ボタン編集）</span>
+    </span>
+  </button>
+
+  <button type="button" data-view="logs">
+    <span class="label">
+      <span class="label-icon">⏱</span>
+      <span class="label-text">スタッフログ</span>
+    </span>
+  </button>
+
+  <button type="button" data-view="analytics">
+    <span class="label">
+      <span class="label-icon">📊</span>
+      <span class="label-text">グラフ分析（β）</span>
+    </span>
+  </button>
+
+  <button type="button" data-view="shift">
+    <span class="label">
+      <span class="label-icon">📅</span>
+      <span class="label-text">シフト表設定</span>
+    </span>
+  </button>
+</nav>
+
+
+
+        <div class="sidebar-footer">
+          この画面で設定した内容が、スタッフ用チェック画面に反映されます。
+        </div>
+      </aside>
+
+      <!-- ================= 右メイン ================= -->
+      <main class="main">
+        <header class="main-header">
+          <div class="main-header-title">管理メニュー</div>
+          <div class="main-header-sub">
+            左のメニューから編集したい項目を選んでください。
+          </div>
+        </header>
+
+        <!-- ① お知らせ管理 -->
+        <section id="view-news" class="view-panel active">
+          <section class="card" id="news-card">
+            <h2>お知らせ管理（ownerNews）</h2>
+            <p class="card-sub">
+              スタッフ画面の「お知らせ」欄に表示される内容を登録・削除できます。
+            </p>
+
+            <div class="row">
+              <label for="newsTitle">タイトル</label>
+              <input type="text" id="newsTitle" placeholder="例）FF油交換について" />
+            </div>
+            <div class="row">
+              <label for="newsBody">本文</label>
+              <textarea id="newsBody" placeholder="例）今週は油交換の頻度を1日2回に増やしてください。夜勤帯で対応お願いします。"></textarea>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn-primary" id="newsAddBtn">お知らせを追加</button>
+              <button type="button" class="btn-secondary" id="newsClearFormBtn">入力をクリア</button>
+            </div>
+            <div class="status" id="newsStatus"></div>
+
+            <hr>
+
+            <p class="hint">※最新20件まで表示。古いものから順に削除してOKです。</p>
+            <ul class="news-list" id="newsList"></ul>
+          </section>
+        </section>
+
+        <!-- ② タスク定義編集 -->
+        <section id="view-tasks" class="view-panel">
+          <section class="card" id="tasks-card">
+            <h2>時間帯ごとのタスク編集（taskSlots）</h2>
+            <p class="card-sub">
+              各時間帯の Aタスク（必須）・Bタスク（余裕）を編集できます。<br>
+              スタッフ画面のチェックリストはここで定義された内容から自動生成されます。
+            </p>
+
+            <div class="row">
+              <label for="slotSelect">編集する時間帯</label>
+              <select id="slotSelect">
+                <option value="t6-8">6:00〜8:00（朝の立ち上げ）</option>
+                <option value="t9-11">9:00〜11:00（午前帯）</option>
+                <option value="t12-14">12:00〜14:00（昼帯）</option>
+                <option value="t15-17">15:00〜17:00（夕方前）</option>
+                <option value="t18-20">18:00〜20:00（夕方〜夜）</option>
+                <option value="t21-23">21:00〜23:00（夜帯）</option>
+                <option value="t0-2">0:00〜2:00（深夜前半）</option>
+                <option value="t3-5">3:00〜5:00（早朝）</option>
+              </select>
+              <p class="slot-note">時間帯を変更すると、その時間帯のタスク定義を Firestore から読み込みます。</p>
+            </div>
+
+            <div class="row">
+              <label for="tasksAInput">Aタスク（必須）</label>
+              <textarea id="tasksAInput" placeholder="例）&#10;CDC納品・片づけ（2便）&#10;ベーカリー納品・片づけ（2便）"></textarea>
+              <div class="hint">1行につき1タスク。空行は無視されます。</div>
+            </div>
+
+            <div class="row">
+              <label for="tasksBInput">Bタスク（余裕あれば）</label>
+              <textarea id="tasksBInput" placeholder="例）&#10;店内・店頭ゴミ箱の清掃&#10;サービスコーナー清掃"></textarea>
+              <div class="hint">1行につき1タスク。空行は無視されます。</div>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn-secondary" id="reloadSlotBtn">選択中の時間帯を再読み込み</button>
+              <button type="button" class="btn-primary" id="saveSlotBtn">この内容で保存</button>
+            </div>
+            <div class="status" id="taskStatus"></div>
+
+            <hr>
+
+            <p class="hint">
+              ※保存すると、その時間帯のチェック状態（完了チェック）だけリセットされます（他の時間帯はそのまま）。<br>
+              ※チェックリスト本体の HTML（スタッフ用画面）は書き換え不要です。この画面は定義だけをいじる役割。
+            </p>
+          </section>
+        </section>
+
+        <!-- ③ シフト表設定 -->
+        <section id="view-shift" class="view-panel">
+          <section class="card" id="shift-card">
+            <h2>シフト表設定</h2>
+            <p class="card-sub">
+              スタッフ画面からワンタップで開ける「シフト表画像」のURLを設定します。<br>
+              画像は Googleドライブ / Gyazo / 自分のサーバーなどにアップして、公開URLを貼ればOKです。
+            </p>
+
+            <!-- URL 直接入力欄 -->
+            <div class="row">
+              <label for="shiftImageUrlInput">シフト表画像URL</label>
+              <input
+                type="text"
+                id="shiftImageUrlInput"
+                placeholder="https:// から始まる画像URLを貼ってください"
+              />
+              <div class="hint">
+                URLを直接貼ってもOKです。<br>
+                下の「画像ファイルをアップロード」で選ぶと、自動でここにURLが入ります。
+              </div>
+            </div>
+
+            <!-- ファイルアップロード欄 -->
+            <div class="row">
+              <label for="shiftImageFileInput">シフト表画像ファイルをアップロード</label>
+              <input
+                type="file"
+                id="shiftImageFileInput"
+                accept="image/*"
+              />
+              <div class="hint">
+                ファイルを選ぶと自動で Firebase Storage にアップロードされ、<br>
+                URL欄とプレビューが更新されます。
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn-primary" id="shiftImageUrlSaveBtn">
+                この内容で保存
+              </button>
+            </div>
+            <div class="status" id="shiftStatus"></div>
+
+            <hr>
+
+            <label>プレビュー</label>
+            <img id="shiftImagePreview" src="" alt="シフト表プレビュー">
+          </section>
+        </section>
+
+        <!-- ④ 引き継ぎメモ用ボタン編集 -->
+        <section id="view-handover" class="view-panel">
+          <section class="card" id="handover-card">
+            <h2>引き継ぎメモ（ボタン文言の編集）</h2>
+            <p class="card-sub">
+              スタッフ画面の「引き継ぎメモ（全員で共有）」に並んでいるボタンの文言を編集できます。<br>
+              今は全時間帯で共通のボタンセット（global）を使います。
+            </p>
+
+            <div class="row">
+              <label for="handoverChipsInput">ボタン文言リスト</label>
+              <textarea id="handoverChipsInput"
+                placeholder="例）&#10;FFケース清掃済み&#10;ホット・常温FF 補充済み&#10;米飯・おにぎり 前陳＆整理済み"></textarea>
+              <div class="hint">
+                1行につき1ボタンになります。空行は無視されます。<br>
+                保存すると、全ての時間帯の「引き継ぎメモボタン」がこの内容で上書きされます。
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn-secondary" id="handoverReloadBtn">現在の設定を読み込み</button>
+              <button type="button" class="btn-primary" id="handoverSaveBtn">この内容で保存</button>
+            </div>
+            <div class="status" id="handoverStatus"></div>
+
+            <hr>
+
+            <label>プレビュー</label>
+            <div class="handover-preview" id="handoverPreview"></div>
+
+            <p class="hint" style="margin-top:6px;">
+              ※スタッフ画面側では <code>handoverTemplates/global</code> の内容を読みにいきます。
+            </p>
+          </section>
+        </section>
+
+        <!-- ⑤ スタッフログ -->
+        <section id="view-logs" class="view-panel">
+          <section class="card" id="logs-card">
+            <h2>スタッフログ（checklistLogs）</h2>
+            <p class="card-sub">
+              チェックリスト操作の履歴を確認できます。<br>
+              営業日と端末ラベルで絞り込みできます。
+            </p>
+
+            <div class="log-filters">
+              <div class="btn-row" style="margin-top:4px; margin-bottom:4px;">
+                <button type="button" class="btn-secondary" id="logTodayBtn">今日</button>
+                <button type="button" class="btn-secondary" id="logYesterdayBtn">昨日</button>
+                <button type="button" class="btn-secondary" id="logLast3Btn">直近3日（※実装予定）</button>
+              </div>
+
+              <div class="field">
+                <label for="logDate">営業日</label>
+                <input type="date" id="logDate">
+              </div>
+
+              <div class="field">
+                <label for="logDevice">端末ラベル（空欄なら全端末）</label>
+                <input type="text" id="logDevice" placeholder="例：レジ横iPad">
+              </div>
+
+              <!-- ★キーワード検索欄 -->
+              <div class="field">
+                <label for="logKeyword">キーワード</label>
+                <input
+                  type="text"
+                  id="logKeyword"
+                  placeholder="時刻 / 営業日 / 端末 / 操作 / タスク"
+                >
+              </div>
+
+              <div class="field" style="flex:0 0 auto;">
+                <button type="button" class="btn-primary" id="logFilterBtn">絞り込み</button>
+              </div>
+            </div>
+
+            <table class="log-table">
+              <thead>
+                <tr>
+                  <th style="width:90px;">時刻</th>
+                  <th style="width:120px;">営業日</th>
+                  <th style="width:140px;">端末</th>
+                  <th style="width:70px;">操作</th>
+                  <th>タスク / メモ</th>
+                </tr>
+              </thead>
+              <tbody id="logTableBody">
+                <tr><td colspan="5">ログを読み込み中...</td></tr>
+              </tbody>
+            </table>
+            <div class="log-empty" id="logEmptyMsg" style="display:none;"></div>
+
+            <div class="status" id="logStatus"></div>
+          </section>
+        </section>
+
+        <!-- ⑥ グラフ分析（β） -->
+        <section id="view-analytics" class="view-panel">
+          <section class="card" id="analytics-card">
+            <h2>グラフ分析（β）</h2>
+            <p class="card-sub">
+              checklistLogs から、営業日ごとの「端末ごとのチェック回数」をざっくり可視化します。<br>
+              どの端末がどれくらいタスクを進めているかの雰囲気を見る用の簡易版です。
+            </p>
+
+            <div class="row analytics-controls">
+              <div class="field">
+                <label for="analyticsDate">営業日</label>
+                <input type="date" id="analyticsDate">
+              </div>
+              <div class="field" style="flex:0 0 auto;">
+                <button type="button" class="btn-primary" id="analyticsRunBtn">
+                  この日で集計
+                </button>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <div class="summary-title">合計チェック回数</div>
+                <div class="summary-value" id="analyticsTotalCount">-</div>
+                <div class="summary-note" id="analyticsSummaryNote"></div>
+              </div>
+            </div>
+
+            <div class="analytics-chart-wrap">
+              <canvas id="deviceChartCanvas" height="220"></canvas>
+            </div>
+
+            <h3 class="subsection-title">端末ごとの完了回数</h3>
+            <table class="log-table analytics-table">
+              <thead>
+                <tr>
+                  <th>端末ラベル</th>
+                  <th>回数</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsTableBody">
+                <tr><td colspan="2">集計結果がここに表示されます。</td></tr>
+              </tbody>
+            </table>
+
+            <div class="log-empty" id="analyticsEmptyMsg" style="display:none;"></div>
+            <div class="status" id="analyticsStatus"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Chart.js（グラフ用） -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+
+  <script>
+    // =============================
+    // 0) オーナーログイン（パスワード＋15時間制限）
+    // =============================
+    (function () {
+      // ★ここにパスワードを書く（好きな文字列に変えてOK）
+      const OWNER_PASSWORD = "nanbu";
+
+      const SESSION_LIMIT_MS = 15 * 60 * 60 * 1000; // 15時間
+      const SESSION_KEY = "lw_ownerSession";
+
+      function isSessionValid() {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return false;
+        try {
+          const data = JSON.parse(raw);
+          if (!data || !data.loggedAt) return false;
+          const loggedAt = data.loggedAt;
+          const now = Date.now();
+          return now - loggedAt < SESSION_LIMIT_MS;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function saveSession() {
+        const payload = {
+          loggedAt: Date.now()
+        };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+      }
+
+            window.addEventListener("DOMContentLoaded", () => {
+        const loginWrap = document.getElementById("ownerLogin");
+        const appWrap = document.getElementById("ownerApp");
+        const pwdInput = document.getElementById("ownerPasswordInput");
+        const loginBtn = document.getElementById("ownerLoginBtn");
+        const errorLabel = document.getElementById("ownerLoginError");
+        const storeIdInput = document.getElementById("storeIdInput");
+
+        if (!loginWrap || !appWrap || !pwdInput || !loginBtn) return;
+
+        function showApp() {
+          loginWrap.style.display = "none";
+          appWrap.style.display = "block";
+        }
+
+        function showLogin() {
+          loginWrap.style.display = "block";
+          appWrap.style.display = "none";
+        }
+
+        // すでにセッションが有効なら、ログイン画面スキップ
+        const currentStoreId = localStorage.getItem("lw_ownerStoreId");
+        if (currentStoreId && ALLOWED_STORES.includes(currentStoreId) && isSessionValid()) {
+          // ついでに入力欄も埋めておく
+          if (storeIdInput) storeIdInput.value = currentStoreId;
+          showApp();
+        } else {
+          showLogin();
+        }
+
+        function tryLogin() {
+          const pwd = pwdInput.value.trim();
+          const storeId = storeIdInput.value.trim();
+
+          if (!storeId) {
+            errorLabel.textContent = "店舗IDを入力してください。";
+            return;
+          }
+          if (!ALLOWED_STORES.includes(storeId)) {
+            errorLabel.textContent = "店舗IDが違います。";
+            return;
+          }
+
+          if (!pwd) {
+            errorLabel.textContent = "パスワードを入力してください。";
+            return;
+          }
+
+          if (pwd === OWNER_PASSWORD) {
+            // 店舗IDを保存
+            localStorage.setItem("lw_ownerStoreId", storeId);
+
+            saveSession();
+            errorLabel.textContent = "";
+
+            // ★ storeId を反映させるためにページごと再読み込み
+            location.reload();
+          } else {
+            errorLabel.textContent = "パスワードが違います。";
+          }
+        }
+
+        loginBtn.addEventListener("click", tryLogin);
+        pwdInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            tryLogin();
+          }
+        });
+      });
+    })();
+
+
+    // =============================
+    // Firebase 設定
+    // =============================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
+      authDomain: "lawson-workflow.firebaseapp.com",
+      projectId: "lawson-workflow",
+      storageBucket: "lawson-workflow.firebasestorage.app",
+      messagingSenderId: "335371795694",
+      appId: "1:335371795694:web:3b0950a616d368b284c7ff",
+      measurementId: "G-BGENZNZMRC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+// ★ サイドバー全体をとってくる
+const sidebarNav = document.querySelector(".sidebar-nav");
+// ★ サイドバーのメニューをクリックしたときの処理
+sidebarNav.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-view]");
+  if (!btn) return;
+
+  const view = btn.dataset.view;
+
+  // ★ 追加：お知らせセンターだけは別タブで notice.html を開く
+  if (view === "notice-center") {
+    window.open("notice.html", "_blank"); // ← 別タブで notice.html を開く
+    return; // ここで終了（switchView は呼ばない）
+  }
+
+  // 🔽 ここから下は「今まで owner.html に書いてあった処理」と同じことを呼ぶ
+  switchView(view);
+});
+
+    
+
+// ★ 店舗ID（storeId）はログイン画面で localStorage に保存しておく想定
+const ALLOWED_STORES = ["nambucho"];               // 許可する店舗ID
+const STORE_KEY = "lw_ownerStoreId";
+
+// ローカルストレージから店舗IDを取得
+const STORE_ID = localStorage.getItem(STORE_KEY);
+
+// 有効な店舗IDのときだけ storeRef を作る
+let storeRef = null;
+if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
+  storeRef = db.collection("stores").doc(STORE_ID);
+}
+
+
+    // 6:00切り替えの「今日の営業日」
+    function getCurrentBusinessKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const d = now.getDate();
+      const base = new Date(y, m, d);
+      if (now.getHours() < 7) {
+        base.setDate(base.getDate() - 1);
+      }
+      const yy = base.getFullYear();
+      const mm = String(base.getMonth() + 1).padStart(2, "0");
+      const dd = String(base.getDate()).padStart(2, "0");
+      return `${yy}-${mm}-${dd}`;
+    }
+
+    // date input の値（YYYY-MM-DD） → businessKey
+    function businessKeyFromDateInput(dateStr) {
+      if (!dateStr) return null;
+      return dateStr;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+  // storeId がまだ設定されていない場合は、Firestore系の初期化はスキップ
+  if (!storeRef) {
+    console.warn("STORE_ID が未設定のため、Firestoreの処理はまだ実行しません。ログイン後にページを再読み込みしてください。");
+    return;
+  }
+      // =============================
+      // オーナーID / 端末名の保存＆自動セット
+      // =============================
+      (function () {
+        const OWNER_ID_KEY = "lw_ownerOwnerId";
+        const ownerIdInput = document.getElementById("ownerIdInput");
+        if (!ownerIdInput) return;
+
+        const savedOwnerId = localStorage.getItem(OWNER_ID_KEY);
+        if (savedOwnerId) {
+          ownerIdInput.value = savedOwnerId;
+        }
+
+        ownerIdInput.addEventListener("change", () => {
+          const value = ownerIdInput.value.trim();
+          if (value) {
+            localStorage.setItem(OWNER_ID_KEY, value);
+          }
+        });
+      })();
+
+      // =============================
+      // モバイル用メニュー開閉
+      // =============================
+      const sidebar = document.querySelector(".sidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+
+      function closeSidebar() {
+        if (!sidebar) return;
+        sidebar.classList.remove("mobile-open");
+        if (sidebarOverlay) sidebarOverlay.classList.remove("active");
+      }
+
+      function openSidebar() {
+        if (!sidebar) return;
+        sidebar.classList.add("mobile-open");
+        if (sidebarOverlay) sidebarOverlay.classList.add("active");
+      }
+
+      mobileMenuBtn?.addEventListener("click", () => {
+        if (sidebar.classList.contains("mobile-open")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+
+      sidebarOverlay?.addEventListener("click", closeSidebar);
+
+     // =============================
+// 左メニュー切り替え
+// =============================
+const navButtons = document.querySelectorAll(".sidebar-nav button");
+const views = document.querySelectorAll(".view-panel");
+
+// Analytics 用参照（activateView 内で使うので先に宣言だけ）
+let runAnalyticsRef = null;
+let analyticsDateInputRef = null;
+
+function activateView(viewId) {
+  // ビューパネルの表示切り替え
+  views.forEach((v) =>
+    v.classList.toggle("active", v.id === "view-" + viewId)
+  );
+
+  // サイドバーの active 切り替え
+  navButtons.forEach((btn) =>
+    btn.classList.toggle("active", btn.dataset.view === viewId)
+  );
+
+  // シフト表タブが開かれたら現在設定を読み込む
+  if (viewId === "shift") {
+    loadShiftImageSetting();
+  }
+
+  // グラフ分析タブが開かれたら自動で集計（初回）
+  if (viewId === "analytics" && runAnalyticsRef) {
+    if (analyticsDateInputRef && !analyticsDateInputRef.value) {
+      analyticsDateInputRef.value = getCurrentBusinessKey();
+    }
+    runAnalyticsRef();
+  }
+}
+
+// 左メニューボタンにクリックイベントを付与
+navButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const viewId = btn.dataset.view;
+
+    // ★ お知らせセンターだけは別タブで notice.html を開く
+    if (viewId === "notice-center") {
+      window.open("notice.html", "_blank"); // 同じフォルダにある想定
+      closeSidebar();                       // スマホならメニュー閉じる
+      return;                               // ここで終了
+    }
+
+    // それ以外のメニューは普通にビュー切り替え
+    activateView(viewId);
+    closeSidebar();
+  });
+});
+
+// デフォルト：お知らせ管理ビューを表示
+activateView("news");
+
+
+      // =============================
+      // 1) ownerNews （お知らせ管理）
+      // =============================
+      const newsTitleInput = document.getElementById("newsTitle");
+      const newsBodyInput = document.getElementById("newsBody");
+      const newsAddBtn = document.getElementById("newsAddBtn");
+      const newsClearBtn = document.getElementById("newsClearFormBtn");
+      const newsStatus = document.getElementById("newsStatus");
+      const newsList = document.getElementById("newsList");
+      const ownerNewsColRef = storeRef.collection("ownerNews");
+
+      function setNewsStatus(msg, ok) {
+  newsStatus.textContent = msg || "";
+  newsStatus.className = "status " + (ok ? "ok" : "err");
+}
+
+
+      newsAddBtn.addEventListener("click", async () => {
+        const title = newsTitleInput.value.trim();
+        const body = newsBodyInput.value.trim();
+        if (!title && !body) {
+          setNewsStatus("タイトルか本文を入力してください。", false);
+          return;
+        }
+        setNewsStatus("保存中…", true);
+        try {
+          await ownerNewsColRef.add({
+            title,
+            body,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          setNewsStatus("お知らせを追加しました。", true);
+          newsTitleInput.value = "";
+          newsBodyInput.value = "";
+        } catch (e) {
+          console.error(e);
+          setNewsStatus("保存に失敗しました。", false);
+        }
+      });
+
+      newsClearBtn.addEventListener("click", () => {
+        newsTitleInput.value = "";
+        newsBodyInput.value = "";
+        setNewsStatus("", true);
+      });
+
+      ownerNewsColRef
+        .orderBy("createdAt", "desc")
+        .limit(20)
+        .onSnapshot(
+          (snapshot) => {
+            newsList.innerHTML = "";
+            if (snapshot.empty) {
+              const li = document.createElement("li");
+              li.textContent = "現在、お知らせはありません。";
+              newsList.appendChild(li);
+              return;
+            }
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              const li = document.createElement("li");
+              li.className = "news-item";
+
+              const main = document.createElement("div");
+              main.className = "news-main";
+
+              const titleEl = document.createElement("div");
+              titleEl.className = "news-title";
+              titleEl.textContent = data.title || "(タイトルなし)";
+
+              const bodyEl = document.createElement("div");
+              bodyEl.className = "news-body";
+              bodyEl.textContent = data.body || "";
+
+              const metaEl = document.createElement("div");
+              metaEl.className = "news-meta";
+              const createdAt = data.createdAt ? data.createdAt.toDate() : null;
+              metaEl.textContent = createdAt
+                ? createdAt.toLocaleString("ja-JP")
+                : "日時情報なし";
+
+              main.appendChild(titleEl);
+              main.appendChild(bodyEl);
+              main.appendChild(metaEl);
+
+              const actions = document.createElement("div");
+              actions.className = "news-actions";
+              const delBtn = document.createElement("button");
+              delBtn.className = "btn-danger";
+              delBtn.textContent = "削除";
+              delBtn.addEventListener("click", async () => {
+                if (!confirm("このお知らせを削除しますか？")) return;
+                await doc.ref.delete();
+              });
+              actions.appendChild(delBtn);
+
+              li.appendChild(main);
+              li.appendChild(actions);
+
+              newsList.appendChild(li);
+            });
+          },
+          (error) => {
+            console.error("ownerNews 読み込みエラー", error);
+            newsList.innerHTML = "";
+            const li = document.createElement("li");
+            li.textContent = "お知らせの読み込みに失敗しました。";
+            newsList.appendChild(li);
+          }
+        );
+
+      // =============================
+      // 2) taskSlots（時間帯ごとのタスク定義）
+      // =============================
+      const slotSelect = document.getElementById("slotSelect");
+      const tasksAInput = document.getElementById("tasksAInput");
+      const tasksBInput = document.getElementById("tasksBInput");
+      const reloadSlotBtn = document.getElementById("reloadSlotBtn");
+      const saveSlotBtn = document.getElementById("saveSlotBtn");
+      const taskStatus = document.getElementById("taskStatus");
+      const taskSlotsRef = storeRef.collection("taskSlots");
+      const tasksDocRef  = storeRef.collection("tasks").doc("main"); // チェック状態リセット用
+
+      function setTaskStatus(msg, ok) {
+        taskStatus.textContent = msg || "";
+        taskStatus.className = "status " + (ok ? "ok" : "err");
+      }
+
+      async function loadSlotDefinition(slotId) {
+        setTaskStatus("読み込み中…", true);
+        tasksAInput.value = "";
+        tasksBInput.value = "";
+        try {
+          const snap = await taskSlotsRef.doc(slotId).get();
+          if (!snap.exists) {
+            setTaskStatus(
+              "まだ定義されていません。HTML側の初期値が使われます。",
+              true
+            );
+            return;
+          }
+          const data = snap.data() || {};
+          (data.tasksA || []).forEach((t, i) => {
+            tasksAInput.value += (i ? "\n" : "") + t;
+          });
+          (data.tasksB || []).forEach((t, i) => {
+            tasksBInput.value += (i ? "\n" : "") + t;
+          });
+          setTaskStatus("読み込み完了。", true);
+        } catch (e) {
+          console.error(e);
+          setTaskStatus("読み込みに失敗しました。", false);
+        }
+      }
+
+      reloadSlotBtn.addEventListener("click", () => {
+        loadSlotDefinition(slotSelect.value);
+      });
+      slotSelect.addEventListener("change", () => {
+        loadSlotDefinition(slotSelect.value);
+      });
+
+      saveSlotBtn.addEventListener("click", async () => {
+        const slotId = slotSelect.value;
+        const tasksA = tasksAInput.value
+          .split("\n")
+          .map((t) => t.trim())
+          .filter((t) => t);
+        const tasksB = tasksBInput.value
+          .split("\n")
+          .map((t) => t.trim())
+          .filter((t) => t);
+
+        setTaskStatus("保存中…", true);
+        try {
+          await taskSlotsRef.doc(slotId).set({ tasksA, tasksB }, { merge: true });
+
+          // この時間帯のチェック状態だけリセット
+          const docSnap = await tasksDocRef.get();
+          const data = docSnap.exists ? docSnap.data() : {};
+          const checkedIds = (data.checkedIds || []).filter(
+            (id) => !id.startsWith(slotId + "-")
+          );
+          await tasksDocRef.set(
+            { checkedIds, businessKey: getCurrentBusinessKey() },
+            { merge: true }
+          );
+
+          setTaskStatus(
+            "保存しました（この時間帯のチェック状態をリセットしました）。",
+            true
+          );
+        } catch (e) {
+          console.error(e);
+          setTaskStatus("保存に失敗しました。", false);
+        }
+      });
+
+      // 初回ロード
+      loadSlotDefinition(slotSelect.value);
+
+      // =============================
+      // 3) handoverTemplates（引き継ぎメモ用ボタン）
+      // =============================
+      const handoverChipsInput = document.getElementById("handoverChipsInput");
+      const handoverReloadBtn = document.getElementById("handoverReloadBtn");
+      const handoverSaveBtn = document.getElementById("handoverSaveBtn");
+      const handoverStatus = document.getElementById("handoverStatus");
+      const handoverPreview = document.getElementById("handoverPreview");
+      const handoverTplRef = storeRef.collection("handoverTemplates").doc("global");
+
+      function setHandoverStatus(msg, ok) {
+        handoverStatus.textContent = msg || "";
+        handoverStatus.className = "status " + (ok ? "ok" : "err");
+      }
+
+      function updateHandoverPreview(chips) {
+        handoverPreview.innerHTML = "";
+        if (!chips || chips.length === 0) {
+          const span = document.createElement("span");
+          span.className = "handover-preview-chip";
+          span.textContent = "（ボタンなし）";
+          handoverPreview.appendChild(span);
+          return;
+        }
+        chips.forEach((text) => {
+          const chip = document.createElement("span");
+          chip.className = "handover-preview-chip";
+          chip.textContent = text;
+          handoverPreview.appendChild(chip);
+        });
+      }
+
+      async function loadHandoverTemplate() {
+        setHandoverStatus("読み込み中…", true);
+        try {
+          const snap = await handoverTplRef.get();
+          const chips =
+            snap.exists && Array.isArray(snap.data().chips)
+              ? snap.data().chips
+              : [];
+          handoverChipsInput.value = chips.join("\n");
+          updateHandoverPreview(chips);
+          setHandoverStatus("読み込み完了。", true);
+        } catch (e) {
+          console.error(e);
+          setHandoverStatus("読み込みに失敗しました。", false);
+        }
+      }
+
+      handoverReloadBtn.addEventListener("click", loadHandoverTemplate);
+
+      handoverSaveBtn.addEventListener("click", async () => {
+        const chips = handoverChipsInput.value
+          .split("\n")
+          .map((t) => t.trim())
+          .filter((t) => t);
+        setHandoverStatus("保存中…", true);
+        try {
+          await handoverTplRef.set({ chips }, { merge: true });
+          updateHandoverPreview(chips);
+          setHandoverStatus("保存しました。", true);
+        } catch (e) {
+          console.error(e);
+          setHandoverStatus("保存に失敗しました。", false);
+        }
+      });
+
+      loadHandoverTemplate();
+
+      // =============================
+      // 4) shiftSheet（シフト表設定）
+      // =============================
+      const shiftImageUrlInput = document.getElementById("shiftImageUrlInput");
+      const shiftImageUrlSaveBtn = document.getElementById("shiftImageUrlSaveBtn");
+      const shiftImagePreview = document.getElementById("shiftImagePreview");
+      const shiftStatus = document.getElementById("shiftStatus");
+      const shiftDocRef = storeRef.collection("settings").doc("shiftSheet");
+
+      // Storage の参照を用意
+      const storage = firebase.storage();
+      const shiftImageFileInput = document.getElementById("shiftImageFileInput");
+
+      // 画像アップロード → Storage → Firestore → 画面反映
+      shiftImageFileInput?.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+          setShiftStatus("画像をアップロード中…", true);
+
+          // 保存先パス（ファイル名の前にタイムスタンプを付けて被り防止）
+          const storageRef = storage
+            .ref()
+            .child(`shiftSheets/${Date.now()}_${file.name}`);
+
+          // Storage にアップロード
+          const snapshot = await storageRef.put(file);
+
+          // 公開URLを取得
+          const url = await snapshot.ref.getDownloadURL();
+
+          // Firestore に保存（settings/shiftSheet.imageUrl）
+          await shiftDocRef.set({ imageUrl: url }, { merge: true });
+
+          // 画面も更新
+          if (shiftImageUrlInput) {
+            shiftImageUrlInput.value = url;
+          }
+          if (shiftImagePreview) {
+            shiftImagePreview.src = url;
+            shiftImagePreview.style.display = "block";
+          }
+
+          setShiftStatus("アップロード＆URL保存が完了しました。", true);
+        } catch (err) {
+          console.error("シフト表画像アップロードエラー", err);
+          setShiftStatus(
+            "画像のアップロードに失敗しました：" + (err.message || ""),
+            false
+          );
+        } finally {
+          // 同じファイルをもう一回選べるようにする
+          if (shiftImageFileInput) {
+            shiftImageFileInput.value = "";
+          }
+        }
+      });
+
+      function setShiftStatus(msg, ok) {
+        if (!shiftStatus) return;
+        shiftStatus.textContent = msg || "";
+        shiftStatus.className = "status " + (ok ? "ok" : "err");
+      }
+
+      // Firestore から現在のURLを読み込む
+      async function loadShiftImageSetting() {
+        if (!shiftImageUrlInput || !shiftImagePreview) return;
+        setShiftStatus("読み込み中…", true);
+
+        try {
+          const snap = await shiftDocRef.get();
+          if (!snap.exists) {
+            shiftImageUrlInput.value = "";
+            shiftImagePreview.style.display = "none";
+            setShiftStatus("まだシフト表は設定されていません。", true);
+            return;
+          }
+
+          const data = snap.data() || {};
+          const url = data.imageUrl || "";
+
+          shiftImageUrlInput.value = url;
+          if (url) {
+            shiftImagePreview.src = url;
+            shiftImagePreview.style.display = "block";
+            setShiftStatus("読み込み完了。", true);
+          } else {
+            shiftImagePreview.style.display = "none";
+            setShiftStatus("URLが設定されていません。", true);
+          }
+        } catch (e) {
+          console.error("shiftSheet 読み込みエラー", e);
+          setShiftStatus(
+            "読み込みに失敗しました：" + (e.message || ""),
+            false
+          );
+        }
+      }
+
+      // 保存ボタン（URL欄の内容をそのまま保存）
+      shiftImageUrlSaveBtn?.addEventListener("click", async () => {
+        if (!shiftImageUrlInput) return;
+        const url = shiftImageUrlInput.value.trim();
+
+        setShiftStatus("保存中…", true);
+        try {
+          await shiftDocRef.set({ imageUrl: url || null }, { merge: true });
+
+          if (url) {
+            shiftImagePreview.src = url;
+            shiftImagePreview.style.display = "block";
+          } else if (shiftImagePreview) {
+            shiftImagePreview.style.display = "none";
+          }
+
+          setShiftStatus("シフト表URLを保存しました。", true);
+        } catch (e) {
+          console.error("shiftSheet 保存エラー", e);
+          setShiftStatus(
+            "保存に失敗しました：" + (e.message || ""),
+            false
+          );
+        }
+      });
+
+      // （おまけ）オーナー画面を開いた直後にも一回だけ読み込んでおく
+      loadShiftImageSetting();
+
+      // =============================
+      // 5) checklistLogs（スタッフログ）
+      // =============================
+      const logDateInput = document.getElementById("logDate");
+      const logDeviceInput = document.getElementById("logDevice");
+      const logKeywordInput = document.getElementById("logKeyword");
+      const logFilterBtn = document.getElementById("logFilterBtn");
+      const logTableBody = document.getElementById("logTableBody");
+      const logEmptyMsg = document.getElementById("logEmptyMsg");
+      const logStatus = document.getElementById("logStatus");
+      const logsColRef = storeRef.collection("checklistLogs");
+      let logsUnsub = null;
+
+      function setLogStatus(msg, ok) {
+        logStatus.textContent = msg || "";
+        logStatus.className = "status " + (ok ? "ok" : "err");
+      }
+
+      function renderLogs(docs, businessKey, deviceFilter) {
+        logTableBody.innerHTML = "";
+        logEmptyMsg.style.display = "none";
+
+        if (docs.length === 0) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 5;
+          td.textContent = "該当するログはありませんでした。";
+          tr.appendChild(td);
+          logTableBody.appendChild(tr);
+
+          logEmptyMsg.textContent =
+            "営業日: " +
+            (businessKey || "指定なし") +
+            (deviceFilter ? " / 端末: " + deviceFilter : "");
+          logEmptyMsg.style.display = "block";
+          return;
+        }
+
+        docs.forEach((doc) => {
+          const data = doc.data();
+          const tr = document.createElement("tr");
+
+          const createdAt = data.createdAt
+            ? data.createdAt.toDate()
+            : data.clientTimeISO
+            ? new Date(data.clientTimeISO)
+            : null;
+
+          const timeTd = document.createElement("td");
+          timeTd.textContent = createdAt
+            ? createdAt.toLocaleTimeString("ja-JP", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+              })
+            : "";
+
+          const bkTd = document.createElement("td");
+          bkTd.textContent = data.businessKey || "";
+
+          const devTd = document.createElement("td");
+          devTd.textContent = data.deviceLabel || "未設定";
+
+          const actionTd = document.createElement("td");
+          actionTd.textContent = data.action || "";
+
+          const taskTd = document.createElement("td");
+          if (data.taskLabel) {
+            taskTd.textContent = data.taskLabel;
+          } else if (data.extra && data.extra.noteText) {
+            taskTd.textContent = data.extra.noteText;
+          } else {
+            taskTd.textContent = "";
+          }
+
+          tr.appendChild(timeTd);
+          tr.appendChild(bkTd);
+          tr.appendChild(devTd);
+          tr.appendChild(actionTd);
+          tr.appendChild(taskTd);
+
+          logTableBody.appendChild(tr);
+        });
+      }
+
+      function startLogsListener() {
+        const dateStr = logDateInput.value;
+        const businessKey = businessKeyFromDateInput(dateStr);
+        const deviceFilter = logDeviceInput.value.trim();
+        const keywordRaw = logKeywordInput ? logKeywordInput.value.trim() : "";
+        const keyword = keywordRaw.toLowerCase();
+
+        if (!businessKey) {
+          const todayKey = getCurrentBusinessKey();
+          logDateInput.value = todayKey;
+          return startLogsListener();
+        }
+
+        if (logsUnsub) {
+          logsUnsub();
+          logsUnsub = null;
+        }
+
+        setLogStatus("読み込み中…", true);
+        logTableBody.innerHTML =
+          "<tr><td colspan='5'>ログを読み込み中...</td></tr>";
+        logEmptyMsg.style.display = "none";
+
+        logsUnsub = logsColRef
+          .where("businessKey", "==", businessKey)
+          .onSnapshot(
+            (snapshot) => {
+              let docs = [];
+              snapshot.forEach((doc) => docs.push(doc));
+
+              // createdAt 降順ソート
+              docs.sort((a, b) => {
+                const da = a.data().createdAt
+                  ? a.data().createdAt.toMillis()
+                  : 0;
+                const db = b.data().createdAt
+                  ? b.data().createdAt.toMillis()
+                  : 0;
+                return db - da;
+              });
+
+              // ① 端末ラベルでフィルタ
+              if (deviceFilter) {
+                docs = docs.filter(
+                  (doc) => (doc.data().deviceLabel || "") === deviceFilter
+                );
+              }
+
+              // ② キーワードで全文検索フィルタ
+              if (keyword) {
+                docs = docs.filter((doc) => {
+                  const data = doc.data() || {};
+
+                  const createdAt = data.createdAt
+                    ? data.createdAt.toDate()
+                    : data.clientTimeISO
+                    ? new Date(data.clientTimeISO)
+                    : null;
+
+                  const timeStr = createdAt
+                    ? createdAt.toLocaleTimeString("ja-JP", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })
+                    : "";
+
+                  const taskText = data.taskLabel
+                    ? data.taskLabel
+                    : data.extra && data.extra.noteText
+                    ? data.extra.noteText
+                    : "";
+
+                  // 検索対象を全部くっつけて1本の文字列にする
+                  const haystack = [
+                    timeStr,                      // 時刻
+                    data.businessKey || "",       // 営業日
+                    data.deviceLabel || "未設定", // 端末
+                    data.action || "",            // 操作
+                    taskText || "",               // タスク / メモ
+                  ]
+                    .join(" ")
+                    .toLowerCase();
+
+                  return haystack.includes(keyword);
+                });
+              }
+
+              renderLogs(docs, businessKey, deviceFilter);
+              setLogStatus(`読み込み完了（${docs.length}件）`, true);
+            },
+            (error) => {
+              console.error("checklistLogs 読み込みエラー", error);
+              setLogStatus("ログの読み込みに失敗しました。", false);
+              logTableBody.innerHTML =
+                "<tr><td colspan='5'>ログの読み込みに失敗しました。</td></tr>";
+            }
+          );
+      }
+
+      // 日付ショートカットボタン
+      const logTodayBtn = document.getElementById("logTodayBtn");
+      const logYesterdayBtn = document.getElementById("logYesterdayBtn");
+      const logLast3Btn = document.getElementById("logLast3Btn"); // まだ未実装
+
+      function setDateInputToToday() {
+        logDateInput.value = getCurrentBusinessKey();
+      }
+
+      function setDateInputToYesterday() {
+        const today = getCurrentBusinessKey(); // YYYY-MM-DD
+        const [y, m, d] = today.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        dt.setDate(dt.getDate() - 1);
+        const yy = dt.getFullYear();
+        const mm = String(dt.getMonth() + 1).padStart(2, "0");
+        const dd = String(dt.getDate()).padStart(2, "0");
+        logDateInput.value = `${yy}-${mm}-${dd}`;
+      }
+
+      logTodayBtn?.addEventListener("click", () => {
+        setDateInputToToday();
+        startLogsListener();
+      });
+
+      logYesterdayBtn?.addEventListener("click", () => {
+        setDateInputToYesterday();
+        startLogsListener();
+      });
+
+      logLast3Btn?.addEventListener("click", () => {
+        alert("直近3日の集計はあとで実装しよう💡（今日は日付1日ずつ見てね）");
+      });
+
+      // フィルタボタン
+      logFilterBtn.addEventListener("click", () => {
+        startLogsListener();
+      });
+
+      // 端末ラベル・キーワード入力で Enter 押したら検索
+      logDeviceInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") startLogsListener();
+      });
+      logKeywordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") startLogsListener();
+      });
+
+      // 初期値：今日の営業日
+      logDateInput.value = getCurrentBusinessKey();
+      startLogsListener();
+
+      // =============================
+      // 6) グラフ分析（analytics）
+      // =============================
+      const analyticsDateInput = document.getElementById("analyticsDate");
+      const analyticsRunBtn = document.getElementById("analyticsRunBtn");
+      const analyticsTotalCount = document.getElementById("analyticsTotalCount");
+      const analyticsSummaryNote = document.getElementById("analyticsSummaryNote");
+      const analyticsTableBody = document.getElementById("analyticsTableBody");
+      const analyticsEmptyMsg = document.getElementById("analyticsEmptyMsg");
+      const analyticsStatus = document.getElementById("analyticsStatus");
+      const deviceChartCanvas = document.getElementById("deviceChartCanvas");
+
+      let deviceChart = null;
+
+      function setAnalyticsStatus(msg, ok) {
+        analyticsStatus.textContent = msg || "";
+        analyticsStatus.className = "status " + (ok ? "ok" : "err");
+      }
+
+      async function runAnalytics() {
+        let businessKey = businessKeyFromDateInput(analyticsDateInput.value);
+        if (!businessKey) {
+          businessKey = getCurrentBusinessKey();
+          analyticsDateInput.value = businessKey;
+        }
+
+        setAnalyticsStatus("集計中…", true);
+        analyticsTableBody.innerHTML =
+          "<tr><td colspan='2'>集計中...</td></tr>";
+        analyticsEmptyMsg.style.display = "none";
+        analyticsTotalCount.textContent = "-";
+        analyticsSummaryNote.textContent = "";
+
+        try {
+          const snapshot = await logsColRef
+            .where("businessKey", "==", businessKey)
+            .get();
+
+          if (snapshot.empty) {
+            analyticsTableBody.innerHTML =
+              "<tr><td colspan='2'>この営業日のログがありません。</td></tr>";
+            analyticsEmptyMsg.textContent = "営業日: " + businessKey;
+            analyticsEmptyMsg.style.display = "block";
+            analyticsTotalCount.textContent = "0";
+            analyticsSummaryNote.textContent = "チェックログがありません。";
+            if (deviceChart) {
+              deviceChart.destroy();
+              deviceChart = null;
+            }
+            setAnalyticsStatus("集計完了（0件）", true);
+            return;
+          }
+
+          const perDevice = {};
+          let total = 0;
+
+          snapshot.forEach((doc) => {
+            const data = doc.data() || {};
+            const actionStr = (data.action || "").toLowerCase();
+
+            // ★完了扱いの条件：
+            // action に "check" or "on" が含まれているものを「チェックした」とみなす
+            if (!actionStr) return;
+            if (!actionStr.includes("check") && !actionStr.includes("on")) return;
+
+            const device = data.deviceLabel || "未設定";
+            perDevice[device] = (perDevice[device] || 0) + 1;
+            total++;
+          });
+
+          // テーブル描画
+          analyticsTableBody.innerHTML = "";
+          const devices = Object.keys(perDevice);
+
+          if (devices.length === 0) {
+            analyticsTableBody.innerHTML =
+              "<tr><td colspan='2'>「チェック完了」とみなせるログがありませんでした。</td></tr>";
+            analyticsEmptyMsg.textContent =
+              "営業日: " + businessKey + "（action の条件を調整すればカウントが増えるかもしれません）";
+            analyticsEmptyMsg.style.display = "block";
+          } else {
+            devices
+              .sort((a, b) => (perDevice[b] || 0) - (perDevice[a] || 0))
+              .forEach((device) => {
+                const tr = document.createElement("tr");
+                const tdDevice = document.createElement("td");
+                const tdCount = document.createElement("td");
+                tdDevice.textContent = device;
+                tdCount.textContent = perDevice[device];
+                tr.appendChild(tdDevice);
+                tr.appendChild(tdCount);
+                analyticsTableBody.appendChild(tr);
+              });
+          }
+
+          analyticsTotalCount.textContent = String(total);
+          analyticsSummaryNote.textContent =
+            devices.length > 0
+              ? `端末数: ${devices.length} / 1端末あたり平均 ${(total / devices.length).toFixed(1)} 回`
+              : "完了ログがないため平均は算出できません。";
+
+          // グラフ描画
+          if (deviceChart) {
+            deviceChart.destroy();
+            deviceChart = null;
+          }
+          if (devices.length > 0 && deviceChartCanvas) {
+            const ctx = deviceChartCanvas.getContext("2d");
+            deviceChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels: devices,
+                datasets: [
+                  {
+                    label: "チェック回数",
+                    data: devices.map((d) => perDevice[d]),
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      precision: 0,
+                    },
+                  },
+                },
+                plugins: {
+                  legend: {
+                    display: false,
+                  },
+                },
+              },
+            });
+          }
+
+          setAnalyticsStatus(`集計完了（${total}回）`, true);
+        } catch (e) {
+          console.error("analytics 集計エラー", e);
+          analyticsTableBody.innerHTML =
+            "<tr><td colspan='2'>集計に失敗しました。</td></tr>";
+          analyticsEmptyMsg.style.display = "none";
+          if (deviceChart) {
+            deviceChart.destroy();
+            deviceChart = null;
+          }
+          analyticsTotalCount.textContent = "-";
+          analyticsSummaryNote.textContent = "";
+          setAnalyticsStatus("集計に失敗しました：" + (e.message || ""), false);
+        }
+      }
+
+      analyticsRunBtn.addEventListener("click", () => {
+        runAnalytics();
+      });
+
+      // activateView から呼べるように参照を渡しておく
+      runAnalyticsRef = runAnalytics;
+      analyticsDateInputRef = analyticsDateInput;
+    });
+  </script>
+</body>
+</html>
