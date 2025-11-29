@@ -765,19 +765,15 @@
             </p>
 
             <div class="row">
-              <label for="slotSelect">編集する時間帯</label>
-              <select id="slotSelect">
-                <option value="t6-8">6:00〜8:00（朝の立ち上げ）</option>
-                <option value="t9-11">9:00〜11:00（午前帯）</option>
-                <option value="t12-14">12:00〜14:00（昼帯）</option>
-                <option value="t15-17">15:00〜17:00（夕方前）</option>
-                <option value="t18-20">18:00〜20:00（夕方〜夜）</option>
-                <option value="t21-23">21:00〜23:00（夜帯）</option>
-                <option value="t0-2">0:00〜2:00（深夜前半）</option>
-                <option value="t3-5">3:00〜5:00（早朝）</option>
-              </select>
-              <p class="slot-note">時間帯を変更すると、その時間帯のタスク定義を Firestore から読み込みます。</p>
-            </div>
+  <label for="slotSelect">編集する時間帯</label>
+  <select id="slotSelect">
+    <!-- ★ 時間帯リストは JavaScript で自動生成 -->
+  </select>
+  <p class="slot-note">
+    時間帯を変更すると、その時間帯のタスク定義を Firestore から読み込みます。
+  </p>
+</div>
+
 
             <div class="row">
               <label for="tasksAInput">Aタスク（必須）</label>
@@ -803,6 +799,43 @@
               ※保存すると、その時間帯のチェック状態（完了チェック）だけリセットされます（他の時間帯はそのまま）。<br>
               ※チェックリスト本体の HTML（スタッフ用画面）は書き換え不要です。この画面は定義だけをいじる役割。
             </p>
+<hr>
+
+<!-- ★ ここから追加：時間帯の自動生成UI -->
+<div class="row">
+  <label>時間帯の自動生成（営業開始〜終了と区切り時間）</label>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;">
+    <div style="min-width:120px;">
+      <div style="font-size:11px;color:#555;">開始</div>
+      <input type="time" id="slotConfigStart" value="06:00" />
+    </div>
+    <div style="min-width:120px;">
+      <div style="font-size:11px;color:#555;">終了</div>
+      <input type="time" id="slotConfigEnd" value="23:00" />
+    </div>
+    <div style="min-width:150px;">
+      <div style="font-size:11px;color:#555;">区切り</div>
+      <select id="slotConfigInterval">
+        <option value="60">1時間ごと</option>
+        <option value="120">2時間ごと</option>
+        <option value="180" selected>3時間ごと</option>
+        <option value="240">4時間ごと</option>
+        <option value="300">5時間ごと</option>
+      </select>
+    </div>
+    <div>
+      <button type="button" class="btn-secondary" id="slotConfigGenerateBtn">
+        この設定で時間帯を自動生成
+      </button>
+    </div>
+  </div>
+  <p class="hint">
+    ※「開始」「終了」と「区切り時間」を変えて「自動生成」すると、時間帯のリストが作り直されます。<br>
+    ※時間帯を作り直すと、新しい時間帯IDごとにタスクを管理できます（タスク内容は上の入力欄で編集）。
+  </p>
+</div>
+<!-- ★ ここまで追加 -->
+            
           </section>
         </section>
 
@@ -1136,24 +1169,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-// ★ サイドバー全体をとってくる
-const sidebarNav = document.querySelector(".sidebar-nav");
-// ★ サイドバーのメニューをクリックしたときの処理
-sidebarNav.addEventListener("click", (e) => {
-  const btn = e.target.closest("button[data-view]");
-  if (!btn) return;
 
-  const view = btn.dataset.view;
-
-  // ★ 追加：お知らせセンターだけは別タブで notice.html を開く
-  if (view === "notice-center") {
-    window.open("notice.html", "_blank"); // ← 別タブで notice.html を開く
-    return; // ここで終了（switchView は呼ばない）
-  }
-
-  // 🔽 ここから下は「今まで owner.html に書いてあった処理」と同じことを呼ぶ
-  switchView(view);
-});
 
     
 
@@ -1429,6 +1445,167 @@ activateView("news");
       const taskSlotsRef = storeRef.collection("taskSlots");
       const tasksDocRef  = storeRef.collection("tasks").doc("main"); // チェック状態リセット用
 
+            // ★ 時間帯設定 UI 要素
+      const slotConfigStartInput = document.getElementById("slotConfigStart");
+      const slotConfigEndInput = document.getElementById("slotConfigEnd");
+      const slotConfigIntervalSelect = document.getElementById("slotConfigInterval");
+      const slotConfigGenerateBtn = document.getElementById("slotConfigGenerateBtn");
+
+      // Firestore 上の時間帯設定ドキュメント
+      const timeSlotsConfigRef = storeRef.collection("settings").doc("timeSlotsConfig");
+
+      // デフォルトの時間帯リスト（いままでと同じ）
+      function getDefaultSlots() {
+        return [
+          { id: "t6-8",  label: "6:00〜8:00（朝の立ち上げ）" },
+          { id: "t9-11", label: "9:00〜11:00（午前帯）" },
+          { id: "t12-14", label: "12:00〜14:00（昼帯）" },
+          { id: "t15-17", label: "15:00〜17:00（夕方前）" },
+          { id: "t18-20", label: "18:00〜20:00（夕方〜夜）" },
+          { id: "t21-23", label: "21:00〜23:00（夜帯）" },
+          { id: "t0-2",  label: "0:00〜2:00（深夜前半）" },
+          { id: "t3-5",  label: "3:00〜5:00（早朝）" }
+        ];
+      }
+
+      // slotSelect の option を作り直す
+      function renderSlotOptions(slots, initialLoad) {
+        slotSelect.innerHTML = "";
+        if (!slots || slots.length === 0) {
+          slots = getDefaultSlots();
+        }
+
+        slots.forEach((s) => {
+          const opt = document.createElement("option");
+          opt.value = s.id;
+          opt.textContent = s.label;
+          slotSelect.appendChild(opt);
+        });
+
+        // 1個目を選択
+        if (!slotSelect.value && slots[0]) {
+          slotSelect.value = slots[0].id;
+        }
+
+        // 選択された時間帯の定義を読み込む
+        if (slotSelect.value) {
+          loadSlotDefinition(slotSelect.value);
+        }
+      }
+
+      // Firestore から時間帯設定を読み込み
+      async function loadTimeSlotsConfig(initialLoad) {
+        try {
+          const snap = await timeSlotsConfigRef.get();
+          if (!snap.exists) {
+            // まだ設定ない → デフォルトで描画
+            renderSlotOptions(getDefaultSlots(), initialLoad);
+            return;
+          }
+          const data = snap.data() || {};
+          const slots = Array.isArray(data.slots) ? data.slots : getDefaultSlots();
+
+          // UI 側に start/end/interval 反映
+          if (slotConfigStartInput && data.start) {
+            slotConfigStartInput.value = data.start;
+          }
+          if (slotConfigEndInput && data.end) {
+            slotConfigEndInput.value = data.end;
+          }
+          if (slotConfigIntervalSelect && data.intervalMinutes) {
+            const val = String(data.intervalMinutes);
+            const has = Array.from(slotConfigIntervalSelect.options).some(
+              (opt) => opt.value === val
+            );
+            if (has) slotConfigIntervalSelect.value = val;
+          }
+
+          renderSlotOptions(slots, initialLoad);
+        } catch (e) {
+          console.error("timeSlotsConfig 読み込みエラー", e);
+          renderSlotOptions(getDefaultSlots(), initialLoad);
+        }
+      }
+
+      // 入力値から時間帯スロットを自動生成
+function generateSlotsFromInputs() {
+  if (!slotConfigStartInput || !slotConfigEndInput || !slotConfigIntervalSelect) {
+    return null;
+  }
+  const start = slotConfigStartInput.value || "06:00";
+  const end   = slotConfigEndInput.value   || "23:00";
+  const intervalMin = parseInt(slotConfigIntervalSelect.value, 10) || 180;
+
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+
+  if (sm !== 0 || em !== 0) {
+    alert("時間は 00 分ちょうどにしてください（例: 06:00）");
+    return null;
+  }
+
+  let startTotal = sh * 60 + sm;
+  let endTotal   = eh * 60 + em;
+
+  // ★ここがポイント：終了時間が開始時間以下なら「翌日の同時刻」として扱う
+  // 例）開始 06:00 / 終了 00:00 → endTotal = 24:00 とみなす
+  if (endTotal <= startTotal) {
+    endTotal += 24 * 60; // 24時間足す
+  }
+
+  if ((endTotal - startTotal) % intervalMin !== 0) {
+    alert("（終了 − 開始）の時間が区切り時間で割り切れるように設定してください。");
+    return null;
+  }
+
+  const slots = [];
+  let t = startTotal;
+  while (t < endTotal) {
+    const next = t + intervalMin;
+
+    const h1 = Math.floor(t / 60);
+    const h2 = Math.floor(next / 60);
+
+    // 表示用は 24時間でループ（24:00 → 0:00）
+    const h1Disp = h1 % 24;
+    const h2Disp = h2 % 24;
+
+    const id = `t${h1Disp}-${h2Disp}`;
+    const label = `${h1Disp}:00〜${h2Disp}:00`;
+
+    slots.push({ id, label });
+    t = next;
+  }
+  return { slots, start, end, intervalMinutes: intervalMin };
+}
+
+
+      // 「この設定で時間帯を自動生成」ボタン
+      slotConfigGenerateBtn?.addEventListener("click", async () => {
+        const result = generateSlotsFromInputs();
+        if (!result) return;
+        const { slots, start, end, intervalMinutes } = result;
+
+        try {
+          // Firestore に保存
+          await timeSlotsConfigRef.set(
+            { start, end, intervalMinutes, slots },
+            { merge: true }
+          );
+          // プルダウンを更新
+          renderSlotOptions(slots, false);
+          setTaskStatus(
+            "時間帯リストを更新しました。このあと各時間帯のタスクを編集してください。",
+            true
+          );
+        } catch (e) {
+          console.error("timeSlotsConfig 保存エラー", e);
+          setTaskStatus("時間帯リストの保存に失敗しました。", false);
+        }
+      });
+
+
+      
       function setTaskStatus(msg, ok) {
         taskStatus.textContent = msg || "";
         taskStatus.className = "status " + (ok ? "ok" : "err");
@@ -1505,7 +1682,9 @@ activateView("news");
       });
 
       // 初回ロード
-      loadSlotDefinition(slotSelect.value);
+      // ★ 初回は時間帯設定を読み込んでからプルダウン生成
+      loadTimeSlotsConfig(true);
+
 
       // =============================
       // 3) handoverTemplates（引き継ぎメモ用ボタン）
