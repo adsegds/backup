@@ -170,7 +170,7 @@
 
   /* ナビ（時間帯ジャンプ） */
   .nav {
-    display: none;
+    display: none !important;   /* ← ここに !important 追加！ */
     overflow-x: auto;
     gap: 6px;
     padding: 8px 2px 4px;
@@ -248,9 +248,12 @@
     font-size: 1.27em;
     font-weight: 600;
   }
+    
+  /* 通常の時間帯カードの右側ラベルを消す */  
   .slot-note {
     font-size: 0.9em;
     color: #666;
+    display: none;          /* ← これ追加！ */
   }
 
   .tasks-group {
@@ -815,6 +818,7 @@
   #notice-section .slot-note {
     font-size: 0.9em;
     color: #b66a00;
+    display: inline;        /* ← これ追加！ */
   }
   .notice-lead {
     font-size: 0.9em;
@@ -1541,10 +1545,12 @@
         }
 
         // ★ ヘッダーナビを表示（CSSでは display: none なので JSでON）
-        const navElForDisplay = document.querySelector(".nav");
-        if (navElForDisplay) {
-          navElForDisplay.style.display = "flex";
-        }
+        // ★ ヘッダーナビは使わないので表示しない
+// const navElForDisplay = document.querySelector(".nav");
+// if (navElForDisplay) {
+//   navElForDisplay.style.display = "flex";
+// }
+
 
         // ===== DMM風メニュー開閉 =====
         const appMenuBtn = document.getElementById("appMenuBtn");
