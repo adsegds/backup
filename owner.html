@@ -632,6 +632,172 @@
 }
 
 
+
+
+
+/* ========== シフトAIタブ用レイアウト ========== */
+.shiftai-layout {
+  max-width: 1100px;
+  margin: 0 auto 32px;
+  padding: 4px;
+}
+
+/* 上の説明ヘッダー */
+.shiftai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.shiftai-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.shiftai-subtitle {
+  font-size: 12px;
+  color: #666;
+}
+
+.shiftai-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  background: #111;
+  color: #fff;
+}
+
+/* カード本体：既存 .card に近い雰囲気 */
+.shiftai-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.shiftai-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* 行レイアウト */
+.shiftai-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  align-items: flex-start;
+}
+
+.shiftai-label {
+  width: 90px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #444;
+  padding-top: 3px;
+}
+
+.shiftai-field {
+  flex: 1;
+  font-size: 12px;
+}
+
+/* ラジオ・チップ */
+.shiftai-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 14px;
+  font-size: 12px;
+}
+
+.shiftai-date-input {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.shiftai-help {
+  font-size: 11px;
+  color: #777;
+  margin-top: 3px;
+}
+
+.shiftai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shiftai-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 11px;
+  background: #f9fafb;
+}
+
+/* ボタンまわり */
+.shiftai-actions {
+  margin-top: 14px;
+}
+
+.shiftai-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #111827;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shiftai-primary-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.shiftai-note {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #777;
+}
+
+/* プレビュー部分 */
+.shiftai-empty {
+  font-size: 12px;
+  color: #555;
+}
+
+.shiftai-preview-area {
+  margin-top: 8px;
+}
+
+/* スマホレイアウト */
+@media (max-width: 720px) {
+  .shiftai-row {
+    flex-direction: column;
+  }
+  .shiftai-label {
+    width: auto;
+  }
+}
+
+
+
+
+
+    
+
     
     
   </style>
