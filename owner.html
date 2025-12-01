@@ -1584,18 +1584,60 @@ if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-       // ★ AIボタンのクリック動作（ここを追加）
+  // ★ AIボタンのクリック動作（ここを追加）
   const aiBtn = document.getElementById("aiOptimizeBtn");
   if (aiBtn) {
     aiBtn.addEventListener("click", () => {
       alert("AI最適化の準備をしています…（UI動作テスト）");
     });
   }
+
   // storeId がまだ設定されていない場合は、Firestore系の初期化はスキップ
   if (!storeRef) {
     console.warn("STORE_ID が未設定のため、Firestoreの処理はまだ実行しません。ログイン後にページを再読み込みしてください。");
     return;
   }
+
+  // =============================
+  // シフトAIビュー用のUI制御（週 / 月切り替え）
+  // =============================
+  (function () {
+    const rangeRadios = document.querySelectorAll('input[name="shiftaiRangeType"]');
+    const dateInput = document.getElementById("shiftaiBaseDate");
+    const dateLabel = document.querySelector("[data-shiftai-date-label]");
+    const primaryBtnLabel = document.getElementById("shiftaiPrimaryBtnLabel");
+
+    if (!rangeRadios.length || !dateInput || !dateLabel || !primaryBtnLabel) {
+      return; // まだ shiftai ビューを作っていない場合は何もしない
+    }
+
+    // 初期値：今日の営業日を基準日にセット
+    if (!dateInput.value) {
+      dateInput.value = getCurrentBusinessKey(); // "YYYY-MM-DD"
+    }
+
+    function updateUI() {
+      const checked = document.querySelector('input[name="shiftaiRangeType"]:checked');
+      const mode = checked ? checked.value : "week";
+
+      if (mode === "week") {
+        dateLabel.textContent = "基準日";
+        primaryBtnLabel.textContent = "この週をAIで最適化";
+      } else {
+        dateLabel.textContent = "基準月";
+        primaryBtnLabel.textContent = "この月をAIで最適化";
+      }
+    }
+
+    rangeRadios.forEach((r) => {
+      r.addEventListener("change", updateUI);
+    });
+
+    updateUI();
+  })();
+
+
+
       // =============================
       // オーナーID / 端末名の保存＆自動セット
       // =============================
