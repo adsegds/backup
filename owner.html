@@ -1321,6 +1321,13 @@ if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+       // ★ AIボタンのクリック動作（ここを追加）
+  const aiBtn = document.getElementById("aiOptimizeBtn");
+  if (aiBtn) {
+    aiBtn.addEventListener("click", () => {
+      alert("AI最適化の準備をしています…（UI動作テスト）");
+    });
+  }
   // storeId がまだ設定されていない場合は、Firestore系の初期化はスキップ
   if (!storeRef) {
     console.warn("STORE_ID が未設定のため、Firestoreの処理はまだ実行しません。ログイン後にページを再読み込みしてください。");
