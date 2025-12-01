@@ -1409,6 +1409,17 @@ function activateView(viewId) {
     }
     runAnalyticsRef();
   }
+
+ // ★ AIボタン制御（ここを追加）
+  const aiBtn = document.getElementById("aiOptimizeBtn");
+  if (aiBtn) {
+    if (viewId === "shiftai") {
+      aiBtn.style.display = "block";
+    } else {
+      aiBtn.style.display = "none";
+    }
+  }
+  
 }
 
 // 左メニューボタンにクリックイベントを付与
