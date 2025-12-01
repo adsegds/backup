@@ -1584,11 +1584,152 @@ if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-  // ★ AIボタンのクリック動作（ここを追加）
+  // =============================
+  // AI最適化テスト版（OpenAI直叩き）
+  // =============================
   const aiBtn = document.getElementById("aiOptimizeBtn");
+  const shiftaiPrimaryBtn = document.getElementById("shiftaiPrimaryBtn");
+  const shiftaiPreviewArea = document.getElementById("shiftaiPreviewArea");
+  const shiftaiPreviewEmpty = document.getElementById("shiftaiPreviewEmpty");
+  const shiftaiBaseDateInput = document.getElementById("shiftaiBaseDate");
+
+  // ★ 自分の OpenAI APIキーをここに入れる（テスト用）
+  const OPENAI_API_KEY = "ここに自分のAPIキー";
+
+  async function runShiftAiTest() {
+    if (!shiftaiPreviewArea || !shiftaiPrimaryBtn) return;
+
+    // ボタン状態変更
+    const oldLabel = shiftaiPrimaryBtn.textContent;
+    shiftaiPrimaryBtn.disabled = true;
+    shiftaiPrimaryBtn.textContent = "AIに問い合わせ中…";
+
+    try {
+      // 週 / 月 & 基準日
+      const checked = document.querySelector('input[name="shiftaiRangeType"]:checked');
+      const mode = checked ? checked.value : "week";
+      const baseDate = shiftaiBaseDateInput.value || getCurrentBusinessKey();
+
+      // テスト用ダミーデータ（あとで Firestore から読む形に差し替え）
+      const payload = {
+        mode,
+        baseDate,
+        storeId: STORE_ID || "test-store",
+        businessHours: { open: "06:00", close: "23:00" },
+        staff: [
+          { id: "takahashi", name: "高橋", roles: ["レジ", "品出し"], maxHoursPerWeek: 28, canNight: true },
+          { id: "moriwaki",  name: "森脇",  roles: ["レジ"],             maxHoursPerWeek: 20, canNight: false },
+          { id: "udagawa",   name: "宇田川", roles: ["品出し", "揚げ物"], maxHoursPerWeek: 24, canNight: true }
+        ],
+        requiredSlots: [
+          { timeRange: "06:00-09:00", minStaff: 2 },
+          { timeRange: "09:00-12:00", minStaff: 1 },
+          { timeRange: "12:00-15:00", minStaff: 2 },
+          { timeRange: "15:00-18:00", minStaff: 2 },
+          { timeRange: "18:00-22:00", minStaff: 3 }
+        ],
+        weekdayRules: {
+          Fri: { peakMultiplier: 1.2, note: "金曜夜は客数多め" },
+          Sat: { peakMultiplier: 1.3, note: "土曜は全体的に多い" }
+        },
+        events: [
+          {
+            date: baseDate,
+            timeRange: "18:00-21:00",
+            type: "peak",
+            note: "会社帰りピーク"
+          }
+        ]
+      };
+
+      const systemPrompt = `
+あなたはコンビニのシフト作成AIです。
+与えられたJSONをもとに、1週間分のシフト案を日本語で作成してください。
+
+・スタッフごとに「合計勤務時間」が極端にならないようにバランスを取る
+・requiredSlots.minStaff を満たすように配置する
+・連続勤務は最大8時間までにする
+・出力フォーマットは次のようなMarkdownテキストにしてください：
+
+# シフト案（YYYY-MM-DD〜YYYY-MM-DD）
+
+## 1日目（YYYY-MM-DD）
+- 06:00-09:00: 高橋 / 宇田川
+- 09:00-12:00: 高橋
+...
+
+## スタッフ別集計
+- 高橋: 合計 XX時間
+- 森脇: 合計 XX時間
+- 宇田川: 合計 XX時間
+`.trim();
+
+      const userPrompt = `
+以下のJSONを元に、${mode === "week" ? "1週間" : "1ヶ月"}のシフト案を作成してください。
+
+\`\`\`json
+${JSON.stringify(payload, null, 2)}
+\`\`\`
+`.trim();
+
+      // ==== OpenAI API 呼び出し ====
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + OPENAI_API_KEY
+        },
+        body: JSON.stringify({
+          model: "gpt-4.1-mini",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ]
+        })
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("OpenAIエラー: " + text);
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || "(AIから内容が返ってきませんでした)";
+
+      // プレビュー描画
+      if (shiftaiPreviewEmpty) {
+        shiftaiPreviewEmpty.style.display = "none";
+      }
+      shiftaiPreviewArea.innerHTML = "";
+
+      const card = document.createElement("div");
+      card.style.whiteSpace = "pre-wrap";
+      card.style.fontSize = "12px";
+      card.textContent = content;
+
+      shiftaiPreviewArea.appendChild(card);
+    } catch (err) {
+      console.error(err);
+      alert("AI呼び出しでエラーが起きました: " + (err.message || err));
+    } finally {
+      shiftaiPrimaryBtn.disabled = false;
+      shiftaiPrimaryBtn.textContent = oldLabel;
+    }
+  }
+
+  // メインのボタンに紐づけ
+  if (shiftaiPrimaryBtn) {
+    shiftaiPrimaryBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      runShiftAiTest();
+    });
+  }
+
+  // 右上の黒い「AI最適化」ボタン → 同じ処理を叩く
   if (aiBtn) {
-    aiBtn.addEventListener("click", () => {
-      alert("AI最適化の準備をしています…（UI動作テスト）");
+    aiBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      runShiftAiTest();
     });
   }
 
