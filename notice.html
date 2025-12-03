@@ -55,9 +55,10 @@
       position: sticky;
       top: 46px;
       z-index: 9;
+      overflow-x: auto;
     }
     .tab-btn {
-      flex: 1;
+      flex: 1 0 auto;
       padding: 8px;
       border-radius: 999px;
       border: 1px solid #ddd;
@@ -195,8 +196,21 @@
       line-height: 1.5;
     }
 
-
-    
+    /* 写真つきタスク用 */
+    .photo-thumb {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: #eee;
+    }
+    .photo-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body class="role-staff">
@@ -217,9 +231,10 @@
       <button class="tab-btn active" data-tab="ownerNews">① 経営者 → 全員</button>
       <button class="tab-btn" data-tab="reports">② スタッフ → 経営者</button>
       <button class="tab-btn" data-tab="board">③ 全員掲示板</button>
+      <button class="tab-btn" data-tab="taskPhotos">④ 写真つきタスク報告</button>
     </div>
 
-        <!-- ① 経営者 → 全員 -->
+    <!-- ① 経営者 → 全員 -->
     <section class="tab-panel active" id="tab-ownerNews">
       <div class="section-head">
         <h2>① 経営者 → 全員へのお知らせ</h2>
@@ -238,7 +253,6 @@
       <div id="ownerNewsList"></div>
       <div id="ownerNewsEmpty" class="empty-text">まだお知らせはありません。</div>
     </section>
-
 
     <!-- ② スタッフ → 経営者 -->
     <section class="tab-panel" id="tab-reports">
@@ -309,6 +323,21 @@
       <div id="boardList"></div>
       <div id="boardEmpty" class="empty-text">まだ掲示板の投稿はありません。</div>
     </section>
+
+    <!-- ④ 写真つきタスク報告 -->
+    <section class="tab-panel" id="tab-taskPhotos">
+      <div class="section-head">
+        <h2>④ 写真つきタスク報告（Aタスク用）</h2>
+        <p>
+          「Aタスク（写真必須）」でアップロードされた写真をここにタイムライン形式で表示します。<br>
+          どの時間帯で・どのタスクを・誰が実施したかを、写真付きで確認できます。
+        </p>
+      </div>
+
+      <!-- 読み取り専用タイムライン -->
+      <div id="photoList"></div>
+      <div id="photoEmpty" class="empty-text">まだ写真つきタスクの報告はありません。</div>
+    </section>
   </div>
 
   <!-- Firebase v8（今のサイトと同じ系列） -->
@@ -316,7 +345,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <script>
-    // ★ ここを自分の firebaseConfig に差し替え
+    // ★ ここを自分の firebaseConfig に差し替え（owner/index と同じ）
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -326,6 +355,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // ★ 店舗ID（とりあえず固定。必要になったらクエリパラメータなどにする）
+    const STORE_ID = "nambucho"; // ← 自分の店舗IDに合わせて
+    const storeRef = db.collection("stores").doc(STORE_ID);
 
     // ===== 役割切り替え =====
     const roleSelect = document.getElementById("roleSelect");
@@ -370,8 +402,9 @@
     const ownerNewsList = document.getElementById("ownerNewsList");
     const ownerNewsEmpty = document.getElementById("ownerNewsEmpty");
 
-    // owner.html から投稿された ownerNews コレクションを読むだけ
-    db.collection("ownerNews")
+    // owner.html から投稿された stores/{storeId}/ownerNews を読むだけ
+    storeRef
+      .collection("ownerNews")
       .orderBy("createdAt", "desc")
       .onSnapshot((snap) => {
         ownerNewsList.innerHTML = "";
@@ -403,7 +436,6 @@
         });
       });
 
-
     // ============================
     // ② reports（スタッフ → 経営者）
     // ============================
@@ -423,7 +455,7 @@
       }
 
       try {
-        await db.collection("reports").add({
+        await storeRef.collection("reports").add({
           category,
           message,
           staffName: name,
@@ -439,9 +471,11 @@
     });
 
     // オーナー用：一覧表示
-    db.collection("reports")
+    storeRef
+      .collection("reports")
       .orderBy("createdAt", "desc")
       .onSnapshot((snap) => {
+        if (!reportsList) return;
         reportsList.innerHTML = "";
         if (snap.empty) {
           reportsEmpty.style.display = "block";
@@ -488,7 +522,7 @@
       }
 
       try {
-        await db.collection("board").add({
+        await storeRef.collection("board").add({
           message,
           author,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -500,7 +534,8 @@
       }
     });
 
-    db.collection("board")
+    storeRef
+      .collection("board")
       .orderBy("createdAt", "desc")
       .onSnapshot((snap) => {
         boardList.innerHTML = "";
@@ -523,6 +558,65 @@
             </div>
           `;
           boardList.appendChild(div);
+        });
+      });
+
+    // ============================
+    // ④ taskPhotos（写真つきタスク報告）
+    // ============================
+    const photoList = document.getElementById("photoList");
+    const photoEmpty = document.getElementById("photoEmpty");
+
+    // 将来 index.html 側からこんなデータが飛んでくる想定：
+    // stores/{storeId}/taskPhotos:
+    // {
+    //   imageUrl: "https://...",
+    //   slotId: "t6-9" など,
+    //   slotLabel: "06:00〜09:00 朝の立ち上げ",
+    //   taskLabel: "FFケース内部清掃（扉を開けて撮影）",
+    //   staffName: "なかにし",
+    //   deviceLabel: "レジ横タブレット",
+    //   businessDate: "2025-12-01",
+    //   createdAt: serverTimestamp()
+    // }
+    storeRef
+      .collection("taskPhotos")
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .onSnapshot((snap) => {
+        photoList.innerHTML = "";
+        if (snap.empty) {
+          photoEmpty.style.display = "block";
+          return;
+        }
+        photoEmpty.style.display = "none";
+
+        snap.forEach(doc => {
+          const data = doc.data() || {};
+          const div = document.createElement("div");
+          div.className = "card";
+
+          const imageUrl = data.imageUrl || "";
+          const taskLabel = data.taskLabel || "(タスク名なし)";
+          const slotLabel = data.slotLabel || data.slotId || "";
+          const staffName = data.staffName || data.deviceLabel || "（名無し）";
+          const bizDate = data.businessDate || "";
+          const dateText = data.createdAt ? formatDate(data.createdAt) : "";
+
+          div.innerHTML = `
+            <div class="photo-badge-row">
+              <span class="badge">Aタスク（写真必須）</span>
+              ${slotLabel ? `<span class="badge">${slotLabel}</span>` : ""}
+              ${bizDate ? `<span class="badge">営業日: ${bizDate}</span>` : ""}
+            </div>
+            ${imageUrl ? `<img src="${imageUrl}" alt="タスク写真" class="photo-thumb">` : ""}
+            <div class="item-title">${taskLabel}</div>
+            <div class="item-meta">
+              <span>投稿：${staffName}</span>
+              ${dateText ? `<span>${dateText}</span>` : ""}
+            </div>
+          `;
+          photoList.appendChild(div);
         });
       });
   </script>
