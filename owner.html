@@ -1982,12 +1982,13 @@ activateView("news");
           }
         );
 
-            // =============================
+           // =============================
       // 2) taskSlots（時間帯ごとのタスク定義）
       // =============================
       const slotSelect = document.getElementById("slotSelect");
-      const tasksAInput = document.getElementById("tasksAInput");
-      const tasksBInput = document.getElementById("tasksBInput");
+      const tasksPhotoInput = document.getElementById("tasksPhotoInput"); // ★ 写真必須
+      const tasksAInput = document.getElementById("tasksAInput");         // 必須
+      const tasksBInput = document.getElementById("tasksBInput");         // 余裕あれば
       const reloadSlotBtn = document.getElementById("reloadSlotBtn");
       const saveSlotBtn = document.getElementById("saveSlotBtn");
       const taskStatus = document.getElementById("taskStatus");
@@ -2033,48 +2034,47 @@ activateView("news");
 
       // slotSelect の option を作り直す
       function renderSlotOptions(slots, initialLoad) {
-  slotSelect.innerHTML = "";
-  if (!slots || slots.length === 0) {
-    slots = getDefaultSlots();
-  }
+        slotSelect.innerHTML = "";
+        if (!slots || slots.length === 0) {
+          slots = getDefaultSlots();
+        }
 
-  slots.forEach((s) => {
-    const opt = document.createElement("option");
-    opt.value = s.id;
+        slots.forEach((s) => {
+          const opt = document.createElement("option");
+          opt.value = s.id;
 
-    let text = "";
+          let text = "";
 
-    // ★ カスタム編集で入力した行には _raw が入っている
-    // 例: "06:00-09:00 朝の立ち上げ"
-    if (s._raw && typeof s._raw === "string") {
-      // 先頭の時間部分とラベル部分に分割
-      const parts = s._raw.split(/\s+/, 2);
-      const rangePart = parts[0];          // "06:00-09:00"
-      const labelPart = parts[1] || "";    // "朝の立ち上げ"（ない場合もあり）
+          // ★ カスタム編集で入力した行には _raw が入っている
+          // 例: "06:00-09:00 朝の立ち上げ"
+          if (s._raw && typeof s._raw === "string") {
+            // 先頭の時間部分とラベル部分に分割
+            const parts = s._raw.split(/\s+/, 2);
+            const rangePart = parts[0];          // "06:00-09:00"
+            const labelPart = parts[1] || "";    // "朝の立ち上げ"（ない場合もあり）
 
-      // 06:00-09:00 → 06:00〜09:00 にしてから結合
-      const rangeNice = rangePart.replace("-", "〜");
-      text = labelPart ? `${rangeNice} ${labelPart}` : rangeNice;
-    } else {
-      // デフォルトのスロット（label に時間も入っているやつ）はそのまま
-      text = s.label || s.id;
-    }
+            // 06:00-09:00 → 06:00〜09:00 にしてから結合
+            const rangeNice = rangePart.replace("-", "〜");
+            text = labelPart ? `${rangeNice} ${labelPart}` : rangeNice;
+          } else {
+            // デフォルトのスロット（label に時間も入っているやつ）はそのまま
+            text = s.label || s.id;
+          }
 
-    opt.textContent = text;
-    slotSelect.appendChild(opt);
-  });
+          opt.textContent = text;
+          slotSelect.appendChild(opt);
+        });
 
-  // 1個目を選択
-  if (!slotSelect.value && slots[0]) {
-    slotSelect.value = slots[0].id;
-  }
+        // 1個目を選択
+        if (!slotSelect.value && slots[0]) {
+          slotSelect.value = slots[0].id;
+        }
 
-  // 選択された時間帯の定義を読み込む
-  if (slotSelect.value) {
-    loadSlotDefinition(slotSelect.value);
-  }
-}
-
+        // 選択された時間帯の定義を読み込む
+        if (slotSelect.value) {
+          loadSlotDefinition(slotSelect.value);
+        }
+      }
 
       // Firestore から時間帯設定を読み込み
       async function loadTimeSlotsConfig(initialLoad) {
@@ -2116,7 +2116,7 @@ activateView("news");
         }
       }
 
-            // 時刻文字列 "HH:MM" → 分（0〜）に変換
+      // 時刻文字列 "HH:MM" → 分（0〜）に変換
       function parseTimeToMinutes(hm) {
         const [hStr, mStr] = hm.split(":");
         const h = parseInt(hStr, 10);
@@ -2355,6 +2355,7 @@ activateView("news");
 
       async function loadSlotDefinition(slotId) {
         setTaskStatus("読み込み中…", true);
+        if (tasksPhotoInput) tasksPhotoInput.value = "";
         tasksAInput.value = "";
         tasksBInput.value = "";
         try {
@@ -2367,12 +2368,24 @@ activateView("news");
             return;
           }
           const data = snap.data() || {};
-          (data.tasksA || []).forEach((t, i) => {
+
+          // ★ 互換用：新旧どっちでも読めるようにする
+          const photoTasks   = data.photoTasks || [];
+          const requiredTasks = data.requiredTasks || data.tasksA || [];
+          const optionalTasks = data.optionalTasks || data.tasksB || [];
+
+          if (tasksPhotoInput) {
+            photoTasks.forEach((t, i) => {
+              tasksPhotoInput.value += (i ? "\n" : "") + t;
+            });
+          }
+          requiredTasks.forEach((t, i) => {
             tasksAInput.value += (i ? "\n" : "") + t;
           });
-          (data.tasksB || []).forEach((t, i) => {
+          optionalTasks.forEach((t, i) => {
             tasksBInput.value += (i ? "\n" : "") + t;
           });
+
           setTaskStatus("読み込み完了。", true);
         } catch (e) {
           console.error(e);
@@ -2383,24 +2396,44 @@ activateView("news");
       reloadSlotBtn.addEventListener("click", () => {
         loadSlotDefinition(slotSelect.value);
       });
+
       slotSelect.addEventListener("change", () => {
         loadSlotDefinition(slotSelect.value);
       });
 
       saveSlotBtn.addEventListener("click", async () => {
         const slotId = slotSelect.value;
-        const tasksA = tasksAInput.value
+
+        const photoTasks = tasksPhotoInput
+          ? tasksPhotoInput.value
+              .split("\n")
+              .map((t) => t.trim())
+              .filter((t) => t)
+          : [];
+
+        const requiredTasks = tasksAInput.value
           .split("\n")
           .map((t) => t.trim())
           .filter((t) => t);
-        const tasksB = tasksBInput.value
+
+        const optionalTasks = tasksBInput.value
           .split("\n")
           .map((t) => t.trim())
           .filter((t) => t);
 
         setTaskStatus("保存中…", true);
         try {
-          await taskSlotsRef.doc(slotId).set({ tasksA, tasksB }, { merge: true });
+          await taskSlotsRef.doc(slotId).set(
+            {
+              photoTasks,
+              requiredTasks,
+              optionalTasks,
+              // ★ 互換用：index.html がまだ tasksA/B を参照していても動くように
+              tasksA: requiredTasks,
+              tasksB: optionalTasks,
+            },
+            { merge: true }
+          );
 
           // この時間帯のチェック状態だけリセット
           const docSnap = await tasksDocRef.get();
@@ -2425,6 +2458,7 @@ activateView("news");
 
       // 初回ロード（時間帯設定 → プルダウン生成 → textarea反映）
       loadTimeSlotsConfig(true);
+
 
 
 
