@@ -1350,6 +1350,7 @@ body.app-ready .app {
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const storage = firebase.storage();  // ★ 追加
 
     // ===== お知らせ（日付フォーマット） =====
     function formatDateForSummary(ts) {
