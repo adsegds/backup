@@ -2246,6 +2246,94 @@ async function loadTaskDefinitions() {
 });
 
 
+
+
+
+// 🆕 写真アップロードボタンの処理 ←★★ ここを今から追加
+document.body.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".task-photo-upload-btn");
+  if (!btn) return;
+
+  const li = btn.closest(".task-item");
+  if (!li) return;
+
+  const fileInput  = li.querySelector(".task-photo-input");
+  const statusEl   = li.querySelector(".task-photo-status");
+  const checkbox   = li.querySelector('input[type="checkbox"][data-task-id]');
+  const taskTextEl = li.querySelector(".task-text");
+
+  if (!fileInput || !checkbox || !taskTextEl) return;
+
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("先に写真を選択してください。");
+    return;
+  }
+
+  if (!STORE_ID || !storeRef) {
+    alert("店舗情報が取得できていません。ログインし直してください。");
+    return;
+  }
+
+  const slotId      = li.dataset.slotId || "unknown";
+  const taskLabel   = li.dataset.taskLabel || taskTextEl.textContent || "";
+  const businessKey = getCurrentBusinessKey();
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "アップロード中...";
+    if (statusEl) statusEl.textContent = "アップロード中...";
+
+    // === Storage にアップロード ===
+    const path = `stores/${STORE_ID}/photoTasks/${businessKey}/${slotId}/${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`;
+    const storageRefPath = storage.ref().child(path);
+
+    await storageRefPath.put(file);
+    const downloadUrl = await storageRefPath.getDownloadURL();
+
+    // === Firestore にも記録（notice.html 用） ===
+    await storeRef.collection("photoReports").add({
+      slotId,
+      taskLabel,
+      photoUrl: downloadUrl,
+      businessKey,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      deviceLabel: currentDeviceLabel || "未設定",
+    });
+
+    // === チェックを解禁＆自動チェック ===
+    checkbox.dataset.photoUploaded = "1";
+    checkbox.dataset.photoLock = "0";
+    checkbox.checked = true;
+
+    saveTasksToFirestore();
+    updateCompletionUI();
+
+    logChecklistAction({
+      taskId: checkbox.dataset.taskId || null,
+      taskLabel,
+      action: "photoUploaded",
+      extra: { photoUrl: downloadUrl },
+    });
+
+    fileInput.value = "";
+    if (statusEl) statusEl.textContent = "アップロード完了";
+    btn.textContent = "再アップロード";
+
+  } catch (err) {
+    console.error("写真アップロードエラー", err);
+    alert("写真のアップロードに失敗しました。通信環境を確認してください。");
+    if (statusEl) statusEl.textContent = "アップロード失敗";
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+
+
+
+        
+
         // 引き継ぎメモ（共通）
         const handoverSlots  = document.querySelectorAll(".handover-slot");
         const handoverColRef = storeRef.collection("handover");
