@@ -2008,44 +2008,52 @@ body.app-ready .app {
         }
 
         async function loadTaskDefinitions() {
-          const taskSlotsRef = storeRef.collection("taskSlots");
-          await Promise.all(
-            timeSlotIds.map(async (slotId) => {
-              const section = document.getElementById(slotId);
-              if (!section) return;
-              const ulA = section.querySelector("ul.tasks.a");
-              const ulB = section.querySelector("ul.tasks.b");
-              if (!ulA || !ulB) return;
+  const taskSlotsRef = storeRef.collection("taskSlots");
+  await Promise.all(
+    timeSlotIds.map(async (slotId) => {
+      const section = document.getElementById(slotId);
+      if (!section) return;
+      const ulA = section.querySelector("ul.tasks.a");
+      const ulB = section.querySelector("ul.tasks.b");
+      if (!ulA || !ulB) return;
 
-              try {
-                const snap = await taskSlotsRef.doc(slotId).get();
-                if (snap.exists) {
-                  const data = snap.data() || {};
-                  const tasksA = data.tasksA || [];
-                  const tasksB = data.tasksB || [];
-                  buildTasksFromDefinition(slotId, ulA, tasksA, "A");
-                  buildTasksFromDefinition(slotId, ulB, tasksB, "B");
-                } else {
-                  // Firestore に定義がない場合 → 既存 li を ID 付与で使う（テンプレが空なら何も出ない）
-                  const setupFromExisting = (ul, groupLabel) => {
-                    ul.querySelectorAll("li").forEach((li, index) => {
-                      const cb = li.querySelector('input[type="checkbox"]');
-                      if (!cb) return;
-                      const taskId = `${slotId}-${groupLabel}-${index}`;
-                      cb.dataset.taskId = taskId;
-                      checkboxMap.set(taskId, cb);
-                      cb.checked = latestCheckedIds.has(taskId);
-                    });
-                  };
-                  setupFromExisting(ulA, "A");
-                  setupFromExisting(ulB, "B");
-                }
-              } catch (e) {
-                console.error("タスク定義読み込みエラー:", slotId, e);
-              }
-            })
-          );
+      try {
+        const snap = await taskSlotsRef.doc(slotId).get();
+        if (snap.exists) {
+          const data = snap.data() || {};
+
+          // 🆕 owner.html で保存してるフィールド
+          const photoTasks = data.photoTasks || data.tasksPhoto || [];
+          const tasksA    = data.tasksA    || [];
+          const tasksB    = data.tasksB    || [];
+
+          // 🆕 Aタスクは「写真必須＋普通の必須」をまとめて描画
+          buildATasksWithPhoto(slotId, ulA, photoTasks, tasksA);
+
+          // Bタスクは今まで通り
+          buildTasksFromDefinition(slotId, ulB, tasksB, "B");
+        } else {
+          // Firestoreに定義がないときのフォールバック（今のままでOK）
+          const setupFromExisting = (ul, groupLabel) => {
+            ul.querySelectorAll("li").forEach((li, index) => {
+              const cb = li.querySelector('input[type="checkbox"]');
+              if (!cb) return;
+              const taskId = `${slotId}-${groupLabel}-${index}`;
+              cb.dataset.taskId = taskId;
+              checkboxMap.set(taskId, cb);
+              cb.checked = latestCheckedIds.has(taskId);
+            });
+          };
+          setupFromExisting(ulA, "A");
+          setupFromExisting(ulB, "B");
         }
+      } catch (e) {
+        console.error("タスク定義読み込みエラー:", slotId, e);
+      }
+    })
+  );
+}
+
 
         function saveTasksToFirestore() {
           const checkedIds = [];
