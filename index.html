@@ -1985,29 +1985,126 @@ body.app-ready .app {
           });
         }
 
-        function buildTasksFromDefinition(slotId, ul, tasks, groupLabel) {
-          ul.innerHTML = "";
-          tasks.forEach((text, index) => {
-            const li = document.createElement("li");
-            li.innerHTML = `
-              <label class="task-item">
-                <input type="checkbox">
-                <span class="task-text"></span>
-              </label>
-            `;
-            const cb   = li.querySelector('input[type="checkbox"]');
-            const span = li.querySelector(".task-text");
-            span.textContent = text;
+        // =============================
+// タスク描画まわり（A写真必須＋Bタスク）
+// =============================
 
-            const taskId = `${slotId}-${groupLabel}-${index}`;
-            cb.dataset.taskId = taskId;
-            checkboxMap.set(taskId, cb);
-            cb.checked = latestCheckedIds.has(taskId);
-            ul.appendChild(li);
-          });
-        }
+// ★ 汎用タスク描画（主に Bタスク用）
+function buildTasksFromDefinition(slotId, ul, tasks, groupLabel) {
+  ul.innerHTML = "";
+  tasks.forEach((text, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <label class="task-item">
+        <input type="checkbox">
+        <span class="task-text"></span>
+      </label>
+    `;
+    const cb   = li.querySelector('input[type="checkbox"]');
+    const span = li.querySelector(".task-text");
+    span.textContent = text;
 
-        async function loadTaskDefinitions() {
+    const taskId = `${slotId}-${groupLabel}-${index}`;
+    cb.dataset.taskId = taskId;
+    checkboxMap.set(taskId, cb);
+    cb.checked = latestCheckedIds.has(taskId);
+    ul.appendChild(li);
+  });
+}
+
+// ★ Aタスク専用：写真必須対応版
+function buildATasksWithPhoto(slotId, ulA, photoTasks, tasksA) {
+  ulA.innerHTML = "";
+
+  const photoList    = Array.isArray(photoTasks) ? photoTasks : [];
+  const requiredList = Array.isArray(tasksA)     ? tasksA     : [];
+
+  // ① 写真必須タスクから先に並べる
+  photoList.forEach((text, index) => {
+    const li = document.createElement("li");
+    li.className = "task-item";
+    li.dataset.slotId = slotId;
+    li.dataset.taskType = "A";
+    li.dataset.photoRequired = "1";
+    li.dataset.taskLabel = text;
+
+    const taskId = `${slotId}-AP-${index}`; // AP = A Photo のイメージ
+    const isDone = latestCheckedIds.has(taskId);
+
+    li.innerHTML = `
+      <div class="task-main-row">
+        <label class="task-main-label">
+          <input
+            type="checkbox"
+            class="task-checkbox"
+            data-task-id="${taskId}"
+            data-photo-lock="1"
+            ${isDone ? "checked" : ""}
+          >
+          <span class="task-text"></span>
+          <span class="badge badge-photo">写真必須</span>
+        </label>
+      </div>
+      <div class="task-photo-area">
+        <input type="file" accept="image/*" capture="environment" class="task-photo-input">
+        <button type="button" class="task-photo-upload-btn">写真アップロード</button>
+        <div class="task-photo-status"></div>
+      </div>
+    `;
+
+    const cb   = li.querySelector('input[type="checkbox"]');
+    const span = li.querySelector(".task-text");
+    span.textContent = text;
+
+    // ★チェック状態を反映
+    if (isDone) {
+      cb.dataset.photoUploaded = "1";
+      cb.dataset.photoLock = "0";
+    } else {
+      cb.dataset.photoUploaded = "0";
+      cb.dataset.photoLock = "1";
+    }
+
+    checkboxMap.set(taskId, cb);
+    ulA.appendChild(li);
+  });
+
+  // ② 普通の Aタスク（チェックのみ）
+  requiredList.forEach((text, index) => {
+    const li = document.createElement("li");
+    li.className = "task-item";
+    li.dataset.slotId = slotId;
+    li.dataset.taskType = "A";
+    li.dataset.taskLabel = text;
+
+    const taskId = `${slotId}-A-${index}`;
+    const isDone = latestCheckedIds.has(taskId);
+
+    li.innerHTML = `
+      <div class="task-main-row">
+        <label class="task-main-label">
+          <input
+            type="checkbox"
+            class="task-checkbox"
+            data-task-id="${taskId}"
+            ${isDone ? "checked" : ""}
+          >
+          <span class="task-text"></span>
+        </label>
+      </div>
+    `;
+
+    const cb   = li.querySelector('input[type="checkbox"]');
+    const span = li.querySelector(".task-text");
+    span.textContent = text;
+
+    checkboxMap.set(taskId, cb);
+    ulA.appendChild(li);
+  });
+}
+
+// ★ Firestore からタスク定義を読み込む（写真対応版）
+async function loadTaskDefinitions() {
   const taskSlotsRef = storeRef.collection("taskSlots");
   await Promise.all(
     timeSlotIds.map(async (slotId) => {
@@ -2022,18 +2119,18 @@ body.app-ready .app {
         if (snap.exists) {
           const data = snap.data() || {};
 
-          // 🆕 owner.html で保存してるフィールド
-          const photoTasks = data.photoTasks || data.tasksPhoto || [];
-          const tasksA    = data.tasksA    || [];
-          const tasksB    = data.tasksB    || [];
+          // 🆕 owner.html で保存してるフィールドを読む
+          const photoTasks = data.tasksPhoto || data.photoTasks || [];
+          const tasksA     = data.tasksA     || [];
+          const tasksB     = data.tasksB     || [];
 
-          // 🆕 Aタスクは「写真必須＋普通の必須」をまとめて描画
+          // 🆕 Aタスク：写真必須＋普通の必須をまとめて描画
           buildATasksWithPhoto(slotId, ulA, photoTasks, tasksA);
 
           // Bタスクは今まで通り
           buildTasksFromDefinition(slotId, ulB, tasksB, "B");
         } else {
-          // Firestoreに定義がないときのフォールバック（今のままでOK）
+          // Firestoreに定義がないときのフォールバック（既存liをそのまま活用）
           const setupFromExisting = (ul, groupLabel) => {
             ul.querySelectorAll("li").forEach((li, index) => {
               const cb = li.querySelector('input[type="checkbox"]');
@@ -2053,6 +2150,7 @@ body.app-ready .app {
     })
   );
 }
+
 
 
         function saveTasksToFirestore() {
