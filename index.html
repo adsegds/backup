@@ -2217,23 +2217,34 @@ async function loadTaskDefinitions() {
 
         // チェック → Firestore + ログ
         document.body.addEventListener("change", (e) => {
-          const target = e.target;
-          if (!target.matches('input[type="checkbox"][data-task-id]')) return;
-          if (applyingRemote) return;
+  const target = e.target;
+  if (!target.matches('input[type="checkbox"][data-task-id]')) return;
 
-          saveTasksToFirestore();
-          updateCompletionUI();
+  // 🆕 写真必須タスクは、写真アップロードが終わるまでロック
+  if (target.dataset.photoLock === "1" && target.dataset.photoUploaded !== "1") {
+    // まだ写真がアップされてない
+    e.preventDefault?.();
+    target.checked = false;
+    alert("このタスクは写真アップロードが必要です。\n先に写真をアップしてください。");
+    return;
+  }
 
-          const taskId = target.dataset.taskId || null;
-          const taskLabel =
-            target.closest(".task-item")?.querySelector(".task-text")?.textContent || null;
+  if (applyingRemote) return;
 
-          logChecklistAction({
-            taskId,
-            taskLabel,
-            action: target.checked ? "check" : "uncheck"
-          });
-        });
+  saveTasksToFirestore();
+  updateCompletionUI();
+
+  const taskId = target.dataset.taskId || null;
+  const taskLabel =
+    target.closest(".task-item")?.querySelector(".task-text")?.textContent || null;
+
+  logChecklistAction({
+    taskId,
+    taskLabel,
+    action: target.checked ? "check" : "uncheck"
+  });
+});
+
 
         // 引き継ぎメモ（共通）
         const handoverSlots  = document.querySelectorAll(".handover-slot");
