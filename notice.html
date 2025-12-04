@@ -38,11 +38,15 @@
   align-items: center;
   gap: 8px;
 
-  background: #111;          /* ★ 黒背景はこちらに移動 */
+  background: #111;
   color: #fff;
-  padding: 10px 14px 8px;    /* 元の高さを維持 */
-  border-radius: 0;          /* 角丸付けたければここで調整 */
+  padding: 10px 14px 8px;
+  border-radius: 0;
+
+  /* ★ ヘッダー高さを強制キープ */
+  min-height: 48px;
 }
+
 
 .top-bar h1 {
   font-size: 16px;           /* もともとのサイズのまま */
