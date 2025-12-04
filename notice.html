@@ -9,7 +9,7 @@
 
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: #202225;      /* デフォルト：Discordっぽいダーク背景 */
+    background: #202225;      /* Discordっぽいダーク背景 */
     color: #e3e5e8;
     line-height: 1.6;
     font-size: 13px;
@@ -94,7 +94,7 @@
     width: 18px;   /* index と同じ長さ */
     height: 2px;
     border-radius: 999px;
-    background: #fff;
+    background: #fff;  /* ダーク固定なので白のまま */
   }
 
   /* ====== タブ（上のチャンネル切り替えみたいな感じ） ====== */
@@ -111,7 +111,6 @@
     overflow-x: auto;
     overflow-y: hidden;
 
-    /* スマホ・タブレットでスワイプをなめらかに */
     -webkit-overflow-scrolling: touch;
 
     /* スクロールバー非表示系 */
@@ -119,7 +118,6 @@
     -ms-overflow-style: none;     /* 旧 Edge / IE */
   }
 
-  /* WebKit系（Chrome / Safari / モバイル）のスクロールバー非表示 */
   .tab-nav::-webkit-scrollbar {
     width: 0;
     height: 0;
@@ -361,11 +359,6 @@
     background: rgba(255,255,255,0.06);
   }
 
-  .theme-toggle-item button {
-    font-weight: 500;
-  }
-
-  /* メニュー開閉 */
   body.menu-open .side-menu-overlay {
     display: block;
   }
@@ -374,117 +367,13 @@
     transform: translateX(0);
   }
 
-  /* ===== ライトテーマ用の上書き ===== */
-  body.theme-light {
-    background: #f5f5f5;
-    color: #111;
-  }
-
-  body.theme-light .top-bar {
-    background: #ffffff;
-    color: #111;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-
-  body.theme-light .menu-btn {
-    color: #111;
-  }
-
-  body.theme-light .role-select select {
-    background: #ffffff;
-    color: #111;
-    border: 1px solid #ccc;
-  }
-
-  body.theme-light .tab-nav {
-    background: #f5f5f5;
-  }
-
-  body.theme-light .tab-btn {
-    background: #ffffff;
-    border-color: #dddddd;
-    color: #333;
-  }
-
-  body.theme-light .tab-btn.active {
-    background: #111;
-    border-color: #111;
-    color: #fff;
-  }
-
-  body.theme-light .section-head h2 {
-    color: #111;
-  }
-
-  body.theme-light .section-head p,
-  body.theme-light .tab-note,
-  body.theme-light .empty-text {
-    color: #555;
-  }
-
-  body.theme-light .card {
-    background: #ffffff;
-    border-color: #dddddd;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-
-  body.theme-light .form-group label {
-    color: #555;
-  }
-
-  body.theme-light .form-group input,
-  body.theme-light .form-group select,
-  body.theme-light .form-group textarea {
-    background: #ffffff;
-    color: #111;
-    border-color: #cccccc;
-  }
-
-  body.theme-light .item-title {
-    color: #111;
-  }
-
-  body.theme-light .item-body {
-    color: #333;
-  }
-
-  body.theme-light .item-meta {
-    color: #777;
-  }
-
-  body.theme-light .badge {
-    background: #eeeeee;
-    color: #555;
-  }
-
-  body.theme-light .badge-status {
-    background: #fbe5e5;
-    color: #b00000;
-  }
-
-  body.theme-light .side-menu {
-    background: #ffffff;
-    color: #111;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
-  }
-
-  body.theme-light .side-menu-header {
-    border-bottom: 1px solid #eeeeee;
-  }
-
-  body.theme-light .menu-item button:hover,
-  body.theme-light .menu-item a:hover {
-    background: rgba(0,0,0,0.04);
-  }
-
   /* スマホ時はタイトル少し小さく */
   @media (max-width: 480px) {
     .top-bar h1 {
       font-size: 1.2em;
     }
   }
-</style>
-
+  </style>
 </head>
 
 <body class="role-staff theme-dark">
@@ -511,9 +400,6 @@
   </div>
 
   <div class="app">
-
-
-  
     <!-- タブ -->
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="ownerNews">① 経営者 → 全員</button>
@@ -645,10 +531,7 @@
       <li class="menu-item">
         <button type="button" data-scroll="tab-reports">📩 スタッフ → 経営者へ</button>
       </li>
-
-      <li class="menu-item theme-toggle-item">
-        <button id="themeToggle" type="button">🌙 ダークモード</button>
-      </li>
+      <!-- テーマ切替ボタンは削除（ダーク固定） -->
     </ul>
   </nav>
 
@@ -960,34 +843,6 @@
         closeMenu();
       }
     });
-
-    // ============================
-    // テーマ切り替え（ダーク / ライト）
-    // ============================
-    const themeToggleBtn = document.getElementById("themeToggle");
-
-    function applyTheme(theme) {
-      document.body.classList.remove("theme-dark", "theme-light");
-      if (theme === "light") {
-        document.body.classList.add("theme-light");
-        if (themeToggleBtn) themeToggleBtn.textContent = "☀ ライトモード";
-      } else {
-        document.body.classList.add("theme-dark");
-        if (themeToggleBtn) themeToggleBtn.textContent = "🌙 ダークモード";
-      }
-      localStorage.setItem("noticeTheme", theme);
-    }
-
-    const savedTheme = localStorage.getItem("noticeTheme") || "dark";
-    applyTheme(savedTheme);
-
-    themeToggleBtn?.addEventListener("click", () => {
-      const current = document.body.classList.contains("theme-light") ? "light" : "dark";
-      const next = current === "light" ? "dark" : "light";
-      applyTheme(next);
-      closeMenu();
-    });
   </script>
-
 </body>
 </html>
