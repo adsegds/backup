@@ -125,11 +125,14 @@
 
 
   .app-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-  }
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto 4px;   /* 中身を真ん中に寄せる */
+  max-width: 1400px;    /* ← .app と同じ幅にそろえる */
+  padding: 0 14px;      /* ← さっき消した左右の余白をここに移動 */
+}
+
 
   .top-bar h1 {
     font-size: 1.45em;
