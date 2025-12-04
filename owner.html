@@ -959,8 +959,9 @@
           </div>
         </header>
 
-        <!-- ① お知らせ管理 -->
+                <!-- ① お知らせ管理 -->
         <section id="view-news" class="view-panel active">
+          <!-- ① 店舗 → スタッフ（今まで通り） -->
           <section class="card" id="news-card">
             <h2>お知らせ管理（ownerNews）</h2>
             <p class="card-sub">
@@ -987,7 +988,19 @@
             <p class="hint">※最新20件まで表示。古いものから順に削除してOKです。</p>
             <ul class="news-list" id="newsList"></ul>
           </section>
+
+          <!-- ② スタッフ → 経営者（reports 一覧）★今回追加 -->
+          <section class="card" id="reports-card">
+            <h2>② スタッフ → 経営者（報告一覧）</h2>
+            <p class="card-sub">
+              notice.html の「② スタッフ → 経営者」から送られた報告が、ここに新しい順で並びます。
+            </p>
+
+            <div id="adminReportsList" class="reports-list"></div>
+            <div id="adminReportsEmpty" class="empty-text">まだ報告はありません。</div>
+          </section>
         </section>
+
 
         <!-- ② タスク定義編集 -->
 <section id="view-tasks" class="view-panel">
