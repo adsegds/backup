@@ -219,14 +219,15 @@
     /* 写真つきタスク用（Discordっぽい埋め込み風） */
 .photo-thumb {
   display: block;
-  width: 100%;          /* カードの中では横幅いっぱい使う */
-  max-width: 520px;     /* でもPCではこれ以上大きくしない */
-  aspect-ratio: 16 / 9; /* 横長の比率にそろえる */
-  object-fit: cover;    /* 余白なしでトリミング */
-  border-radius: 12px;  /* 角丸を少し大きめに */
-  margin: 8px auto;     /* 上下に余白＋中央寄せ */
-  background: #000;     /* 読み込み前の背景（黒） */
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 16 / 9; /* 枠は横長のまま */
+  object-fit: contain;  /* ← contain に変更（切れない） */
+  border-radius: 12px;
+  margin: 8px auto;
+  background: #000;     /* 全体見せるための余白背景 */
 }
+
 
     .photo-badge-row {
       display: flex;
