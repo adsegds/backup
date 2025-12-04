@@ -346,11 +346,16 @@
 
   <script>
     // ★ ここを自分の firebaseConfig に差し替え（owner/index と同じ）
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-    };
+   const firebaseConfig = {
+  apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
+  authDomain: "lawson-workflow.firebaseapp.com",
+  projectId: "lawson-workflow",
+  storageBucket: "lawson-workflow.firebasestorage.app",
+  messagingSenderId: "335371795694",
+  appId: "1:335371795694:web:3b0950a616d368b284c7ff",
+  measurementId: "G-BGENZNZMRC"
+};
+
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
