@@ -314,19 +314,20 @@
   }
 
   .side-menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 260px;
-    height: 100%;
-    background: #18191c;
-    color: #fff;
-    z-index: 21;
-    transform: translateX(-100%);
-    transition: transform 0.2s ease-out;
-    padding: 12px 0;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.5);
-  }
+  position: fixed;
+  top: 0;                /* ← 画面のいちばん上から */
+  left: 0;
+  width: 260px;
+  height: 100%;          /* ← 全高さ */
+  background: #18191c;
+  color: #fff;
+  z-index: 4600;         /* ← ヘッダーより前に出す */
+  transform: translateX(-100%);
+  transition: transform 0.2s ease-out;
+  padding: 12px 0;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.5);
+}
+
 
   .side-menu-header {
     padding: 0 16px 8px;
