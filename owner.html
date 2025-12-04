@@ -1746,6 +1746,87 @@ if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
     return;
   }
 
+
+
+
+
+  // =============================
+  // ② reports（スタッフ → 経営者）一覧
+  // =============================
+  const adminReportsList  = document.getElementById("adminReportsList");
+  const adminReportsEmpty = document.getElementById("adminReportsEmpty");
+
+  // 日付フォーマット（Timestamp → "YYYY/MM/DD HH:MM"）
+  function formatReportDate(ts) {
+    if (!ts || !ts.toDate) return "";
+    const d = ts.toDate();
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, "0");
+    const dd   = String(d.getDate()).padStart(2, "0");
+    const hh   = String(d.getHours()).padStart(2, "0");
+    const mi   = String(d.getMinutes()).padStart(2, "0");
+    return `${yyyy}/${mm}/${dd} ${hh}:${mi}`;
+  }
+
+  if (adminReportsList) {
+    storeRef
+      .collection("reports")
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .onSnapshot(
+        (snap) => {
+          adminReportsList.innerHTML = "";
+
+          if (snap.empty) {
+            if (adminReportsEmpty) adminReportsEmpty.style.display = "block";
+            return;
+          }
+          if (adminReportsEmpty) adminReportsEmpty.style.display = "none";
+
+          snap.forEach((doc) => {
+            const data = doc.data() || {};
+
+            const cat    = data.category || "その他";
+            const msg    = (data.message || "").replace(/\n/g, "<br>");
+            const name   = data.staffName || "（不明）";
+            const status = data.status || "未対応";
+            const dateText = data.createdAt
+              ? formatReportDate(data.createdAt)
+              : "";
+
+            const item = document.createElement("div");
+            item.className = "report-item";
+
+            item.innerHTML = `
+              <div class="report-header">
+                <span class="badge">カテゴリ: ${cat}</span>
+                <span class="badge badge-status">${status}</span>
+              </div>
+              <div class="report-body">${msg}</div>
+              <div class="report-meta">
+                <span>送信者：${name}</span>
+                <span>${dateText}</span>
+              </div>
+            `;
+
+            adminReportsList.appendChild(item);
+          });
+        },
+        (err) => {
+          console.error("reports 読み込みエラー:", err);
+          if (adminReportsEmpty) {
+            adminReportsEmpty.textContent = "報告の読み込みに失敗しました。";
+            adminReportsEmpty.style.display = "block";
+          }
+        }
+      );
+  }
+
+
+
+
+      
+
   // =============================
   // シフトAIビュー用のUI制御（週 / 月切り替え）
   // =============================
