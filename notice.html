@@ -5,444 +5,486 @@
   <title>お知らせセンター</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #202225;      /* デフォルト：Discordっぽいダーク背景 */
-      color: #e3e5e8;
-      line-height: 1.6;
-      font-size: 13px;
-    }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #202225;      /* デフォルト：Discordっぽいダーク背景 */
+    color: #e3e5e8;
+    line-height: 1.6;
+    font-size: 13px;
+  }
 
-    .app {
-      max-width: 1100px;         /* 中央に細めのタイムライン */
-      margin: 0 auto;
-      padding: 16px 0 40px;
-    }
+  .app {
+    max-width: 1100px;         /* 中央に細めのタイムライン */
+    margin: 0 auto;
+    padding: 16px 0 40px;
+  }
 
-    /* ====== 上部バー（サーバー名っぽく） ====== */
-.top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #18191c;
-  color: #fff;
-  padding: 8px 0;              /* ← 左右のpaddingは inner 側に移動 */
-  box-shadow: 0 1px 0 rgba(0,0,0,0.6);
-}
+  /* ===== ヘッダー（index と同じ雰囲気に統一） ===== */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 4000;
+    background: #111;              /* index と同じ黒 */
+    color: #fff;
+    padding: 10px 14px 8px;        /* 上10 / 左右14 / 下8 */
+  }
 
-/* 中身を .app と同じ 1100px 幅にそろえる */
-.top-bar-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-}
+  /* 中身の横幅を .app と合わせる */
+  .top-bar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-.top-bar h1 {
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 右側に押しやる */
-.role-select {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;           /* ← ここはそのままでOK */
-}
-
-    .role-select select {
-      padding: 4px 8px;
-      border-radius: 4px;
-      border: none;
-      font-size: 12px;
-      background: #2f3136;
-      color: #f6f6f6;
-    }
-
-    /* ハンバーガーボタン */
-    .menu-btn {
-      border: none;
-      background: transparent;
-      color: #fff;
-      font-size: 20px;
-      padding: 2px 6px 2px 2px;
-      cursor: pointer;
-    }
-
-    /* ====== タブ（上のチャンネル切り替えみたいな感じ） ====== */
-    .tab-nav {
-      display: flex;
-      gap: 6px;
-      padding: 8px 12px 0;
-      background: #202225;
-      position: sticky;
-      top: 40px;
-      z-index: 9;
-
-      /* 横だけスクロールさせる */
-      overflow-x: auto;
-      overflow-y: hidden;
-
-      /* スマホ・タブレットでスワイプをなめらかに */
-      -webkit-overflow-scrolling: touch;
-
-      /* スクロールバー非表示系 */
-      scrollbar-width: none;        /* Firefox */
-      -ms-overflow-style: none;     /* 旧 Edge / IE */
-    }
-
-    /* WebKit系（Chrome / Safari / モバイル）のスクロールバー非表示 */
-    .tab-nav::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-      display: none;
-    }
-
-    .tab-btn {
-      flex: 1 0 auto;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid #3a3c43;
-      background: #2b2d31;
-      font-size: 11px;
-      cursor: pointer;
-      white-space: nowrap;
-      color: #dcddde;
-    }
-    .tab-btn.active {
-      background: #5865f2;    /* Discordブルー */
-      color: #fff;
-      border-color: #5865f2;
-      font-weight: 600;
-    }
-
-    .tab-panel {
-      display: none;
-      padding: 10px 12px 0;
-    }
-    .tab-panel.active {
-      display: block;
-    }
-
-    .section-head {
-      margin-bottom: 8px;
-    }
-    .section-head h2 {
-      font-size: 13px;
-      font-weight: 600;
-      color: #f6f6f6;
-    }
-    .section-head p {
-      font-size: 11px;
-      color: #b9bbbe;
-    }
-
-    /* ====== メッセージカード ====== */
-    .card {
-      background: #2f3136;
-      border-radius: 10px;
-      padding: 10px 12px;
-      box-shadow: 0 1px 0 rgba(0,0,0,0.4);
-      margin-bottom: 10px;
-      border: 1px solid #202225;
-    }
-
-    .form-group {
-      margin-bottom: 8px;
-    }
-    .form-group label {
-      display: block;
-      font-size: 11px;
-      margin-bottom: 2px;
-      color: #b9bbbe;
-    }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid #3a3c43;
-      font-size: 13px;
-      resize: vertical;
-      background: #1e1f22;
-      color: #f6f6f6;
-    }
-    textarea {
-      min-height: 60px;
-    }
-
-    .btn-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .btn {
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .btn-primary {
-      background: #5865f2;
-      color: #fff;
-    }
-    .btn-ghost {
-      background: #4f545c;
-      color: #f6f6f6;
-    }
-
-    .item-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 2px;
-      color: #f6f6f6;
-    }
-    .item-body {
-      font-size: 13px;
-      white-space: pre-wrap;
-      margin-bottom: 4px;
-      color: #dcddde;
-    }
-    .item-meta {
-      font-size: 11px;
-      color: #a3a6aa;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 1px 6px;
-      border-radius: 999px;
-      font-size: 10px;
-      background: #4f545c;
-      color: #e3e5e8;
-    }
-    .badge-status {
-      background: #f04747;
-      color: #fff;
-    }
-
-    /* 役割で表示切り替え */
-    .owner-only { display: none; }
-    .staff-only { display: none; }
-
-    body.role-owner .owner-only { display: block; }
-    body.role-staff .staff-only { display: block; }
-
-    .empty-text {
-      font-size: 12px;
-      color: #a3a6aa;
-      padding: 4px 2px 2px;
-    }
-
-    .tab-note {
-      font-size: 12px;
-      color: #b9bbbe;
-      line-height: 1.5;
-    }
-
-    /* 写真つきタスク用（Discordっぽい埋め込み風） */
-    .photo-thumb {
-      display: block;
-      width: 100%;
-      max-width: 520px;
-      aspect-ratio: 16 / 9;  /* 枠は横長のまま */
-      object-fit: contain;   /* 切れないように全体表示 */
-      border-radius: 12px;
-      margin: 8px auto;
-      background: #000;      /* 余白部分の背景 */
-    }
-
-    .photo-badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-
-    /* ===== ハンバーガーメニュー ===== */
-    .side-menu-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 20;
-      display: none;
-    }
-
-    .side-menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 260px;
-      height: 100%;
-      background: #18191c;
-      color: #fff;
-      z-index: 21;
-      transform: translateX(-100%);
-      transition: transform 0.2s ease-out;
-      padding: 12px 0;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.5);
-    }
-
-    .side-menu-header {
-      padding: 0 16px 8px;
-      font-size: 13px;
-      font-weight: 600;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 4px;
-    }
-
-    .side-menu ul {
-      list-style: none;
-    }
-
-    .menu-item button,
-    .menu-item a {
-      width: 100%;
-      border: none;
-      background: transparent;
-      color: inherit;
-      text-align: left;
-      padding: 10px 16px;
-      font-size: 13px;
-      cursor: pointer;
-      display: block;
-      text-decoration: none;
-    }
-
-    .menu-item button:hover,
-    .menu-item a:hover {
-      background: rgba(255,255,255,0.06);
-    }
-
-    .theme-toggle-item button {
-      font-weight: 500;
-    }
-
-    /* メニュー開閉 */
-    body.menu-open .side-menu-overlay {
-      display: block;
-    }
-    body.menu-open .side-menu {
-      transform: translateX(0);
-    }
-
-    /* ===== ライトテーマ用の上書き ===== */
-    body.theme-light {
-      background: #f5f5f5;
-      color: #111;
-    }
-
-    body.theme-light .top-bar {
-      background: #ffffff;
-      color: #111;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    body.theme-light .menu-btn {
-      color: #111;
-    }
-    body.theme-light .role-select select {
-      background: #ffffff;
-      color: #111;
-      border: 1px solid #ccc;
-    }
-
-    body.theme-light .tab-nav {
-      background: #f5f5f5;
-    }
-    body.theme-light .tab-btn {
-      background: #ffffff;
-      border-color: #dddddd;
-      color: #333;
-    }
-    body.theme-light .tab-btn.active {
-      background: #111;
-      border-color: #111;
-      color: #fff;
-    }
-
-    body.theme-light .section-head h2 {
-      color: #111;
-    }
-    body.theme-light .section-head p,
-    body.theme-light .tab-note,
-    body.theme-light .empty-text {
-      color: #555;
-    }
-
-    body.theme-light .card {
-      background: #ffffff;
-      border-color: #dddddd;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-
-    body.theme-light .form-group label {
-      color: #555;
-    }
-    body.theme-light .form-group input,
-    body.theme-light .form-group select,
-    body.theme-light .form-group textarea {
-      background: #ffffff;
-      color: #111;
-      border-color: #cccccc;
-    }
-
-    body.theme-light .item-title {
-      color: #111;
-    }
-    body.theme-light .item-body {
-      color: #333;
-    }
-    body.theme-light .item-meta {
-      color: #777;
-    }
-
-    body.theme-light .badge {
-      background: #eeeeee;
-      color: #555;
-    }
-    body.theme-light .badge-status {
-      background: #fbe5e5;
-      color: #b00000;
-    }
-
-    body.theme-light .side-menu {
-      background: #ffffff;
-      color: #111;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.15);
-    }
-    body.theme-light .side-menu-header {
-      border-bottom: 1px solid #eeeeee;
-    }
-    body.theme-light .menu-item button:hover,
-    body.theme-light .menu-item a:hover {
-      background: rgba(0,0,0,0.04);
-    }
-
-
-    @media (max-width: 480px) {
   .top-bar h1 {
+    font-size: 1.45em;             /* index とほぼ同じ */
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 右側の「あなたの立場」 */
+  .role-select {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .role-select select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+    font-size: 12px;
+    background: #2f3136;
+    color: #f6f6f6;
+  }
+
+  /* === index と同じ雰囲気の三本線ボタン === */
+  .menu-btn {
+    border: none;
+    background: transparent;
+    padding: 4px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .menu-btn:hover {
+    background: rgba(255,255,255,0.08);
+  }
+
+  .hamburger-icon {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px 2px;
+  }
+
+  .hamburger-icon span {
+    display: block;
+    width: 18px;   /* index と同じ長さ */
+    height: 2px;
+    border-radius: 999px;
+    background: #fff;
+  }
+
+  /* ====== タブ（上のチャンネル切り替えみたいな感じ） ====== */
+  .tab-nav {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px 0;
+    background: #202225;
+    position: sticky;
+    top: 56px;              /* ヘッダーの高さぶんだけ下げるイメージ */
+    z-index: 9;
+
+    /* 横だけスクロールさせる */
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    /* スマホ・タブレットでスワイプをなめらかに */
+    -webkit-overflow-scrolling: touch;
+
+    /* スクロールバー非表示系 */
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* 旧 Edge / IE */
+  }
+
+  /* WebKit系（Chrome / Safari / モバイル）のスクロールバー非表示 */
+  .tab-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  .tab-btn {
+    flex: 1 0 auto;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #3a3c43;
+    background: #2b2d31;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    color: #dcddde;
+  }
+
+  .tab-btn.active {
+    background: #5865f2;    /* Discordブルー */
+    color: #fff;
+    border-color: #5865f2;
+    font-weight: 600;
+  }
+
+  .tab-panel {
+    display: none;
+    padding: 10px 12px 0;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  .section-head {
+    margin-bottom: 8px;
+  }
+
+  .section-head h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f6f6f6;
+  }
+
+  .section-head p {
+    font-size: 11px;
+    color: #b9bbbe;
+  }
+
+  /* ====== メッセージカード ====== */
+  .card {
+    background: #2f3136;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+    margin-bottom: 10px;
+    border: 1px solid #202225;
+  }
+
+  .form-group {
+    margin-bottom: 8px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    margin-bottom: 2px;
+    color: #b9bbbe;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #3a3c43;
+    font-size: 13px;
+    resize: vertical;
+    background: #1e1f22;
+    color: #f6f6f6;
+  }
+
+  textarea {
+    min-height: 60px;
+  }
+
+  .btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
     font-size: 12px;
   }
-}
 
+  .btn-primary {
+    background: #5865f2;
+    color: #fff;
+  }
 
-  </style>
+  .btn-ghost {
+    background: #4f545c;
+    color: #f6f6f6;
+  }
+
+  .item-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: #f6f6f6;
+  }
+
+  .item-body {
+    font-size: 13px;
+    white-space: pre-wrap;
+    margin-bottom: 4px;
+    color: #dcddde;
+  }
+
+  .item-meta {
+    font-size: 11px;
+    color: #a3a6aa;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    background: #4f545c;
+    color: #e3e5e8;
+  }
+
+  .badge-status {
+    background: #f04747;
+    color: #fff;
+  }
+
+  /* 役割で表示切り替え */
+  .owner-only { display: none; }
+  .staff-only { display: none; }
+
+  body.role-owner .owner-only { display: block; }
+  body.role-staff .staff-only { display: block; }
+
+  .empty-text {
+    font-size: 12px;
+    color: #a3a6aa;
+    padding: 4px 2px 2px;
+  }
+
+  .tab-note {
+    font-size: 12px;
+    color: #b9bbbe;
+    line-height: 1.5;
+  }
+
+  /* 写真つきタスク用（Discordっぽい埋め込み風） */
+  .photo-thumb {
+    display: block;
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 16 / 9;  /* 枠は横長のまま */
+    object-fit: contain;   /* 切れないように全体表示 */
+    border-radius: 12px;
+    margin: 8px auto;
+    background: #000;      /* 余白部分の背景 */
+  }
+
+  .photo-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  /* ===== ハンバーガーメニュー ===== */
+  .side-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 20;
+    display: none;
+  }
+
+  .side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100%;
+    background: #18191c;
+    color: #fff;
+    z-index: 21;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease-out;
+    padding: 12px 0;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.5);
+  }
+
+  .side-menu-header {
+    padding: 0 16px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 4px;
+  }
+
+  .side-menu ul {
+    list-style: none;
+  }
+
+  .menu-item button,
+  .menu-item a {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    display: block;
+    text-decoration: none;
+  }
+
+  .menu-item button:hover,
+  .menu-item a:hover {
+    background: rgba(255,255,255,0.06);
+  }
+
+  .theme-toggle-item button {
+    font-weight: 500;
+  }
+
+  /* メニュー開閉 */
+  body.menu-open .side-menu-overlay {
+    display: block;
+  }
+
+  body.menu-open .side-menu {
+    transform: translateX(0);
+  }
+
+  /* ===== ライトテーマ用の上書き ===== */
+  body.theme-light {
+    background: #f5f5f5;
+    color: #111;
+  }
+
+  body.theme-light .top-bar {
+    background: #ffffff;
+    color: #111;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  body.theme-light .menu-btn {
+    color: #111;
+  }
+
+  body.theme-light .role-select select {
+    background: #ffffff;
+    color: #111;
+    border: 1px solid #ccc;
+  }
+
+  body.theme-light .tab-nav {
+    background: #f5f5f5;
+  }
+
+  body.theme-light .tab-btn {
+    background: #ffffff;
+    border-color: #dddddd;
+    color: #333;
+  }
+
+  body.theme-light .tab-btn.active {
+    background: #111;
+    border-color: #111;
+    color: #fff;
+  }
+
+  body.theme-light .section-head h2 {
+    color: #111;
+  }
+
+  body.theme-light .section-head p,
+  body.theme-light .tab-note,
+  body.theme-light .empty-text {
+    color: #555;
+  }
+
+  body.theme-light .card {
+    background: #ffffff;
+    border-color: #dddddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  body.theme-light .form-group label {
+    color: #555;
+  }
+
+  body.theme-light .form-group input,
+  body.theme-light .form-group select,
+  body.theme-light .form-group textarea {
+    background: #ffffff;
+    color: #111;
+    border-color: #cccccc;
+  }
+
+  body.theme-light .item-title {
+    color: #111;
+  }
+
+  body.theme-light .item-body {
+    color: #333;
+  }
+
+  body.theme-light .item-meta {
+    color: #777;
+  }
+
+  body.theme-light .badge {
+    background: #eeeeee;
+    color: #555;
+  }
+
+  body.theme-light .badge-status {
+    background: #fbe5e5;
+    color: #b00000;
+  }
+
+  body.theme-light .side-menu {
+    background: #ffffff;
+    color: #111;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+  }
+
+  body.theme-light .side-menu-header {
+    border-bottom: 1px solid #eeeeee;
+  }
+
+  body.theme-light .menu-item button:hover,
+  body.theme-light .menu-item a:hover {
+    background: rgba(0,0,0,0.04);
+  }
+
+  /* スマホ時はタイトル少し小さく */
+  @media (max-width: 480px) {
+    .top-bar h1 {
+      font-size: 1.2em;
+    }
+  }
+</style>
+
 </head>
 
 <body class="role-staff theme-dark">
