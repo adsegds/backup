@@ -217,14 +217,15 @@
 
 
     
-    .photo-thumb {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+   .photo-thumb {
+  width: 100%;        /* 横幅いっぱい */
+  aspect-ratio: 4 / 3;/* ← 比率だけ固定（これが超ポイント） */
+  object-fit: cover;  /* 余白を作らず綺麗にトリミング */
   border-radius: 8px;
   margin-bottom: 6px;
   background: #eee;
 }
+
 
 
 
