@@ -9,8 +9,8 @@
 
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: #202225;      /* Discordっぽいダーク背景 */
-    color: #e3e5e8;
+    background: #f5f5f5;      /* ← 業務チェックリストと同じ系統のライトグレー */
+    color: #111;
     line-height: 1.6;
     font-size: 13px;
   }
@@ -26,12 +26,11 @@
     position: sticky;
     top: 0;
     z-index: 4000;
-    background: #111;              /* index と同じ黒 */
+    background: #111;              /* 黒ヘッダー（業務チェックリストと同じ） */
     color: #fff;
-    padding: 10px 14px 8px;        /* 上10 / 左右14 / 下8 */
+    padding: 10px 14px 8px;
   }
 
-  /* 中身の横幅を .app と合わせる */
   .top-bar-inner {
     max-width: 1100px;
     margin: 0 auto;
@@ -41,15 +40,15 @@
   }
 
   .top-bar h1 {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  padding: 0;
-  line-height: 1;
-  letter-spacing: 0.3px;
-  text-transform: none;     /* ← 大文字化を防止 */
-}
-
+    font-size: 16px;        /* 業務チェックリストのタイトル感に合わせる */
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    letter-spacing: 0.3px;
+    text-transform: none;
+    color: #fff;            /* 文字色は白に固定 */
+  }
 
   /* 右側の「あなたの立場」 */
   .role-select {
@@ -63,13 +62,13 @@
   .role-select select {
     padding: 4px 8px;
     border-radius: 4px;
-    border: none;
+    border: 1px solid #ccc;
     font-size: 12px;
-    background: #2f3136;
-    color: #f6f6f6;
+    background: #ffffff;
+    color: #111;
   }
 
-  /* === index と同じ雰囲気の三本線ボタン === */
+  /* === 三本線ボタン === */
   .menu-btn {
     border: none;
     background: transparent;
@@ -79,10 +78,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
   }
 
   .menu-btn:hover {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.12);
   }
 
   .hamburger-icon {
@@ -94,31 +94,26 @@
 
   .hamburger-icon span {
     display: block;
-    width: 18px;   /* index と同じ長さ */
+    width: 18px;
     height: 2px;
     border-radius: 999px;
-    background: #fff;  /* ダーク固定なので白のまま */
+    background: #fff;  /* 黒ヘッダー上なので白線のまま */
   }
 
-  /* ====== タブ（上のチャンネル切り替えみたいな感じ） ====== */
+  /* ====== タブ ====== */
   .tab-nav {
     display: flex;
     gap: 6px;
     padding: 8px 12px 0;
-    background: #202225;
+    background: #f5f5f5;      /* 本体背景と同じ */
     position: sticky;
-    top: 56px;              /* ヘッダーの高さぶんだけ下げるイメージ */
+    top: 56px;
     z-index: 9;
-
-    /* 横だけスクロールさせる */
     overflow-x: auto;
     overflow-y: hidden;
-
     -webkit-overflow-scrolling: touch;
-
-    /* スクロールバー非表示系 */
-    scrollbar-width: none;        /* Firefox */
-    -ms-overflow-style: none;     /* 旧 Edge / IE */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   .tab-nav::-webkit-scrollbar {
@@ -131,18 +126,18 @@
     flex: 1 0 auto;
     padding: 6px 10px;
     border-radius: 999px;
-    border: 1px solid #3a3c43;
-    background: #2b2d31;
+    border: 1px solid #dddddd;
+    background: #ffffff;
     font-size: 11px;
     cursor: pointer;
     white-space: nowrap;
-    color: #dcddde;
+    color: #333;
   }
 
   .tab-btn.active {
-    background: #5865f2;    /* Discordブルー */
+    background: #111;       /* 黒タブ（スクショのボタン系に寄せる） */
     color: #fff;
-    border-color: #5865f2;
+    border-color: #111;
     font-weight: 600;
   }
 
@@ -162,22 +157,22 @@
   .section-head h2 {
     font-size: 13px;
     font-weight: 600;
-    color: #f6f6f6;
+    color: #111;
   }
 
   .section-head p {
     font-size: 11px;
-    color: #b9bbbe;
+    color: #666;
   }
 
   /* ====== メッセージカード ====== */
   .card {
-    background: #2f3136;
+    background: #ffffff;
     border-radius: 10px;
     padding: 10px 12px;
-    box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     margin-bottom: 10px;
-    border: 1px solid #202225;
+    border: 1px solid #dddddd;
   }
 
   .form-group {
@@ -188,7 +183,7 @@
     display: block;
     font-size: 11px;
     margin-bottom: 2px;
-    color: #b9bbbe;
+    color: #555;
   }
 
   .form-group input,
@@ -197,11 +192,11 @@
     width: 100%;
     padding: 6px 8px;
     border-radius: 6px;
-    border: 1px solid #3a3c43;
+    border: 1px solid #cccccc;
     font-size: 13px;
     resize: vertical;
-    background: #1e1f22;
-    color: #f6f6f6;
+    background: #ffffff;
+    color: #111;
   }
 
   textarea {
@@ -224,32 +219,32 @@
   }
 
   .btn-primary {
-    background: #5865f2;
+    background: #111;    /* 黒ボタン（今の「今の時間帯へ」ボタン系に合わせる） */
     color: #fff;
   }
 
   .btn-ghost {
-    background: #4f545c;
-    color: #f6f6f6;
+    background: #f0f0f0;
+    color: #333;
   }
 
   .item-title {
     font-size: 13px;
     font-weight: 600;
     margin-bottom: 2px;
-    color: #f6f6f6;
+    color: #111;
   }
 
   .item-body {
     font-size: 13px;
     white-space: pre-wrap;
     margin-bottom: 4px;
-    color: #dcddde;
+    color: #333;
   }
 
   .item-meta {
     font-size: 11px;
-    color: #a3a6aa;
+    color: #777;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -260,16 +255,17 @@
     padding: 1px 6px;
     border-radius: 999px;
     font-size: 10px;
-    background: #4f545c;
-    color: #e3e5e8;
+    background: #f5f0d6;   /* うすい黄色系（お知らせの帯に寄せる） */
+    color: #8a6d3b;
+    border: 1px solid #f0e2b8;
   }
 
   .badge-status {
-    background: #f04747;
-    color: #fff;
+    background: #fbe5e5;
+    color: #b00000;
+    border-color: #f1c0c0;
   }
 
-  /* 役割で表示切り替え */
   .owner-only { display: none; }
   .staff-only { display: none; }
 
@@ -278,26 +274,26 @@
 
   .empty-text {
     font-size: 12px;
-    color: #a3a6aa;
+    color: #888;
     padding: 4px 2px 2px;
   }
 
   .tab-note {
     font-size: 12px;
-    color: #b9bbbe;
+    color: #666;
     line-height: 1.5;
   }
 
-  /* 写真つきタスク用（Discordっぽい埋め込み風） */
+  /* 写真つきタスク用 */
   .photo-thumb {
     display: block;
     width: 100%;
     max-width: 520px;
-    aspect-ratio: 16 / 9;  /* 枠は横長のまま */
-    object-fit: contain;   /* 切れないように全体表示 */
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
     border-radius: 12px;
     margin: 8px auto;
-    background: #000;      /* 余白部分の背景 */
+    background: #000;
   }
 
   .photo-badge-row {
@@ -309,35 +305,33 @@
 
   /* ===== ハンバーガーメニュー ===== */
   .side-menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 4500;   /* ← ヘッダーより手前に */
-  display: none;
-}
-
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 4500;
+    display: none;
+  }
 
   .side-menu {
-  position: fixed;
-  top: 0;                /* ← 画面のいちばん上から */
-  left: 0;
-  width: 260px;
-  height: 100%;          /* ← 全高さ */
-  background: #18191c;
-  color: #fff;
-  z-index: 4600;         /* ← ヘッダーより前に出す */
-  transform: translateX(-100%);
-  transition: transform 0.2s ease-out;
-  padding: 12px 0;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.5);
-}
-
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100%;
+    background: #ffffff;
+    color: #111;
+    z-index: 4600;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease-out;
+    padding: 12px 0;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+  }
 
   .side-menu-header {
     padding: 0 16px 8px;
     font-size: 13px;
     font-weight: 600;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid #eeeeee;
     margin-bottom: 4px;
   }
 
@@ -361,7 +355,7 @@
 
   .menu-item button:hover,
   .menu-item a:hover {
-    background: rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.04);
   }
 
   body.menu-open .side-menu-overlay {
@@ -375,10 +369,11 @@
   /* スマホ時はタイトル少し小さく */
   @media (max-width: 480px) {
     .top-bar h1 {
-      font-size: 1.2em;
+      font-size: 14px;
     }
   }
-  </style>
+</style>
+
 </head>
 
 <body class="role-staff theme-dark">
