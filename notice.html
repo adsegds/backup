@@ -566,26 +566,25 @@
         });
       });
 
-    // ============================
-    // ④ taskPhotos（写真つきタスク報告）
+        // ============================
+    // ④ photoReports（写真つきタスク報告）
     // ============================
     const photoList = document.getElementById("photoList");
     const photoEmpty = document.getElementById("photoEmpty");
 
-    // 将来 index.html 側からこんなデータが飛んでくる想定：
-    // stores/{storeId}/taskPhotos:
+    // Firestore 構造：
+    // stores/{storeId}/photoReports/{docId}
     // {
-    //   imageUrl: "https://...",
-    //   slotId: "t6-9" など,
-    //   slotLabel: "06:00〜09:00 朝の立ち上げ",
-    //   taskLabel: "FFケース内部清掃（扉を開けて撮影）",
-    //   staffName: "なかにし",
-    //   deviceLabel: "レジ横タブレット",
-    //   businessDate: "2025-12-01",
-    //   createdAt: serverTimestamp()
+    //   businessKey: "2025-12-04",
+    //   createdAt: Timestamp,
+    //   deviceLabel: "未設定" など,
+    //   photourl: "https://....",
+    //   slotId: "t6-9",
+    //   taskLabel: "トイレ点検"
     // }
+
     storeRef
-      .collection("taskPhotos")
+      .collection("photoReports")
       .orderBy("createdAt", "desc")
       .limit(100)
       .onSnapshot((snap) => {
@@ -601,12 +600,12 @@
           const div = document.createElement("div");
           div.className = "card";
 
-          const imageUrl = data.imageUrl || "";
+          const imageUrl  = data.photourl || "";
           const taskLabel = data.taskLabel || "(タスク名なし)";
-          const slotLabel = data.slotLabel || data.slotId || "";
-          const staffName = data.staffName || data.deviceLabel || "（名無し）";
-          const bizDate = data.businessDate || "";
-          const dateText = data.createdAt ? formatDate(data.createdAt) : "";
+          const slotLabel = data.slotId || "";
+          const staffName = data.deviceLabel || "（端末名 未設定）";
+          const bizDate   = data.businessKey || "";
+          const dateText  = data.createdAt ? formatDate(data.createdAt) : "";
 
           div.innerHTML = `
             <div class="photo-badge-row">
@@ -624,6 +623,7 @@
           photoList.appendChild(div);
         });
       });
+
   </script>
 </body>
 </html>
