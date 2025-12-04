@@ -598,16 +598,9 @@ body {
     const STORE_ID = "nambucho";
     const storeRef = db.collection("stores").doc(STORE_ID);
 
-    // ===== 役割切り替え =====
-    const roleSelect = document.getElementById("roleSelect");
-    function updateRole(role) {
-      document.body.classList.remove("role-owner", "role-staff");
-      document.body.classList.add(role === "owner" ? "role-owner" : "role-staff");
-    }
-    roleSelect.addEventListener("change", (e) => {
-      updateRole(e.target.value);
-    });
-    updateRole(roleSelect.value);
+        // ===== 役割（スタッフ固定） =====
+    document.body.classList.add("role-staff");
+
 
     // ===== タブ切り替え =====
     document.querySelectorAll(".tab-btn").forEach(btn => {
