@@ -22,33 +22,39 @@
   }
 
   /* ===== ヘッダー（index と同じ雰囲気に統一） ===== */
-  .top-bar {
-    position: sticky;
-    top: 0;
-    z-index: 4000;
-    background: #111;              /* 黒ヘッダー（業務チェックリストと同じ） */
-    color: #fff;
-    padding: 10px 14px 8px;
-  }
+  /* ===== ヘッダー ===== */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 4000;
+  background: transparent;   /* ★ 画面全幅の黒をやめる */
+}
 
-  .top-bar-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+/* 中身をカードみたいに黒くする */
+.top-bar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
-  .top-bar h1 {
-    font-size: 16px;        /* 業務チェックリストのタイトル感に合わせる */
-    font-weight: 600;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
-    letter-spacing: 0.3px;
-    text-transform: none;
-    color: #fff;            /* 文字色は白に固定 */
-  }
+  background: #111;          /* ★ 黒背景はこちらに移動 */
+  color: #fff;
+  padding: 10px 14px 8px;    /* 元の高さを維持 */
+  border-radius: 0;          /* 角丸付けたければここで調整 */
+}
+
+.top-bar h1 {
+  font-size: 16px;           /* もともとのサイズのまま */
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  text-transform: none;
+  color: #fff;
+}
+
 
   /* 右側の「あなたの立場」 */
   .role-select {
