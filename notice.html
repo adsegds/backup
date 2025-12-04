@@ -567,62 +567,55 @@
       });
 
         // ============================
-    // ④ photoReports（写真つきタスク報告）
-    // ============================
-    const photoList = document.getElementById("photoList");
-    const photoEmpty = document.getElementById("photoEmpty");
+// ④ taskPhotos（写真つきタスク報告）
+// ============================
+storeRef
+  .collection("taskPhotos")
+  .orderBy("createdAt", "desc")
+  .limit(100)
+  .onSnapshot((snap) => {
+    photoList.innerHTML = "";
+    if (snap.empty) {
+      photoEmpty.style.display = "block";
+      return;
+    }
+    photoEmpty.style.display = "none";
 
-    // Firestore 構造：
-    // stores/{storeId}/photoReports/{docId}
-    // {
-    //   businessKey: "2025-12-04",
-    //   createdAt: Timestamp,
-    //   deviceLabel: "未設定" など,
-    //   photourl: "https://....",
-    //   slotId: "t6-9",
-    //   taskLabel: "トイレ点検"
-    // }
+    snap.forEach(doc => {
+      const data = doc.data() || {};
+      const div = document.createElement("div");
+      div.className = "card";
 
-    storeRef
-      .collection("photoReports")
-      .orderBy("createdAt", "desc")
-      .limit(100)
-      .onSnapshot((snap) => {
-        photoList.innerHTML = "";
-        if (snap.empty) {
-          photoEmpty.style.display = "block";
-          return;
-        }
-        photoEmpty.style.display = "none";
+      const imageUrl =
+        data.photourl ||    // ← Firestoreの実データに合わせた！
+        data.photoUrl ||
+        data.photoURL ||
+        data.url ||
+        "";
 
-        snap.forEach(doc => {
-          const data = doc.data() || {};
-          const div = document.createElement("div");
-          div.className = "card";
+      const taskLabel = data.taskLabel || "(タスク名なし)";
+      const slotLabel = data.slotId || "";
+      const staffName = data.deviceLabel || "（端末名 未設定）";
+      const bizDate   = data.businessKey || "";
+      const dateText  = data.createdAt ? formatDate(data.createdAt) : "";
 
-          const imageUrl  = data.photourl || "";
-          const taskLabel = data.taskLabel || "(タスク名なし)";
-          const slotLabel = data.slotId || "";
-          const staffName = data.deviceLabel || "（端末名 未設定）";
-          const bizDate   = data.businessKey || "";
-          const dateText  = data.createdAt ? formatDate(data.createdAt) : "";
+      div.innerHTML = `
+        <div class="photo-badge-row">
+          <span class="badge">Aタスク（写真必須）</span>
+          ${slotLabel ? `<span class="badge">${slotLabel}</span>` : ""}
+          ${bizDate ? `<span class="badge">営業日: ${bizDate}</span>` : ""}
+        </div>
+        ${imageUrl ? `<img src="${imageUrl}" alt="タスク写真" class="photo-thumb">` : ""}
+        <div class="item-title">${taskLabel}</div>
+        <div class="item-meta">
+          <span>投稿：${staffName}</span>
+          ${dateText ? `<span>${dateText}</span>` : ""}
+        </div>
+      `;
+      photoList.appendChild(div);
+    });
+  });
 
-          div.innerHTML = `
-            <div class="photo-badge-row">
-              <span class="badge">Aタスク（写真必須）</span>
-              ${slotLabel ? `<span class="badge">${slotLabel}</span>` : ""}
-              ${bizDate ? `<span class="badge">営業日: ${bizDate}</span>` : ""}
-            </div>
-            ${imageUrl ? `<img src="${imageUrl}" alt="タスク写真" class="photo-thumb">` : ""}
-            <div class="item-title">${taskLabel}</div>
-            <div class="item-meta">
-              <span>投稿：${staffName}</span>
-              ${dateText ? `<span>${dateText}</span>` : ""}
-            </div>
-          `;
-          photoList.appendChild(div);
-        });
-      });
 
   </script>
 </body>
