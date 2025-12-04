@@ -989,17 +989,23 @@
             <ul class="news-list" id="newsList"></ul>
           </section>
 
-          <!-- ② スタッフ → 経営者（reports 一覧）★今回追加 -->
-          <section class="card" id="reports-card">
+                    <!-- ② スタッフ → 経営者（報告一覧） -->
+          <section class="card owner-reports-card" id="reports-card">
             <h2>② スタッフ → 経営者（報告一覧）</h2>
             <p class="card-sub">
-              notice.html の「② スタッフ → 経営者」から送られた報告が、ここに新しい順で並びます。
+              note側のMT や スタッフ報告フォームから送られた内容が、
+              新しい順でここに表示されます。
             </p>
 
+            <!-- 報告が無いときのメッセージ -->
+            <p id="adminReportsEmpty" class="empty-text">
+              まだ報告はありません。
+            </p>
+
+            <!-- 報告一覧（JSで .report-item がどんどん入る） -->
             <div id="adminReportsList" class="reports-list"></div>
-            <div id="adminReportsEmpty" class="empty-text">まだ報告はありません。</div>
           </section>
-        </section>
+
 
 
         <!-- ② タスク定義編集 -->
