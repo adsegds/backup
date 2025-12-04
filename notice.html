@@ -58,16 +58,27 @@
     }
 
     /* ====== タブ（上のチャンネル切り替えみたいな感じ） ====== */
-    .tab-nav {
-      display: flex;
-      gap: 6px;
-      padding: 8px 12px 0;
-      background: #202225;
-      position: sticky;
-      top: 40px;
-      z-index: 9;
-      overflow-x: auto;
-    }
+.tab-nav {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 0;
+  background: #202225;
+  position: sticky;
+  top: 40px;
+  z-index: 9;
+
+  /* 横だけスクロールさせる */
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* スマホ・タブレットでスワイプをなめらかに */
+  -webkit-overflow-scrolling: touch;
+
+  /* スクロールバー非表示系 */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* 旧 Edge / IE */
+}
+
     .tab-btn {
       flex: 1 0 auto;
       padding: 6px 10px;
