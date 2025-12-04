@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>お知らせセンター</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
+  <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -16,7 +16,7 @@
     }
 
     .app {
-      max-width: 640px;   /* ★ここを1100→640に変更（PCでもスマホっぽい横幅に） */
+      max-width: 1100px;
       margin: 0 auto;
       padding-bottom: 40px;
     }
@@ -199,7 +199,7 @@
     /* 写真つきタスク用 */
     .photo-thumb {
       width: 100%;
-      aspect-ratio: 4 / 3;  /* ★比率固定でどんな画像でも“いい感じ” */
+      max-height: 260px;
       object-fit: cover;
       border-radius: 8px;
       margin-bottom: 6px;
@@ -211,8 +211,28 @@
       gap: 6px;
       margin-bottom: 4px;
     }
-  </style>
 
+
+
+
+
+    
+   .photo-thumb {
+  width: 100%;        /* 横幅いっぱい */
+  aspect-ratio: 4 / 3;/* ← 比率だけ固定（これが超ポイント） */
+  object-fit: cover;  /* 余白を作らず綺麗にトリミング */
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: #eee;
+}
+
+
+
+
+
+    
+
+  </style>
 </head>
 <body class="role-staff">
   <div class="app">
