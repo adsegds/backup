@@ -375,9 +375,41 @@
 
 
 
+/* 📌 Noticeページだけハンバーガーを非表示 */
 .menu-btn {
   display: none !important;
 }
+.mobile-menu-btn {
+  display: none !important;
+}
+
+/* 📌 Noticeページ：コンテンツを中央寄せ */
+.notice-wrapper,
+#noticeList,
+#noticeTabs,
+#noticeHeader {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 960px; /* ←幅が広すぎないように */
+}
+
+/* 📌 画面が広い時の余白 */
+body {
+  padding-left: 0 !important;
+}
+
+
+/* 📌 ヘッダーを薄くする */
+.top-bar {
+  padding: 6px 18px !important; /* ←高さを小さく */
+  height: 42px !important;      /* ←ヘッダーの固定高さ */
+}
+.top-bar h1 {
+  font-size: 14px !important;    /* ←文字サイズも控えめ */
+  font-weight: 600;
+}
+
+    
 
 
     
