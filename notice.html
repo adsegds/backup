@@ -344,18 +344,17 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <script>
+    <script>
     // ★ ここを自分の firebaseConfig に差し替え（owner/index と同じ）
-   const firebaseConfig = {
-  apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
-  authDomain: "lawson-workflow.firebaseapp.com",
-  projectId: "lawson-workflow",
-  storageBucket: "lawson-workflow.firebasestorage.app",
-  messagingSenderId: "335371795694",
-  appId: "1:335371795694:web:3b0950a616d368b284c7ff",
-  measurementId: "G-BGENZNZMRC"
-};
-
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
+      authDomain: "lawson-workflow.firebaseapp.com",
+      projectId: "lawson-workflow",
+      storageBucket: "lawson-workflow.firebasestorage.app",
+      messagingSenderId: "335371795694",
+      appId: "1:335371795694:web:3b0950a616d368b284c7ff",
+      measurementId: "G-BGENZNZMRC"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -516,6 +515,10 @@
     const boardList = document.getElementById("boardList");
     const boardEmpty = document.getElementById("boardEmpty");
 
+    // ★ ④ 写真つきタスク報告 用の要素
+    const photoList  = document.getElementById("photoList");
+    const photoEmpty = document.getElementById("photoEmpty");
+
     boardForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const message = document.getElementById("boardMessage").value.trim();
@@ -566,57 +569,56 @@
         });
       });
 
-        // ============================
-// ④ taskPhotos（写真つきタスク報告）
-// ============================
-storeRef
-  .collection("photoReports")
-  .orderBy("createdAt", "desc")
-  .limit(100)
-  .onSnapshot((snap) => {
-    photoList.innerHTML = "";
-    if (snap.empty) {
-      photoEmpty.style.display = "block";
-      return;
-    }
-    photoEmpty.style.display = "none";
+    // ============================
+    // ④ taskPhotos（写真つきタスク報告）
+    // ============================
+    storeRef
+      .collection("photoReports")  // ← Firestore のコレクション名
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .onSnapshot((snap) => {
+        photoList.innerHTML = "";
+        if (snap.empty) {
+          photoEmpty.style.display = "block";
+          return;
+        }
+        photoEmpty.style.display = "none";
 
-    snap.forEach(doc => {
-      const data = doc.data() || {};
-      const div = document.createElement("div");
-      div.className = "card";
+        snap.forEach(doc => {
+          const data = doc.data() || {};
+          const div = document.createElement("div");
+          div.className = "card";
 
-      const imageUrl =
-        data.photourl ||    // ← Firestoreの実データに合わせた！
-        data.photoUrl ||
-        data.photoURL ||
-        data.url ||
-        "";
+          const imageUrl =
+            data.photourl ||    // Firestoreの実データに合わせた！
+            data.photoUrl ||
+            data.photoURL ||
+            data.url ||
+            "";
 
-      const taskLabel = data.taskLabel || "(タスク名なし)";
-      const slotLabel = data.slotId || "";
-      const staffName = data.deviceLabel || "（端末名 未設定）";
-      const bizDate   = data.businessKey || "";
-      const dateText  = data.createdAt ? formatDate(data.createdAt) : "";
+          const taskLabel = data.taskLabel || "(タスク名なし)";
+          const slotLabel = data.slotId || "";
+          const staffName = data.deviceLabel || "（端末名 未設定）";
+          const bizDate   = data.businessKey || "";
+          const dateText  = data.createdAt ? formatDate(data.createdAt) : "";
 
-      div.innerHTML = `
-        <div class="photo-badge-row">
-          <span class="badge">Aタスク（写真必須）</span>
-          ${slotLabel ? `<span class="badge">${slotLabel}</span>` : ""}
-          ${bizDate ? `<span class="badge">営業日: ${bizDate}</span>` : ""}
-        </div>
-        ${imageUrl ? `<img src="${imageUrl}" alt="タスク写真" class="photo-thumb">` : ""}
-        <div class="item-title">${taskLabel}</div>
-        <div class="item-meta">
-          <span>投稿：${staffName}</span>
-          ${dateText ? `<span>${dateText}</span>` : ""}
-        </div>
-      `;
-      photoList.appendChild(div);
-    });
-  });
-
-
+          div.innerHTML = `
+            <div class="photo-badge-row">
+              <span class="badge">Aタスク（写真必須）</span>
+              ${slotLabel ? `<span class="badge">${slotLabel}</span>` : ""}
+              ${bizDate ? `<span class="badge">営業日: ${bizDate}</span>` : ""}
+            </div>
+            ${imageUrl ? `<img src="${imageUrl}" alt="タスク写真" class="photo-thumb">` : ""}
+            <div class="item-title">${taskLabel}</div>
+            <div class="item-meta">
+              <span>投稿：${staffName}</span>
+              ${dateText ? `<span>${dateText}</span>` : ""}
+            </div>
+          `;
+          photoList.appendChild(div);
+        });
+      });
   </script>
+
 </body>
 </html>
