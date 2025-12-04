@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <title>お知らせセンター</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
+  <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #202225;      /* Discordっぽいダーク背景 */
+      background: #202225;      /* デフォルト：Discordっぽいダーク背景 */
       color: #e3e5e8;
       line-height: 1.6;
       font-size: 13px;
@@ -42,6 +42,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .role-select {
       font-size: 12px;
       display: flex;
@@ -57,27 +58,44 @@
       color: #f6f6f6;
     }
 
+    /* ハンバーガーボタン */
+    .menu-btn {
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 20px;
+      padding: 2px 6px 2px 2px;
+      cursor: pointer;
+    }
+
     /* ====== タブ（上のチャンネル切り替えみたいな感じ） ====== */
-.tab-nav {
-  display: flex;
-  gap: 6px;
-  padding: 8px 12px 0;
-  background: #202225;
-  position: sticky;
-  top: 40px;
-  z-index: 9;
+    .tab-nav {
+      display: flex;
+      gap: 6px;
+      padding: 8px 12px 0;
+      background: #202225;
+      position: sticky;
+      top: 40px;
+      z-index: 9;
 
-  /* 横だけスクロールさせる */
-  overflow-x: auto;
-  overflow-y: hidden;
+      /* 横だけスクロールさせる */
+      overflow-x: auto;
+      overflow-y: hidden;
 
-  /* スマホ・タブレットでスワイプをなめらかに */
-  -webkit-overflow-scrolling: touch;
+      /* スマホ・タブレットでスワイプをなめらかに */
+      -webkit-overflow-scrolling: touch;
 
-  /* スクロールバー非表示系 */
-  scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;     /* 旧 Edge / IE */
-}
+      /* スクロールバー非表示系 */
+      scrollbar-width: none;        /* Firefox */
+      -ms-overflow-style: none;     /* 旧 Edge / IE */
+    }
+
+    /* WebKit系（Chrome / Safari / モバイル）のスクロールバー非表示 */
+    .tab-nav::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
 
     .tab-btn {
       flex: 1 0 auto;
@@ -228,17 +246,16 @@
     }
 
     /* 写真つきタスク用（Discordっぽい埋め込み風） */
-.photo-thumb {
-  display: block;
-  width: 100%;
-  max-width: 520px;
-  aspect-ratio: 16 / 9; /* 枠は横長のまま */
-  object-fit: contain;  /* ← contain に変更（切れない） */
-  border-radius: 12px;
-  margin: 8px auto;
-  background: #000;     /* 全体見せるための余白背景 */
-}
-
+    .photo-thumb {
+      display: block;
+      width: 100%;
+      max-width: 520px;
+      aspect-ratio: 16 / 9;  /* 枠は横長のまま */
+      object-fit: contain;   /* 切れないように全体表示 */
+      border-radius: 12px;
+      margin: 8px auto;
+      background: #000;      /* 余白部分の背景 */
+    }
 
     .photo-badge-row {
       display: flex;
@@ -247,21 +264,172 @@
       margin-bottom: 4px;
     }
 
+    /* ===== ハンバーガーメニュー ===== */
+    .side-menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 20;
+      display: none;
+    }
 
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100%;
+      background: #18191c;
+      color: #fff;
+      z-index: 21;
+      transform: translateX(-100%);
+      transition: transform 0.2s ease-out;
+      padding: 12px 0;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.5);
+    }
 
-      /* WebKit系（Chrome / Safari / モバイル）のスクロールバー非表示 */
-.tab-nav::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
-}
+    .side-menu-header {
+      padding: 0 16px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 4px;
+    }
+
+    .side-menu ul {
+      list-style: none;
+    }
+
+    .menu-item button,
+    .menu-item a {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      display: block;
+      text-decoration: none;
+    }
+
+    .menu-item button:hover,
+    .menu-item a:hover {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .theme-toggle-item button {
+      font-weight: 500;
+    }
+
+    /* メニュー開閉 */
+    body.menu-open .side-menu-overlay {
+      display: block;
+    }
+    body.menu-open .side-menu {
+      transform: translateX(0);
+    }
+
+    /* ===== ライトテーマ用の上書き ===== */
+    body.theme-light {
+      background: #f5f5f5;
+      color: #111;
+    }
+
+    body.theme-light .top-bar {
+      background: #ffffff;
+      color: #111;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body.theme-light .menu-btn {
+      color: #111;
+    }
+    body.theme-light .role-select select {
+      background: #ffffff;
+      color: #111;
+      border: 1px solid #ccc;
+    }
+
+    body.theme-light .tab-nav {
+      background: #f5f5f5;
+    }
+    body.theme-light .tab-btn {
+      background: #ffffff;
+      border-color: #dddddd;
+      color: #333;
+    }
+    body.theme-light .tab-btn.active {
+      background: #111;
+      border-color: #111;
+      color: #fff;
+    }
+
+    body.theme-light .section-head h2 {
+      color: #111;
+    }
+    body.theme-light .section-head p,
+    body.theme-light .tab-note,
+    body.theme-light .empty-text {
+      color: #555;
+    }
+
+    body.theme-light .card {
+      background: #ffffff;
+      border-color: #dddddd;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    body.theme-light .form-group label {
+      color: #555;
+    }
+    body.theme-light .form-group input,
+    body.theme-light .form-group select,
+    body.theme-light .form-group textarea {
+      background: #ffffff;
+      color: #111;
+      border-color: #cccccc;
+    }
+
+    body.theme-light .item-title {
+      color: #111;
+    }
+    body.theme-light .item-body {
+      color: #333;
+    }
+    body.theme-light .item-meta {
+      color: #777;
+    }
+
+    body.theme-light .badge {
+      background: #eeeeee;
+      color: #555;
+    }
+    body.theme-light .badge-status {
+      background: #fbe5e5;
+      color: #b00000;
+    }
+
+    body.theme-light .side-menu {
+      background: #ffffff;
+      color: #111;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    }
+    body.theme-light .side-menu-header {
+      border-bottom: 1px solid #eeeeee;
+    }
+    body.theme-light .menu-item button:hover,
+    body.theme-light .menu-item a:hover {
+      background: rgba(0,0,0,0.04);
+    }
 
   </style>
-
 </head>
-<body class="role-staff">
+
+<body class="role-staff theme-dark">
   <div class="app">
     <div class="top-bar">
+      <button class="menu-btn" id="menuBtn">☰</button>
       <h1>南部町ローソン お知らせセンター</h1>
       <div class="role-select">
         あなたの立場：
@@ -386,12 +554,38 @@
     </section>
   </div>
 
-  <!-- Firebase v8（今のサイトと同じ系列） -->
+  <!-- サイドメニュー（ハンバーガー） -->
+  <div class="side-menu-overlay" id="sideOverlay"></div>
+  <nav class="side-menu" id="sideMenu">
+    <div class="side-menu-header">メニュー</div>
+    <ul>
+      <li class="menu-item">
+        <button type="button" data-scroll="tab-taskPhotos">📷 写真つきタスク報告へ</button>
+      </li>
+      <li class="menu-item">
+        <button type="button" data-scroll="tab-ownerNews">📢 経営者 → 全員へ</button>
+      </li>
+      <li class="menu-item">
+        <button type="button" data-scroll="tab-board">💬 全員掲示板へ</button>
+      </li>
+      <li class="menu-item">
+        <button type="button" data-scroll="tab-reports">📩 スタッフ → 経営者へ</button>
+      </li>
+
+      <li class="menu-item theme-toggle-item">
+        <button id="themeToggle" type="button">🌙 ダークモード</button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <script>
-    // ★ ここを自分の firebaseConfig に差し替え（owner/index と同じ）
+  <script>
+    // =============================
+    // Firebase 設定
+    // =============================
     const firebaseConfig = {
       apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
       authDomain: "lawson-workflow.firebaseapp.com",
@@ -406,7 +600,7 @@
     const db = firebase.firestore();
 
     // ★ 店舗ID（とりあえず固定。必要になったらクエリパラメータなどにする）
-    const STORE_ID = "nambucho"; // ← 自分の店舗IDに合わせて
+    const STORE_ID = "nambucho";
     const storeRef = db.collection("stores").doc(STORE_ID);
 
     // ===== 役割切り替え =====
@@ -447,12 +641,11 @@
     }
 
     // ============================
-    // ① ownerNews（経営者 → 全員）※ここは読み取り専用
+    // ① ownerNews（経営者 → 全員）
     // ============================
     const ownerNewsList = document.getElementById("ownerNewsList");
     const ownerNewsEmpty = document.getElementById("ownerNewsEmpty");
 
-    // owner.html から投稿された stores/{storeId}/ownerNews を読むだけ
     storeRef
       .collection("ownerNews")
       .orderBy("createdAt", "desc")
@@ -465,7 +658,7 @@
         ownerNewsEmpty.style.display = "none";
 
         snap.forEach(doc => {
-          const data = doc.data();
+          const data = doc.data() || {};
           const div = document.createElement("div");
           div.className = "card";
 
@@ -520,7 +713,6 @@
       }
     });
 
-    // オーナー用：一覧表示
     storeRef
       .collection("reports")
       .orderBy("createdAt", "desc")
@@ -534,7 +726,7 @@
         reportsEmpty.style.display = "none";
 
         snap.forEach(doc => {
-          const data = doc.data();
+          const data = doc.data() || {};
           const div = document.createElement("div");
           div.className = "card";
           const cat = data.category || "その他";
@@ -600,7 +792,7 @@
         boardEmpty.style.display = "none";
 
         snap.forEach(doc => {
-          const data = doc.data();
+          const data = doc.data() || {};
           const div = document.createElement("div");
           div.className = "card";
 
@@ -619,7 +811,7 @@
     // ④ taskPhotos（写真つきタスク報告）
     // ============================
     storeRef
-      .collection("photoReports")  // ← Firestore のコレクション名
+      .collection("photoReports")
       .orderBy("createdAt", "desc")
       .limit(100)
       .onSnapshot((snap) => {
@@ -636,7 +828,7 @@
           div.className = "card";
 
           const imageUrl =
-            data.photourl ||    // Firestoreの実データに合わせた！
+            data.photourl ||
             data.photoUrl ||
             data.photoURL ||
             data.url ||
@@ -664,6 +856,63 @@
           photoList.appendChild(div);
         });
       });
+
+    // ============================
+    // ハンバーガーメニュー開閉
+    // ============================
+    const menuBtn = document.getElementById("menuBtn");
+    const sideMenu = document.getElementById("sideMenu");
+    const sideOverlay = document.getElementById("sideOverlay");
+
+    function openMenu() {
+      document.body.classList.add("menu-open");
+    }
+    function closeMenu() {
+      document.body.classList.remove("menu-open");
+    }
+
+    menuBtn?.addEventListener("click", openMenu);
+    sideOverlay?.addEventListener("click", closeMenu);
+
+    // メニュー内のボタンで該当タブまでスクロール
+    sideMenu?.addEventListener("click", (e) => {
+      const target = e.target;
+      if (target.matches("[data-scroll]")) {
+        const panelId = target.getAttribute("data-scroll");
+        const panel = document.getElementById(panelId);
+        if (panel) {
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        closeMenu();
+      }
+    });
+
+    // ============================
+    // テーマ切り替え（ダーク / ライト）
+    // ============================
+    const themeToggleBtn = document.getElementById("themeToggle");
+
+    function applyTheme(theme) {
+      document.body.classList.remove("theme-dark", "theme-light");
+      if (theme === "light") {
+        document.body.classList.add("theme-light");
+        if (themeToggleBtn) themeToggleBtn.textContent = "☀ ライトモード";
+      } else {
+        document.body.classList.add("theme-dark");
+        if (themeToggleBtn) themeToggleBtn.textContent = "🌙 ダークモード";
+      }
+      localStorage.setItem("noticeTheme", theme);
+    }
+
+    const savedTheme = localStorage.getItem("noticeTheme") || "dark";
+    applyTheme(savedTheme);
+
+    themeToggleBtn?.addEventListener("click", () => {
+      const current = document.body.classList.contains("theme-light") ? "light" : "dark";
+      const next = current === "light" ? "dark" : "light";
+      applyTheme(next);
+      closeMenu();
+    });
   </script>
 
 </body>
