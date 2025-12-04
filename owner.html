@@ -802,7 +802,73 @@
 
 
 
+/* =============================
+   ② スタッフ → 経営者（報告一覧）のレイアウト調整
+   ============================= */
 
+.owner-reports-card {
+  margin-top: 32px;            /* お知らせ管理カードとの間をあける */
+}
+
+#adminReportsList {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                     /* 1件ごとの間隔 */
+}
+
+/* 1件分のカード */
+.report-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fafafa;
+  border: 1px solid #e3e3e3;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 上の「カテゴリ / 未対応」部分 */
+.report-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+/* 本文部分 */
+.report-body {
+  margin-bottom: 4px;
+}
+
+/* 下の「送信者 / 日時」部分 */
+.report-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #666;
+}
+
+/* カテゴリ/ステータスのバッジ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #edf2ff;
+}
+
+.badge-status {
+  background: #ffe4e1;
+}
+
+
+
+
+
+
+
+    
 
 
     
