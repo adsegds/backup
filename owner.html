@@ -1857,7 +1857,7 @@ if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
 
 
 
-  // =============================
+   // =============================
   // ② reports（スタッフ → 経営者）一覧
   // =============================
   const adminReportsList  = document.getElementById("adminReportsList");
@@ -1914,7 +1914,53 @@ if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
                 <span>送信者：${name}</span>
                 <span>${dateText}</span>
               </div>
+              <div class="report-actions">
+                <button type="button"
+                        class="btn-report-small js-report-done">
+                  対応済みにする
+                </button>
+                <button type="button"
+                        class="btn-report-small btn-report-delete js-report-delete">
+                  削除
+                </button>
+              </div>
             `;
+
+            // ▼ ボタンのイベント設定
+            const doneBtn   = item.querySelector(".js-report-done");
+            const deleteBtn = item.querySelector(".js-report-delete");
+
+            // 「対応済みにする」ボタン
+            doneBtn.addEventListener("click", async () => {
+              try {
+                await storeRef
+                  .collection("reports")
+                  .doc(doc.id)
+                  .update({
+                    status: "対応済み",
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  });
+              } catch (err) {
+                console.error("status 更新エラー:", err);
+                alert("ステータス更新に失敗しました。");
+              }
+            });
+
+            // 「削除」ボタン
+            deleteBtn.addEventListener("click", async () => {
+              const ok = window.confirm("この報告を削除してもよろしいですか？");
+              if (!ok) return;
+
+              try {
+                await storeRef
+                  .collection("reports")
+                  .doc(doc.id)
+                  .delete();
+              } catch (err) {
+                console.error("reports 削除エラー:", err);
+                alert("削除に失敗しました。");
+              }
+            });
 
             adminReportsList.appendChild(item);
           });
@@ -1928,6 +1974,7 @@ if (STORE_ID && ALLOWED_STORES.includes(STORE_ID)) {
         }
       );
   }
+
 
 
 
