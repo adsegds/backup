@@ -987,6 +987,130 @@ body.app-ready .app {
 }
 
 
+
+
+
+
+
+
+
+
+
+.badge-photo {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  background: #ffe5e5;
+  color: #b00;
+  margin-left: 6px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== 写真タスク UI（美しく・SE最適化） ===== */
+
+.task-photo-area {
+  border: 1px solid #e5e5e5;
+  background: #fafafa;
+  padding: 8px 8px 4px;
+  border-radius: 8px;
+  margin: 6px auto 4px;   /* ← 左右 auto で中央寄せ */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 420px;        /* ← PC/iPad では幅420pxでキレイに */
+  width: 100%;             /* ← スマホでは画面いっぱい使う */
+  box-sizing: border-box;
+}
+
+.task-photo-input {
+  font-size: 12px;
+  background: #fff;
+  padding: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.task-photo-upload-btn {
+  background: #4a8df7;
+  color: #fff;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  width: 100%;
+  text-align: center;
+}
+
+.task-photo-upload-btn:active {
+  background: #3a76d1;
+}
+
+.task-photo-status {
+  font-size: 11px;
+  color: #666;
+  min-height: 0;    /* ← 14px → 0 に */
+  margin-top: 0;    /* ← 念のため */
+}
+
+/* === iPhone SE / スマホ最適化 === */
+@media (max-width: 430px) {
+  .task-photo-area {
+    padding: 6px 6px 4px;
+    gap: 4px;
+  }
+
+  .task-photo-input {
+    font-size: 11px;
+    padding: 4px;
+  }
+
+  .task-photo-upload-btn {
+    font-size: 12px;
+    padding: 5px 6px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   </style>
 </head>
   
@@ -1576,17 +1700,6 @@ body.app-ready .app {
       // 本体初期化（STORE_ID / storeRef がセット済みで呼ぶ）
       // =============================
       function startApp() {
-
-
-        // ★ storeRef がなければ何もしない（安全ガード）
-        if (!STORE_ID || !storeRef) {
-          console.warn("STORE_ID / storeRef 未設定のため、startApp を中止します。");
-          showLogin();
-          setAppReady();
-          return;
-        }
-
-        
         // 店舗ID / パスワード表示（※ index.html には非表示だけど一応）
         const storeIdDisplay = document.getElementById("storeIdDisplay");
         const storePassDisplay = document.getElementById("storePassDisplay");
@@ -2505,7 +2618,7 @@ document.body.addEventListener("click", async (e) => {
           }
         });
 
-               // 経営者お知らせ（ownerNews）
+        // 経営者お知らせ（ownerNews）
         const infoListEl = document.querySelector(".info-list");
         const noticeStatusBadge = document.getElementById("notice-status-badge");
         const noticeReadBtn = document.getElementById("notice-read-btn");
@@ -2605,175 +2718,6 @@ document.body.addEventListener("click", async (e) => {
           });
         }
 
-        // =============================
-        // 🔑 スタッフ用パスワード変更（view-auth）
-        // =============================
-        const newStaffPassInput  = document.getElementById("newStaffPassInput");
-        const changeStaffPassBtn = document.getElementById("changeStaffPassBtn");
-        const changeStaffPassMsg = document.getElementById("changeStaffPassMsg");
-
-        if (changeStaffPassBtn && newStaffPassInput && changeStaffPassMsg) {
-          changeStaffPassBtn.addEventListener("click", async (e) => {
-            e.preventDefault();
-
-            const newPass = newStaffPassInput.value.trim();
-            if (!newPass) {
-              changeStaffPassMsg.textContent = "新しいパスワードを入力してください。";
-              changeStaffPassMsg.className = "status err";
-              return;
-            }
-
-            if (!storeRef) {
-              changeStaffPassMsg.textContent =
-                "店舗情報がまだ読み込み中です。少し待ってから再度お試しください。";
-              changeStaffPassMsg.className = "status err";
-              return;
-            }
-
-            try {
-              changeStaffPassMsg.textContent = "更新中…";
-              changeStaffPassMsg.className = "status";
-
-              await storeRef
-                .collection("settings")
-                .doc("auth")
-                .set(
-                  {
-                    staffPassword: newPass,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  },
-                  { merge: true }
-                );
-
-              changeStaffPassMsg.textContent =
-                "スタッフパスワードを更新しました。スタッフ用ログイン画面でこのパスワードを使ってください。";
-              changeStaffPassMsg.className = "status ok";
-              newStaffPassInput.value = "";
-            } catch (err) {
-              console.error("スタッフパスワード更新エラー", err);
-              changeStaffPassMsg.textContent =
-                "更新に失敗しました。時間をおいて再度お試しください。";
-              changeStaffPassMsg.className = "status err";
-            }
-          });
-        }
-
-        // =============================
-        // ② reports（スタッフ → 経営者）一覧
-        // =============================
-        const adminReportsList  = document.getElementById("adminReportsList");
-        const adminReportsEmpty = document.getElementById("adminReportsEmpty");
-
-        function formatReportDate(ts) {
-          if (!ts || !ts.toDate) return "";
-          const d = ts.toDate();
-          const yyyy = d.getFullYear();
-          const mm   = String(d.getMonth() + 1).padStart(2, "0");
-          const dd   = String(d.getDate()).padStart(2, "0");
-          const hh   = String(d.getHours()).padStart(2, "0");
-          const mi   = String(d.getMinutes()).padStart(2, "0");
-          return `${yyyy}/${mm}/${dd} ${hh}:${mi}`;
-        }
-
-        if (adminReportsList) {
-          storeRef
-            .collection("reports")
-            .orderBy("createdAt", "desc")
-            .limit(100)
-            .onSnapshot(
-              (snap) => {
-                adminReportsList.innerHTML = "";
-
-                if (snap.empty) {
-                  if (adminReportsEmpty) adminReportsEmpty.style.display = "block";
-                  return;
-                }
-                if (adminReportsEmpty) adminReportsEmpty.style.display = "none";
-
-                snap.forEach((doc) => {
-                  const data = doc.data() || {};
-
-                  const cat    = data.category || "その他";
-                  const msg    = (data.message || "").replace(/\n/g, "<br>");
-                  const name   = data.staffName || "（不明）";
-                  const status = data.status || "未対応";
-                  const dateText = data.createdAt
-                    ? formatReportDate(data.createdAt)
-                    : "";
-
-                  const item = document.createElement("div");
-                  item.className = "report-item";
-
-                  item.innerHTML = `
-                    <div class="report-header">
-                      <span class="badge">カテゴリ: ${cat}</span>
-                      <span class="badge badge-status">${status}</span>
-                    </div>
-                    <div class="report-body">${msg}</div>
-                    <div class="report-meta">
-                      <span>送信者：${name}</span>
-                      <span>${dateText}</span>
-                    </div>
-                    <div class="report-actions">
-                      <button type="button"
-                              class="btn-report-small js-report-done">
-                        対応済みにする
-                      </button>
-                      <button type="button"
-                              class="btn-report-small btn-report-delete js-report-delete">
-                        削除
-                      </button>
-                    </div>
-                  `;
-
-                  const doneBtn   = item.querySelector(".js-report-done");
-                  const deleteBtn = item.querySelector(".js-report-delete");
-
-                  // 「対応済みにする」ボタン
-                  doneBtn.addEventListener("click", async () => {
-                    try {
-                      await storeRef
-                        .collection("reports")
-                        .doc(doc.id)
-                        .update({
-                          status: "対応済み",
-                          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        });
-                    } catch (err) {
-                      console.error("status 更新エラー:", err);
-                      alert("ステータス更新に失敗しました。");
-                    }
-                  });
-
-                  // 「削除」ボタン
-                  deleteBtn.addEventListener("click", async () => {
-                    const ok = window.confirm("この報告を削除してもよろしいですか？");
-                    if (!ok) return;
-
-                    try {
-                      await storeRef
-                        .collection("reports")
-                        .doc(doc.id)
-                        .delete();
-                    } catch (err) {
-                      console.error("reports 削除エラー:", err);
-                      alert("削除に失敗しました。");
-                    }
-                  });
-
-                  adminReportsList.appendChild(item);
-                });
-              },
-              (err) => {
-                console.error("reports 読み込みエラー:", err);
-                if (adminReportsEmpty) {
-                  adminReportsEmpty.textContent = "報告の読み込みに失敗しました。";
-                  adminReportsEmpty.style.display = "block";
-                }
-              }
-            );
-        }
-
         // ★ ここで timeSlots を読み込み → その後にバーとタスクを構築
         loadTimeSlotsConfig().then(() => {
           initializeProgressBars();
@@ -2782,7 +2726,6 @@ document.body.addEventListener("click", async (e) => {
 
         setupDailyResetAt7AM();
       } // startApp ここまで
-
 
       // =============================
       // ログインボタン押下
