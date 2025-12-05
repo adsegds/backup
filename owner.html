@@ -943,6 +943,93 @@
 
 
 
+
+
+/* =============================
+   ① お知らせ管理（ownerNews）の一覧デザイン
+   ============================= */
+
+/* UL 全体：縦にカードを並べる */
+.news-list {
+  list-style: none;
+  margin-top: 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;              /* 1件ごとの間隔 */
+}
+
+/* 1件分のカード（②の .report-item とほぼ同じ雰囲気） */
+.news-list li {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fafafa;
+  border: 1px solid #e3e3e3;
+  font-size: 13px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* タイトル行（もし title を別要素にしていたらここが効く） */
+.news-title {
+  font-weight: 600;
+}
+
+/* 本文テキスト */
+.news-body {
+  white-space: pre-wrap;    /* 改行もそのまま反映 */
+}
+
+/* 日付＋その他メタ情報行 */
+.news-meta {
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #666;
+}
+
+/* 日付だけの span があればここにマイルドに効く */
+.news-date {
+  opacity: 0.9;
+}
+
+/* 削除ボタンを右下にちょこんと置くイメージ */
+.news-list li button,
+.news-delete-btn {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+  align-self: flex-end;      /* 右寄せ */
+  background: #ffb3b3;
+  color: #fff;
+}
+
+.news-list li button:hover,
+.news-delete-btn:hover {
+  background: #ff8c8c;
+}
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
     
     
 
