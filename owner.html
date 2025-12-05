@@ -2215,6 +2215,72 @@
       return;
     }
 
+
+
+
+
+    // =============================
+    // 🔑 スタッフ用パスワード変更（view-auth）
+    // =============================
+    const newStaffPassInput  = document.getElementById("newStaffPassInput");
+    const changeStaffPassBtn = document.getElementById("changeStaffPassBtn");
+    const changeStaffPassMsg = document.getElementById("changeStaffPassMsg");
+
+    if (changeStaffPassBtn && newStaffPassInput && changeStaffPassMsg) {
+      changeStaffPassBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const newPass = newStaffPassInput.value.trim();
+        if (!newPass) {
+          changeStaffPassMsg.textContent = "新しいパスワードを入力してください。";
+          changeStaffPassMsg.className = "status err";
+          return;
+        }
+
+        if (!storeRef) {
+          changeStaffPassMsg.textContent =
+            "店舗情報がまだ読み込み中です。少し待ってから再度お試しください。";
+          changeStaffPassMsg.className = "status err";
+          return;
+        }
+
+        try {
+          changeStaffPassMsg.textContent = "更新中…";
+          changeStaffPassMsg.className = "status";
+
+          await storeRef
+            .collection("settings")
+            .doc("auth")
+            .set(
+              {
+                staffPassword: newPass,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            );
+
+          changeStaffPassMsg.textContent =
+            "スタッフパスワードを更新しました。スタッフ用ログイン画面でこのパスワードを使ってください。";
+          changeStaffPassMsg.className = "status ok";
+          newStaffPassInput.value = "";
+        } catch (err) {
+          console.error("スタッフパスワード更新エラー", err);
+          changeStaffPassMsg.textContent =
+            "更新に失敗しました。時間をおいて再度お試しください。";
+          changeStaffPassMsg.className = "status err";
+        }
+      });
+    }
+
+
+
+
+
+
+
+
+
+    
     // =============================
     // ② reports（スタッフ → 経営者）一覧
     // =============================
