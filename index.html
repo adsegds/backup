@@ -1576,6 +1576,17 @@ body.app-ready .app {
       // 本体初期化（STORE_ID / storeRef がセット済みで呼ぶ）
       // =============================
       function startApp() {
+
+
+        // ★ storeRef がなければ何もしない（安全ガード）
+        if (!STORE_ID || !storeRef) {
+          console.warn("STORE_ID / storeRef 未設定のため、startApp を中止します。");
+          showLogin();
+          setAppReady();
+          return;
+        }
+
+        
         // 店舗ID / パスワード表示（※ index.html には非表示だけど一応）
         const storeIdDisplay = document.getElementById("storeIdDisplay");
         const storePassDisplay = document.getElementById("storePassDisplay");
