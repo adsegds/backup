@@ -2063,6 +2063,24 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+
+
+
+    // ★ 新規登録ボタン（owner.html → signup.html）
+  const ownerRegisterBtn = document.getElementById("ownerRegisterBtn");
+  if (ownerRegisterBtn) {
+    ownerRegisterBtn.addEventListener("click", () => {
+      // 同じタブで開く
+      window.location.href = "signup.html";
+
+      // ※別タブで開きたいならこっち
+      // window.open("signup.html", "_blank");
+    });
+  }
+
+
+
+    
     // =============================
     // AI最適化（Cloud Functions 経由版）
     // =============================
