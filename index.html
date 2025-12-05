@@ -1690,11 +1690,25 @@ body.app-ready .app {
 
 
     document.addEventListener("DOMContentLoaded", () => {
-      const loginScreen = document.getElementById("loginScreen");
-      const appEl = document.querySelector(".app");
-      const loginStoreIdInput = document.getElementById("loginStoreId");
-      const loginStorePassInput = document.getElementById("loginStorePass");
-      const loginBtn = document.getElementById("loginBtn");
+  const loginScreen = document.getElementById("loginScreen");
+  const appEl = document.querySelector(".app");
+  const loginStoreIdInput = document.getElementById("loginStoreId");
+  const loginStorePassInput = document.getElementById("loginStorePass");
+  const loginBtn = document.getElementById("loginBtn");
+
+  // ★ 店舗IDは固定 or URLパラメータで決める（スタッフには見せない）
+  const fixedStoreId = resolveStoreId();
+  if (loginStoreIdInput) {
+    loginStoreIdInput.value = fixedStoreId;
+
+    // 入力欄とラベルを非表示
+    loginStoreIdInput.style.display = "none";
+    const label = loginStoreIdInput.previousElementSibling;
+    if (label) {
+      label.style.display = "none";
+    }
+  }
+
 
       // ★ 念のため、読み込み中クラスを付けておく
       document.body.classList.add("app-loading");
