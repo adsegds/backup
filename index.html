@@ -2906,10 +2906,10 @@ document.body.addEventListener("click", async (e) => {
       } // startApp ここまで
 
 
-      // =============================
+           // =============================
       // ログインボタン押下
       // =============================
-      function handleLogin() {
+      async function handleLogin() {
         const id = (loginStoreIdInput?.value || "").trim();
         const pass = (loginStorePassInput?.value || "").trim();
 
@@ -2921,29 +2921,59 @@ document.body.addEventListener("click", async (e) => {
           alert("この店舗IDではチェックリストを利用できません。");
           return;
         }
-        const expected = STORE_PASSWORDS[id];
-        if (!expected) {
-          alert("この店舗IDにはパスワードが設定されていません。");
-          return;
-        }
-        if (pass !== expected) {
-          alert("パスワードが違います。");
+        if (!pass) {
+          alert("パスワードを入力してください。");
           return;
         }
 
-                // ログイン成功
-        STORE_ID = id;
-        storeRef = db.collection("stores").doc(STORE_ID);
-        saveLoginCache(STORE_ID);
+        try {
+          // 👇 この店舗の settings/auth を取得
+          const storeDocRef = db.collection("stores").doc(id);
+          const authSnap = await storeDocRef
+            .collection("settings")
+            .doc("auth")
+            .get();
 
-        showApp();
+          let expected = null;
 
-        // ★ ここで「読み込み中 → 準備完了」に切り替え
-        setAppReady();
+          if (authSnap.exists) {
+            const authData = authSnap.data() || {};
+            if (authData.staffPassword) {
+              // ★ オーナー画面( owner.html )で設定したスタッフ用パスワードを最優先
+              expected = authData.staffPassword;
+            }
+          }
 
-        startApp();
+          // Firestore にまだ設定がないときは、昔の定数をフォールバックで使う
+          if (!expected) {
+            expected = STORE_PASSWORDS[id] || null;
+          }
 
+          if (!expected) {
+            alert("この店舗IDにはパスワードが設定されていません。");
+            return;
+          }
+
+          if (pass !== expected) {
+            alert("パスワードが違います。");
+            return;
+          }
+
+          // ✅ ログイン成功
+          STORE_ID = id;
+          storeRef = storeDocRef;
+          saveLoginCache(STORE_ID);
+
+          showApp();
+          setAppReady();
+          startApp();
+
+        } catch (err) {
+          console.error("ログイン処理エラー:", err);
+          alert("ログイン処理中にエラーが発生しました。時間をおいて再度お試しください。");
+        }
       }
+
 
       if (loginBtn) {
         loginBtn.addEventListener("click", handleLogin);
