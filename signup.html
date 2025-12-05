@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shiftask Pro 新規登録</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #111;
+      line-height: 1.6;
+    }
+
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+      padding: 24px 22px 20px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .sub {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 13px;
+      outline: none;
+    }
+    input:focus {
+      border-color: #111;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .btn-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn-primary {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #111;
+      color: #fff;
+      cursor: pointer;
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      min-height: 1.2em;
+    }
+    .status.ok {
+      color: #0a7b34;
+    }
+    .status.err {
+      color: #c00;
+    }
+
+    .back-link {
+      margin-top: 16px;
+      font-size: 12px;
+      text-align: right;
+    }
+    .back-link a {
+      color: #111;
+      text-decoration: none;
+      border-bottom: 1px solid #111;
+      padding-bottom: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="card">
+      <h1 class="title">Shiftask Pro 新規登録</h1>
+      <p class="sub">
+        1店舗ごとに「店舗ID」を1つ登録します。<br>
+        登録が完了したら、管理画面（owner.html）からログインできます。
+      </p>
+
+      <div class="field">
+        <label for="signupStoreId">店舗ID（英数字・3〜30文字）</label>
+        <input
+          id="signupStoreId"
+          type="text"
+          placeholder="例：nambucho"
+          autocomplete="off"
+        />
+        <p class="hint">
+          ローマ字の店舗名などがおすすめです。<br>
+          例）<code>nambucho</code> / <code>lawson_001</code> など
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="signupEmail">オーナーのメールアドレス</label>
+        <input
+          id="signupEmail"
+          type="email"
+          placeholder="例：owner@example.com"
+          autocomplete="email"
+        />
+        <p class="hint">
+          将来のお知らせメール送信用。スタッフには公開されません。
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="signupOwnerPass">管理者パスワード</label>
+        <input
+          id="signupOwnerPass"
+          type="password"
+          placeholder="管理者用パスワード"
+        />
+        <p class="hint">
+          オーナー用管理画面（owner.html）で使うパスワードです。
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="signupStaffPass">スタッフパスワード</label>
+        <input
+          id="signupStaffPass"
+          type="password"
+          placeholder="スタッフ画面用パスワード"
+        />
+        <p class="hint">
+          スタッフ用チェックリスト画面（index.html）のログインに使います。
+        </p>
+      </div>
+
+      <div class="btn-row">
+        <button id="signupSubmitBtn" class="btn-primary" type="button">
+          🌟 この内容で登録する
+        </button>
+      </div>
+
+      <p id="signupStatus" class="status"></p>
+
+      <div class="back-link">
+        <a href="owner.html">← 管理者ログイン画面に戻る</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase v8（owner.html と同じでOK） -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    // =============================
+    // Firebase 設定（owner.html と同じ）
+    // =============================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
+      authDomain: "lawson-workflow.firebaseapp.com",
+      projectId: "lawson-workflow",
+      storageBucket: "lawson-workflow.firebasestorage.app",
+      messagingSenderId: "335371795694",
+      appId: "1:335371795694:web:3b0950a616d368b284c7ff",
+      measurementId: "G-BGENZNZMRC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function validateStoreId(id) {
+      if (!id) return "店舗IDを入力してください。";
+      if (id.length < 3 || id.length > 30) {
+        return "店舗IDは3〜30文字で入力してください。";
+      }
+      if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+        return "店舗IDは英数字と - _ だけが使えます。";
+      }
+      return null;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const storeIdInput   = document.getElementById("signupStoreId");
+      const emailInput     = document.getElementById("signupEmail");
+      const ownerPassInput = document.getElementById("signupOwnerPass");
+      const staffPassInput = document.getElementById("signupStaffPass");
+      const submitBtn      = document.getElementById("signupSubmitBtn");
+      const statusEl       = document.getElementById("signupStatus");
+
+      async function handleSignup() {
+        const storeId   = (storeIdInput.value || "").trim();
+        const email     = (emailInput.value || "").trim();
+        const ownerPass = (ownerPassInput.value || "").trim();
+        const staffPass = (staffPassInput.value || "").trim();
+
+        // 入力チェック
+        const idError = validateStoreId(storeId);
+        if (idError) {
+          statusEl.textContent = idError;
+          statusEl.className = "status err";
+          return;
+        }
+        if (!email) {
+          statusEl.textContent = "メールアドレスを入力してください。";
+          statusEl.className = "status err";
+          return;
+        }
+        if (!ownerPass) {
+          statusEl.textContent = "管理者パスワードを入力してください。";
+          statusEl.className = "status err";
+          return;
+        }
+        if (!staffPass) {
+          statusEl.textContent = "スタッフパスワードを入力してください。";
+          statusEl.className = "status err";
+          return;
+        }
+
+        submitBtn.disabled = true;
+        statusEl.textContent = "登録中です…";
+        statusEl.className = "status";
+
+        try {
+          const storeDocRef = db.collection("stores").doc(storeId);
+          const snap = await storeDocRef.get();
+
+          if (snap.exists) {
+            statusEl.textContent = "この店舗IDはすでに使われています。別のIDを入力してください。";
+            statusEl.className = "status err";
+            submitBtn.disabled = false;
+            return;
+          }
+
+          // stores/{storeId} 本体
+          await storeDocRef.set({
+            storeId,
+            email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            plan: "trial",          // とりあえず trial 扱い
+            isActive: true
+          });
+
+          // settings/auth にパスワードなど
+          await storeDocRef
+            .collection("settings")
+            .doc("auth")
+            .set({
+              ownerPassword: ownerPass,
+              staffPassword: staffPass,
+              email,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+          // （将来）ここで Cloud Functions 経由のメール送信も呼べる
+          // try {
+          //   await fetch("https://us-central1-lawson-workflow.cloudfunctions.net/sendSignupMail", {
+          //     method: "POST",
+          //     headers: { "Content-Type": "application/json" },
+          //     body: JSON.stringify({ storeId, email })
+          //   });
+          // } catch (e) {
+          //   console.warn("メール送信は失敗しましたが、登録自体は完了しています:", e);
+          // }
+
+          statusEl.textContent =
+            "登録が完了しました！管理者ログイン画面に戻って、店舗IDと管理者パスワードでログインしてください。";
+          statusEl.className = "status ok";
+
+          // 入力をクリア
+          ownerPassInput.value = "";
+          staffPassInput.value = "";
+
+          // 3秒後に owner.html へ誘導（任意）
+          setTimeout(() => {
+            window.location.href = "owner.html";
+          }, 3000);
+
+        } catch (err) {
+          console.error("登録エラー", err);
+          statusEl.textContent = "登録中にエラーが発生しました。時間をおいて再度お試しください。";
+          statusEl.className = "status err";
+          submitBtn.disabled = false;
+          return;
+        }
+      }
+
+      if (submitBtn) {
+        submitBtn.addEventListener("click", handleSignup);
+      }
+      // Enter でも送信したいとき
+      [storeIdInput, emailInput, ownerPassInput, staffPassInput].forEach((el) => {
+        if (!el) return;
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSignup();
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
