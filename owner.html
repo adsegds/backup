@@ -1067,34 +1067,79 @@
   </style>
 </head>
 <body>
-  <!-- ① ログイン画面 -->
+   <!-- ① ログイン画面 -->
   <div id="ownerLogin" class="login-wrap">
     <div class="login-title">管理者 ログイン</div>
     <div class="login-sub">
-      管理画面に入るためのパスワードを入力してください。
+      新規登録 or ログインして管理画面に入ってください。
     </div>
 
+    <!-- タブ -->
+    <div class="login-tabs">
+      <button type="button" class="login-tab active" data-mode="login">ログイン</button>
+      <button type="button" class="login-tab" data-mode="register">新規登録</button>
+    </div>
 
+    <!-- ▼ ログイン用フォーム -->
+    <div id="loginForm" class="login-form">
+      <label for="storeIdInput">店舗ID</label>
+      <input
+        id="storeIdInput"
+        type="text"
+        placeholder="例：nambucho"
+        autocomplete="off"
+      />
 
-<label for="storeIdInput">店舗ID</label>
-<input
-  id="storeIdInput"
-  type="text"
-  placeholder="例：nambucho"
-  autocomplete="off"
-/>
+      <label for="ownerPasswordInput">管理者パスワード</label>
+      <input
+        id="ownerPasswordInput"
+        type="password"
+        placeholder="パスワード"
+        autocomplete="current-password"
+      />
 
-    
-    <label for="ownerPasswordInput">パスワード</label>
-    <input
-      id="ownerPasswordInput"
-      type="password"
-      placeholder="パスワード"
-      autocomplete="current-password"
-    />
+      <div class="login-btn-row">
+        <button id="ownerLoginBtn" class="login-btn" type="button">ログイン</button>
+      </div>
+    </div>
 
-    <div class="login-btn-row">
-      <button id="ownerLoginBtn" class="login-btn" type="button">ログイン</button>
+    <!-- ▼ 新規登録フォーム -->
+    <div id="registerForm" class="login-form" style="display:none;">
+      <label for="regStoreIdInput">店舗ID（英数字・3〜30文字）</label>
+      <input
+        id="regStoreIdInput"
+        type="text"
+        placeholder="例：nambucho"
+        autocomplete="off"
+      />
+
+      <label for="regEmailInput">メールアドレス</label>
+      <input
+        id="regEmailInput"
+        type="email"
+        placeholder="例：owner@example.com"
+        autocomplete="email"
+      />
+
+      <label for="regOwnerPasswordInput">管理者パスワード</label>
+      <input
+        id="regOwnerPasswordInput"
+        type="password"
+        placeholder="管理者用パスワード"
+      />
+
+      <label for="regStaffPasswordInput">スタッフパスワード</label>
+      <input
+        id="regStaffPasswordInput"
+        type="password"
+        placeholder="スタッフ画面用パスワード"
+      />
+
+      <div class="login-btn-row">
+        <button id="ownerRegisterBtn" class="login-btn" type="button">
+          新規登録する
+        </button>
+      </div>
     </div>
 
     <p id="ownerLoginError" class="login-error"></p>
@@ -1104,6 +1149,7 @@
       ※時間が経つと自動的にログアウトされます。
     </p>
   </div>
+
 
   <!-- ② 本体アプリ（ログイン後に表示） -->
   <div id="ownerApp" style="display:none;">
