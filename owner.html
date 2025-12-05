@@ -997,23 +997,24 @@
   opacity: 0.9;
 }
 
-/* 削除ボタンを右下にちょこんと置くイメージ */
+/* 削除ボタン：② 報告一覧と同じ系の色にする */
 .news-list li button,
 .news-delete-btn {
   padding: 4px 12px;
   border-radius: 999px;
-  border: none;
+  border: 1px solid #ffb3b3;   /* ← 枠線あり */
   font-size: 11px;
   cursor: pointer;
-  align-self: flex-end;      /* 右寄せ */
-  background: #ffb3b3;
-  color: #fff;
+  align-self: flex-end;
+  background: #fff0f0;         /* ← 薄いピンク背景 */
+  color: #333;                 /* ← 文字は濃いめ */
 }
 
 .news-list li button:hover,
 .news-delete-btn:hover {
-  background: #ff8c8c;
+  background: #ffd6d6;         /* ← ホバー時ちょっと濃く */
 }
+
 
 
 
