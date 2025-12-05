@@ -1553,6 +1553,46 @@
           </section>
         </section>
 
+
+
+
+        <!-- 🔑 パスワード設定（スタッフ用） -->
+        <section id="view-auth" class="view-panel">
+          <section class="card" id="auth-card">
+            <h2>スタッフ用 パスワード設定</h2>
+            <p class="card-sub">
+              スタッフ側ログイン用のパスワードを変更できます。<br>
+              ここで設定したパスワードを、スタッフ画面（index.html）のログインに使います。
+            </p>
+
+            <div class="row">
+              <label for="newStaffPassInput">新しいスタッフパスワード</label>
+              <input
+                id="newStaffPassInput"
+                type="password"
+                placeholder="例：staff1234"
+              />
+              <div class="hint">
+                ※英数字を混ぜて、スタッフにだけ共有してください。
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button id="changeStaffPassBtn" class="btn-primary" type="button">
+                🔑 パスワードを変更する
+              </button>
+            </div>
+
+            <p id="changeStaffPassMsg" class="status" style="margin-top:10px;"></p>
+          </section>
+        </section>
+
+
+
+
+
+
+        
         <!-- ⑤ スタッフログ -->
         <section id="view-logs" class="view-panel">
           <section class="card" id="logs-card">
