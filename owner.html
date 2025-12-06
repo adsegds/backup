@@ -1880,6 +1880,13 @@
       showLogin();
     }
 
+
+
+ // ★一時的に自動ログインを停止（毎回ログイン画面）
+    showLogin();
+
+    
+
     function validateStoreId(id) {
       // 半角英数字と - _ のみ、3〜30文字制限
       return /^[a-zA-Z0-9_-]{3,30}$/.test(id);
