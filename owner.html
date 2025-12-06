@@ -1587,35 +1587,69 @@
         </section>
 
         <!-- 🔑 パスワード設定（スタッフ用） -->
-        <section id="view-auth" class="view-panel">
-          <section class="card" id="auth-card">
-            <h2>スタッフ用 パスワード設定</h2>
-            <p class="card-sub">
-              スタッフ側ログイン用のパスワードを変更できます。<br>
-              ここで設定したパスワードを、スタッフ画面（index.html）のログインに使います。
-            </p>
+<section id="view-auth" class="view-panel">
+  <section class="card" id="auth-card">
+    <h2>スタッフ用 パスワード設定</h2>
+    <p class="card-sub">
+      スタッフ側ログイン用のパスワードを変更できます。<br>
+      ここで設定したパスワードを、スタッフ画面（index.html）のログインに使います。
+    </p>
 
-            <div class="row">
-              <label for="newStaffPassInput">新しいスタッフパスワード</label>
-              <input
-                id="newStaffPassInput"
-                type="password"
-                placeholder="例：staff1234"
-              />
-              <div class="hint">
-                ※英数字を混ぜて、スタッフにだけ共有してください。
-              </div>
-            </div>
+    <!-- 🔗 スタッフ画面URL ＋ ボタン -->
+    <div class="row">
+      <label>スタッフ用 チェックリスト画面</label>
+      <a
+        id="openStaffIndexLink"
+        href="#"
+        class="btn-secondary"
+        target="_blank"
+      >
+        ▶ スタッフ画面を開く
+      </a>
+      <p class="hint">
+        この店舗ID専用のURL<br>
+        <code>https://shiftask-pro.web.app/?store=店舗ID</code><br>
+        を自動でセットします（JS側で反映）。
+      </p>
+    </div>
 
-            <div class="btn-row">
-              <button id="changeStaffPassBtn" class="btn-primary" type="button">
-                🔑 パスワードを変更する
-              </button>
-            </div>
+    <!-- 🔳 QRコード表示エリア -->
+    <div class="row">
+      <label>スタッフ用ログインQR</label>
+      <div id="staffIndexQrBox" class="staff-qr-box">
+        <!-- JSでQRコードを自動生成 -->
+      </div>
+      <p class="hint">
+        このQRを印刷して休憩室などに貼れば、<br>
+        スタッフはカメラで読み取るだけでログイン画面を開けます。
+      </p>
+    </div>
 
-            <p id="changeStaffPassMsg" class="status" style="margin-top:10px;"></p>
-          </section>
-        </section>
+    <hr>
+
+    <!-- パスワード変更フォーム -->
+    <div class="row">
+      <label for="newStaffPassInput">新しいスタッフパスワード</label>
+      <input
+        id="newStaffPassInput"
+        type="password"
+        placeholder="例：staff1234"
+      />
+      <div class="hint">
+        ※英数字を混ぜて、スタッフにだけ共有してください。
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="changeStaffPassBtn" class="btn-primary" type="button">
+        🔑 パスワードを変更する
+      </button>
+    </div>
+
+    <p id="changeStaffPassMsg" class="status" style="margin-top:10px;"></p>
+  </section>
+</section>
+
 
         <!-- ⑤ スタッフログ -->
         <section id="view-logs" class="view-panel">
