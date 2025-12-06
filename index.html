@@ -1109,6 +1109,54 @@ body.app-ready .app {
 
 
 
+/* 上の黒ヘッダーの右端に出すボタン */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.staff-logout-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  font-size: 12px;
+  background: #ffffff;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.staff-logout-btn:hover {
+  opacity: 0.9;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   </style>
@@ -1153,6 +1201,13 @@ body.app-ready .app {
       </span>
     </button>
     <h1>業務チェックリスト</h1>
+
+ <button id="staffLogoutBtn" class="staff-logout-btn" type="button">
+      店舗切り替え / ログアウト
+    </button>
+
+
+
   </div>
   <p>時間帯ごとの A＝必須 / B＝余裕あれば。迷ったらAから。</p>
 
@@ -1200,6 +1255,9 @@ body.app-ready .app {
         <button data-size="medium">中</button>
         <button data-size="large">大</button>
       </div>
+
+
+
     </header>
 
     <main>
@@ -1245,9 +1303,13 @@ body.app-ready .app {
               すべて読んだことにする
             </button>
 
-            <a href="notice.html" class="notice-center-link">
-              ▶ お知らせセンターを見る
-            </a>
+            <a
+  href="#"
+  id="openNoticeCenterBtn"
+  class="notice-center-link"
+>
+  ▶ お知らせセンターを見る
+</a>
           </div>
         </div>
       </section>
@@ -1531,18 +1593,17 @@ body.app-ready .app {
       // oosakanamba: "osaka777",
     };
 
-    // ★ 店舗ID：基本は固定。?store=xxx があればそれを優先
-    const DEFAULT_STORE_ID = "nambucho";
+    // ★ 店舗ID：?store=xxx があればそれ、なければ空欄
+function resolveStoreId() {
+  const params = new URLSearchParams(location.search);
+  const fromUrl = params.get("store");
 
-    function resolveStoreId() {
-      const params = new URLSearchParams(location.search);
-      const fromUrl = params.get("store");
+  if (fromUrl && fromUrl.trim()) {
+    return fromUrl.trim();   // URL で指定された場合のみ自動入力
+  }
+  return "";                 // ← それ以外は空欄
+}
 
-      if (fromUrl && fromUrl.trim()) {
-        return fromUrl.trim();
-      }
-      return DEFAULT_STORE_ID;
-    }
 
     // （必要なら）事前に許可しておく店舗一覧
     // 今はパスワード定義用としてだけ使うイメージ
@@ -1696,18 +1757,15 @@ body.app-ready .app {
   const loginStorePassInput = document.getElementById("loginStorePass");
   const loginBtn = document.getElementById("loginBtn");
 
-  // ★ 店舗IDは固定 or URLパラメータで決める（スタッフには見せない）
-  const fixedStoreId = resolveStoreId();
-  if (loginStoreIdInput) {
-    loginStoreIdInput.value = fixedStoreId;
-
-    // 入力欄とラベルを非表示
-    loginStoreIdInput.style.display = "none";
-    const label = loginStoreIdInput.previousElementSibling;
-    if (label) {
-      label.style.display = "none";
-    }
+  // ★ 店舗IDは「入力できる」ようにする（URLパラメータがあれば初期値にする）
+if (loginStoreIdInput) {
+  const initialId = resolveStoreId();   // ?store=xxx があればそれ、なければ空欄
+  if (initialId) {
+    loginStoreIdInput.value = initialId;  // ある場合のみ初期セット
   }
+  // 👇非表示にはしない！（ユーザーが入力できる必要がある）
+}
+
 
 
       // ★ 念のため、読み込み中クラスを付けておく
@@ -1786,6 +1844,36 @@ body.app-ready .app {
             closeAppMenu();
           }
         });
+
+
+
+      
+
+
+      // =============================
+        // お知らせセンター（スタッフ用）へのリンク
+        // =============================
+        const openNoticeBtn = document.getElementById("openNoticeCenterBtn");
+        if (openNoticeBtn && STORE_ID) {
+          const noticeUrl = `notice.html?store=${encodeURIComponent(STORE_ID)}`;
+
+          // aタグなら href にセット
+          if (openNoticeBtn.tagName === "A") {
+            openNoticeBtn.href = noticeUrl;
+            openNoticeBtn.target = "_blank";
+          } else {
+            // button などの場合は click で開く
+            openNoticeBtn.addEventListener("click", () => {
+              window.open(noticeUrl, "_blank");
+            });
+          }
+        }
+
+
+
+
+
+
 
         // =============================
         // シフト表URL読み込み
@@ -2938,14 +3026,28 @@ document.body.addEventListener("click", async (e) => {
       } // startApp ここまで
 
 
-    // =============================
-// ログインボタン押下（ID入力不要版）
+
+
+
+
+
+
+
+
+   // =============================
+// ログインボタン押下（ID入力版）
 // =============================
 async function handleLogin() {
-  // ★ 店舗IDは入力欄を無視して、共通関数で決定
-  const id = resolveStoreId();   // ← ここだけで決まる（nambucho）
+  // 1) 入力欄の値を優先
+  const inputId = (loginStoreIdInput?.value || "").trim();
+  // 2) 入力が空なら URL / デフォルトから補完
+  const id = inputId || resolveStoreId();
   const pass = (loginStorePassInput?.value || "").trim();
 
+  if (!id) {
+    alert("店舗IDを入力してください。");
+    return;
+  }
   if (!pass) {
     alert("パスワードを入力してください。");
     return;
@@ -3002,6 +3104,10 @@ async function handleLogin() {
 
 
 
+
+
+
+
       if (loginBtn) {
         loginBtn.addEventListener("click", handleLogin);
       }
@@ -3012,6 +3118,55 @@ async function handleLogin() {
           }
         });
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ★ スタッフ用 ログアウト（店舗切り替え）
+      const staffLogoutBtn = document.getElementById("staffLogoutBtn");
+      if (staffLogoutBtn) {
+        staffLogoutBtn.addEventListener("click", () => {
+          try {
+            // ログイン関連のキャッシュを消す
+            localStorage.removeItem(STORE_ID_CACHE_KEY);
+            localStorage.removeItem(STORE_ID_TIME_KEY);
+
+            // 端末ラベルや文字サイズも一旦リセットしたいなら clear
+            // ※残したいなら上の2行だけでもOK
+            localStorage.clear();
+          } catch (e) {
+            console.warn("localStorage clear error:", e);
+          }
+
+          // 画面をリロード → ログイン画面に戻る
+          location.reload();
+        });
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // =============================
 // 自動ログイン判定
@@ -3026,15 +3181,16 @@ if (cachedId) {
   setAppReady();
   startApp();
 } else {
-  // ✅ キャッシュが無い場合は、URL or デフォルトIDで初期化
-  STORE_ID = resolveStoreId();
-  storeRef = db.collection("stores").doc(STORE_ID);
-
+  // キャッシュが無い → ふつうにログイン画面からスタート
   showLogin();
   setAppReady();
 }
+
+
+
 
     });
   </script>
 </body>
 </html>
+
