@@ -141,7 +141,7 @@
       </div>
 
       <div class="field">
-        <label for="signupEmail">オーナーのメールアドレス</label>
+        <label for="signupEmail">オーナーのメールアドレス（任意）</label>
         <input
           id="signupEmail"
           type="email"
@@ -149,7 +149,7 @@
           autocomplete="email"
         />
         <p class="hint">
-          将来のお知らせメール送信用。スタッフには公開されません。
+          将来のお知らせメール送信用。今は空でもOKです。
         </p>
       </div>
 
@@ -244,11 +244,7 @@
           statusEl.className = "status err";
           return;
         }
-        if (!email) {
-          statusEl.textContent = "メールアドレスを入力してください。";
-          statusEl.className = "status err";
-          return;
-        }
+        // メールは任意（空でもOK）
         if (!ownerPass) {
           statusEl.textContent = "管理者パスワードを入力してください。";
           statusEl.className = "status err";
@@ -278,45 +274,53 @@
           // stores/{storeId} 本体
           await storeDocRef.set({
             storeId,
-            email,
+            email: email || null,
+            ownerPassword: ownerPass,
+            staffPassword: staffPass,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            plan: "trial",          // とりあえず trial 扱い
+            plan: "trial",
             isActive: true
           });
 
-          // settings/auth にパスワードなど
+          // settings/auth にも保存
           await storeDocRef
             .collection("settings")
             .doc("auth")
             .set({
               ownerPassword: ownerPass,
               staffPassword: staffPass,
-              email,
+              email: email || null,
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
               updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-          // （将来）ここで Cloud Functions 経由のメール送信も呼べる
-          // try {
-          //   await fetch("https://us-central1-lawson-workflow.cloudfunctions.net/sendSignupMail", {
-          //     method: "POST",
-          //     headers: { "Content-Type": "application/json" },
-          //     body: JSON.stringify({ storeId, email })
-          //   });
-          // } catch (e) {
-          //   console.warn("メール送信は失敗しましたが、登録自体は完了しています:", e);
-          // }
+          // ★ メールアドレスが入力されているときだけ、お礼メールを送る
+          if (email) {
+            try {
+              await fetch(
+                "https://us-central1-lawson-workflow.cloudfunctions.net/sendSignupMail",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ storeId, email })
+                }
+              );
+            } catch (mailErr) {
+              console.warn(
+                "メール送信に失敗しましたが、登録自体は完了しています:",
+                mailErr
+              );
+            }
+          }
 
           statusEl.textContent =
             "登録が完了しました！管理者ログイン画面に戻って、店舗IDと管理者パスワードでログインしてください。";
           statusEl.className = "status ok";
 
-          // 入力をクリア
           ownerPassInput.value = "";
           staffPassInput.value = "";
 
-          // 3秒後に owner.html へ誘導（任意）
           setTimeout(() => {
             window.location.href = "owner.html";
           }, 3000);
@@ -333,7 +337,7 @@
       if (submitBtn) {
         submitBtn.addEventListener("click", handleSignup);
       }
-      // Enter でも送信したいとき
+
       [storeIdInput, emailInput, ownerPassInput, staffPassInput].forEach((el) => {
         if (!el) return;
         el.addEventListener("keydown", (e) => {
