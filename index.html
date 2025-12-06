@@ -3169,11 +3169,19 @@ async function handleLogin() {
 
 
 // =============================
-// 自動ログイン判定
+// 自動ログイン判定（URLの store を優先）
 // =============================
-const cachedId = getCachedLoginStoreId();
-if (cachedId) {
-  // ✅ 15時間以内なら前回ログイン店舗でそのまま入る
+const urlStoreId = resolveStoreId();          // ?store=xxx（あれば）
+const cachedId   = getCachedLoginStoreId();   // 15時間以内の前回ログイン店舗
+
+if (urlStoreId && urlStoreId !== cachedId) {
+  // 🔺 URLで店舗指定されていて、それがキャッシュと違うとき
+  //    → 自動ログインはしないで、ログイン画面からスタート
+  //      （店舗ID入力欄にはさっき initialId = resolveStoreId() で入ってる）
+  showLogin();
+  setAppReady();
+} else if (cachedId) {
+  // ✅ URL指定なし or URLとキャッシュが同じ → 今まで通り自動ログイン
   STORE_ID = cachedId;
   storeRef = db.collection("stores").doc(STORE_ID);
 
@@ -3181,10 +3189,11 @@ if (cachedId) {
   setAppReady();
   startApp();
 } else {
-  // キャッシュが無い → ふつうにログイン画面からスタート
+  // キャッシュもない → ふつうにログイン画面
   showLogin();
   setAppReady();
 }
+
 
 
 
