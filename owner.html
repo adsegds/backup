@@ -2149,59 +2149,63 @@
     return dateStr;
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+ document.addEventListener("DOMContentLoaded", () => {
 
-
-
-
-
-
-// ★ ここから追加 --------------------------
   const currentStoreId =
     (existingSession && existingSession.storeId) ||
     localStorage.getItem(STORE_KEY) ||
     "";
 
-  const staffPreviewLink = document.getElementById("staffNoticePreviewLink");
-  if (staffPreviewLink && currentStoreId) {
-    staffPreviewLink.href = `notice.html?store=${encodeURIComponent(currentStoreId)}`;
-  }
-  // ★ ここまで追加 --------------------------
+  // ▼ スタッフ用ログインURL（index.html） & QRコード
+  if (currentStoreId) {
+    const staffIndexUrl =
+      `https://shiftask-pro.web.app/?store=${encodeURIComponent(currentStoreId)}`;
 
-
-
-
-
-
-
-
-// ★ ログアウトボタン
-    const logoutBtn = document.getElementById("ownerLogoutBtn");
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
-        // セッション情報と店舗IDを削除
-        localStorage.removeItem(SESSION_KEY);
-        localStorage.removeItem(STORE_KEY);
-
-        // ついでにオーナー端末名も消したかったらここも
-        // localStorage.removeItem("lw_ownerOwnerId");
-
-        // ページ再読み込み → ログイン画面に戻る
-        location.reload();
-      });
+    const openStaffIndexLink = document.getElementById("openStaffIndexLink");
+    if (openStaffIndexLink) {
+      openStaffIndexLink.href = staffIndexUrl;
+      openStaffIndexLink.target = "_blank";
     }
 
-    // ★ 新規登録ボタン（owner.html → signup.html）
+    const staffIndexQrBox = document.getElementById("staffIndexQrBox");
+    if (staffIndexQrBox && window.QRCode) {
+      staffIndexQrBox.innerHTML = "";
+      new QRCode(staffIndexQrBox, {
+        text: staffIndexUrl,
+        width: 180,
+        height: 180,
+      });
+    }
+  }
+
+  // ▼ スタッフ用お知らせセンタープレビュー（notice.html）
+  const staffPreviewLink = document.getElementById("staffNoticePreviewLink");
+  if (staffPreviewLink && currentStoreId) {
+    staffPreviewLink.href =
+      `notice.html?store=${encodeURIComponent(currentStoreId)}`;
+  }
+
+  // ★ ログアウトボタン
+  const logoutBtn = document.getElementById("ownerLogoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(STORE_KEY);
+      location.reload();
+    });
+  }
+
+  // ★ 新規登録ボタン（owner.html → signup.html）
   const ownerRegisterBtn = document.getElementById("ownerRegisterBtn");
   if (ownerRegisterBtn) {
     ownerRegisterBtn.addEventListener("click", () => {
-      // 同じタブで開く
       window.location.href = "signup.html";
-
-      // ※別タブで開きたいならこっち
-      // window.open("signup.html", "_blank");
     });
   }
+
+  // ←この下に、もともとの loginWrap〜 いろいろ続いてる
+
+
 
 
 
