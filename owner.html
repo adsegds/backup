@@ -1494,6 +1494,99 @@
 
 
 
+/* ===== シフト作成：スタッフ名セルまわり ===== */
+
+/* 名前＋×ボタンを横並び＆中央寄せ */
+#shiftWeekTbody .staff-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 名前入力の見た目をちょい上品に */
+#shiftWeekTbody .staff-name-cell input[type="text"] {
+  flex: 1;
+  min-width: 140px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#shiftWeekTbody .staff-name-cell input[type="text"]:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+/* ×ボタン（上品な丸ボタン） */
+.staff-remove-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  font-size: 12px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #555;
+  transition: 
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease;
+}
+
+/* ホバーした時にちょいリッチに */
+.staff-remove-btn:hover {
+  background-color: #111;
+  color: #fff;
+  border-color: #111;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+/* クリック時にポチッと沈む感じ */
+.staff-remove-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
     
 
     
