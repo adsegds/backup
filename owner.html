@@ -1152,6 +1152,334 @@
 
 
 
+
+
+    
+
+
+
+
+
+
+
+
+/* ========== ⑦ シフト作成（AI＆手動） ========== */
+
+.shift-week-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.shift-week-controls .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.shift-week-controls label {
+  font-weight: 600;
+}
+
+.shift-week-controls input[type="date"],
+.shift-week-controls select {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+}
+
+.shift-week-controls button {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.shift-week-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.shift-week-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.shift-week-table th,
+.shift-week-table td {
+  border: 1px solid #eee;
+  padding: 4px 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.shift-week-table th {
+  background: #fafafa;
+}
+
+.shift-week-table td.staff-name-cell {
+  min-width: 120px;
+  text-align: left;
+}
+
+.shift-week-table td.staff-name-cell input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  padding: 2px 4px;
+}
+
+/* ★ 時給セル */
+.shift-week-table td.wage-cell {
+  min-width: 90px;
+  text-align: right;
+}
+
+.shift-week-table td.wage-cell input {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 4px;
+  text-align: right;
+}
+
+.shift-week-table td.shift-cell {
+  min-width: 120px;
+}
+
+.shift-week-table td.shift-cell .time-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shift-week-table td.shift-cell input[type="time"] {
+  width: 100%;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.shift-week-footer {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.shift-week-footer .primary {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.shift-week-footer .day-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.shift-week-footer .day-detail select {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+}
+
+.shift-week-footer .day-detail button {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.shift-day-board-area {
+  margin-top: 16px;
+}
+
+/* 日別shiftboardテーブル（ざっくり確認用） */
+
+#shiftDayBoardTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+#shiftDayBoardTable th,
+#shiftDayBoardTable td {
+  border: 1px solid #eee;
+  padding: 3px 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#shiftDayBoardTable th {
+  background: #fafafa;
+}
+
+#shiftDayBoardTable td.board-staff-name {
+  background: #fcfcfc;
+  text-align: left;
+  cursor: pointer;
+}
+
+#shiftDayBoardTable td.board-slot {
+  min-width: 32px;
+  cursor: default;
+}
+
+#shiftDayBoardTable td.board-slot.active {
+  background: #111;
+  color: #fff;
+}
+
+/* 日別シフト合計表示 */
+.shift-day-summary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #333;
+}
+
+/* 5分単位編集モーダル */
+
+.shift-time-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+}
+
+.shift-time-modal.show {
+  display: block;
+}
+
+.shift-time-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.shift-time-modal-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 360px;
+  width: 90%;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 18px 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  font-size: 13px;
+}
+
+.shift-time-modal-inner h3 {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.shift-time-modal-sub {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.shift-time-modal-body .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.shift-time-modal-body label {
+  min-width: 40px;
+}
+
+.shift-time-modal-body input[type="time"] {
+  flex: 1;
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.shift-time-modal-body .hint {
+  font-size: 11px;
+  color: #666;
+}
+
+.shift-time-modal-footer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.shift-time-modal-footer button {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.shift-time-modal-footer button.primary {
+  background: #111;
+  color: #fff;
+}
+
+.shift-time-modal-footer button:not(.primary) {
+  background: #eee;
+  color: #333;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
     
 
 
