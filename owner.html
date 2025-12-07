@@ -4137,6 +4137,18 @@ activateView("news");
 
     loadHandoverTemplate();
 
+
+
+
+
+
+
+
+
+
+
+   
+
     // =============================
     // 4) shiftSheet（シフト表設定）
     // =============================
@@ -4816,23 +4828,53 @@ activateView("news");
   }
 
   function renderWeekBody() {
-    tbody.innerHTML = "";
+  tbody.innerHTML = "";
 
-    weekData.staff.forEach((staff, rowIndex) => {
-      const tr = document.createElement("tr");
+  weekData.staff.forEach((staff, rowIndex) => {
+    const tr = document.createElement("tr");
 
-      // スタッフ名
-      const nameTd = document.createElement("td");
-      nameTd.className = "staff-name-cell";
-      const nameInput = document.createElement("input");
-      nameInput.type = "text";
-      nameInput.value = staff.name || "";
-      nameInput.placeholder = "スタッフ名";
-      nameInput.addEventListener("input", () => {
-        weekData.staff[rowIndex].name = nameInput.value.trim();
-      });
-      nameTd.appendChild(nameInput);
-      tr.appendChild(nameTd);
+    // スタッフ名 ＋ 削除ボタン
+    const nameTd = document.createElement("td");
+    nameTd.className = "staff-name-cell";
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.value = staff.name || "";
+    nameInput.placeholder = "例：高橋さん";
+    nameInput.addEventListener("input", () => {
+      weekData.staff[rowIndex].name = nameInput.value.trim();
+      if (lastOpenedDateStr) {
+        openDayBoard(lastOpenedDateStr);
+      }
+    });
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "✕";
+    removeBtn.className = "staff-remove-btn";
+    removeBtn.style.marginLeft = "4px";
+    removeBtn.style.fontSize = "11px";
+    removeBtn.addEventListener("click", () => {
+      if (weekData.staff.length <= 1) {
+        alert("スタッフは最低1人は必要です。");
+        return;
+      }
+      if (!confirm(`「${weekData.staff[rowIndex].name || "スタッフ" + (rowIndex + 1)}」を削除しますか？`)) {
+        return;
+      }
+      weekData.staff.splice(rowIndex, 1);
+      renderWeekBody();
+      if (lastOpenedDateStr) {
+        openDayBoard(lastOpenedDateStr);
+      }
+    });
+
+    nameTd.appendChild(nameInput);
+    nameTd.appendChild(removeBtn);
+    tr.appendChild(nameTd);
+
+    
+
 
       // 時給
       const hourlyTd = document.createElement("td");
