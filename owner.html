@@ -1587,6 +1587,156 @@
 
 
 
+
+/* ============================
+   スタッフ名 ＋ ×ボタン（高級感）
+   ============================ */
+
+/* スタッフ名セルを横並びに */
+.shift-week-table .staff-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 180px;
+}
+
+/* 名前入力（丸くて少しリッチ） */
+.shift-week-table .staff-name-cell input {
+  flex: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  background: #fff;
+}
+
+/* ×ボタン（丸くてちょい高級感） */
+.staff-remove-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s ease,
+              box-shadow 0.15s ease,
+              transform 0.05s;
+}
+
+.staff-remove-btn:hover {
+  background: #fff;
+  box-shadow: 0 0 0 1px #eee,
+              0 2px 4px rgba(0,0,0,0.06);
+}
+
+.staff-remove-btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* ============================
+   日別 / 1週間 / 1ヶ月 トグル
+   ============================ */
+
+.shiftboard-view-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+/* PC幅のときは横並びで右側に日付 */
+@media (min-width: 900px) {
+  .shiftboard-view-controls {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* トグル全体の土台 */
+.shiftboard-view-toggle {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #f4f4f4;
+  box-shadow: inset 0 0 0 1px #e6e6e6;
+}
+
+/* トグル内のボタン共通 */
+.shiftboard-view-toggle .sub-btn {
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+/* ホバー時（うっすら浮く） */
+.shiftboard-view-toggle .sub-btn:hover {
+  background: #fff;
+  border-color: #ddd;
+}
+
+/* アクティブなボタン（日別 / 1週間 / 1ヶ月のどれか） */
+.shiftboard-view-toggle .sub-btn.is-active {
+  background: #111;
+  color: #fff;
+  box-shadow: 0 0 0 1px #111;
+}
+
+/* ============================
+   日付セレクト ＋ 詳細ボタン
+   ============================ */
+
+.shiftboard-day-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shiftboard-day-picker select {
+  min-width: 220px;
+}
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
     
 
     
