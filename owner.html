@@ -5112,12 +5112,49 @@ activateView("news");
     renderWeekBody();
   });
 
-  saveBtn?.addEventListener("click", () => {
+    // 「この週のシフトを保存」ボタン
+  saveBtn?.addEventListener("click", async () => {
     if (!weekData) return;
+
+    // ① これまで通りブラウザに保存（ローカル用）
     saveWeekData(STORAGE_KEY, weekData);
     saveWeekData(LAST_WEEK_KEY, weekData);
-    alert("この週のシフトをブラウザに保存しました。（仮実装）");
+
+    // ② Firestore にも保存（スタッフ用シフト表で読む用）
+    try {
+      // storeRef はログイン後にセットされているグローバル変数
+      if (!storeRef) {
+        alert("店舗IDが未設定のため、Firestoreには保存できません。（一度ログアウトしてログインし直してください）");
+        return;
+      }
+
+      // 週の開始日（weekData に入ってる想定）
+      const weekStartStr = weekData.weekStart || weekStartInput.value;
+      if (!weekStartStr) {
+        alert("対象週の開始日を選択してください。");
+        return;
+      }
+
+      // Firestore に保存するデータ
+      const payload = {
+        weekStart: weekStartStr,
+        templateId: "default-24h",              // とりあえず固定でOK
+        members: weekData.staff || [],          // ← ここ大事：staff → members にして保存
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+
+      await storeRef
+        .collection("shiftWeeks")
+        .doc(weekStartStr)   // 例：2025-12-08
+        .set(payload, { merge: true });
+
+      alert("この週のシフトをブラウザ ＋ Firestore に保存しました！（スタッフ用シフト表に反映されます）");
+    } catch (err) {
+      console.error("Firestore 保存エラー:", err);
+      alert("Firestoreへの保存に失敗しました… コンソールを確認してください。");
+    }
   });
+
 
   openDayDetailBtn?.addEventListener("click", () => {
     const dateStr = daySelect.value;
