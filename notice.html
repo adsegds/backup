@@ -775,7 +775,7 @@
     // ④ taskPhotos（写真つきタスク報告）
     // ============================
     storeRef
-      .collection("photoReports")  // ← ここは今のまま。後で taskPhotos に変えたくなったら言って！
+      .collection("taskPhotos") 
       .orderBy("createdAt", "desc")
       .limit(100)
       .onSnapshot((snap) => {
