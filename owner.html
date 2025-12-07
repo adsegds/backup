@@ -4934,8 +4934,21 @@ activateView("news");
     analyticsDateInputRef = analyticsDateInput;
   });
 
+
+
+
+
+
+
+
+
+
+
+
+
+    
 // ====================================
-// ⑦ シフト作成（手動）＋日別shiftboard
+// ⑦ シフト作成（手動）＋日別 / 週別 shiftboard
 // ====================================
 (function setupShiftCreate() {
   const weekStartInput = document.getElementById("shiftWeekStart");
@@ -4952,6 +4965,11 @@ activateView("news");
   const dayBoardTitle = document.getElementById("shiftDayBoardTitle");
   const dayBoardTable = document.getElementById("shiftDayBoardTable");
   const dayBoardSummary = document.getElementById("shiftDayBoardSummary");
+
+  // 🔸 ビュー切り替えボタン（日 / 週 / 月）
+  const viewDayBtn   = document.getElementById("shiftViewDayBtn");
+  const viewWeekBtn  = document.getElementById("shiftViewWeekBtn");
+  const viewMonthBtn = document.getElementById("shiftViewMonthBtn");
 
   // モーダル要素
   const timeModal = document.getElementById("shiftTimeModal");
@@ -4983,7 +5001,7 @@ activateView("news");
 
   let weekData = null;
   let currentWeekDates = [];
-  let lastOpenedDateStr = null;
+  let lastOpenedDateStr = null; // ★今どの日付の「日別」を開いているか
 
   // ---------- 日付ヘルパ ----------
   function toDate(str) {
@@ -5050,6 +5068,7 @@ activateView("news");
       };
     }
 
+    // その週の7日分を作る
     currentWeekDates = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(weekStartDate);
@@ -5083,54 +5102,51 @@ activateView("news");
     });
   }
 
+  // ---------- 週テーブル（行：スタッフ / 列：日付） ----------
   function renderWeekBody() {
-  tbody.innerHTML = "";
+    tbody.innerHTML = "";
 
-  weekData.staff.forEach((staff, rowIndex) => {
-    const tr = document.createElement("tr");
+    weekData.staff.forEach((staff, rowIndex) => {
+      const tr = document.createElement("tr");
 
-    // スタッフ名 ＋ 削除ボタン
-    const nameTd = document.createElement("td");
-    nameTd.className = "staff-name-cell";
+      // スタッフ名 ＋ 削除ボタン
+      const nameTd = document.createElement("td");
+      nameTd.className = "staff-name-cell";
 
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.value = staff.name || "";
-    nameInput.placeholder = "例：高橋さん";
-    nameInput.addEventListener("input", () => {
-      weekData.staff[rowIndex].name = nameInput.value.trim();
-      if (lastOpenedDateStr) {
-        openDayBoard(lastOpenedDateStr);
-      }
-    });
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.value = staff.name || "";
+      nameInput.placeholder = "例：高橋さん";
+      nameInput.addEventListener("input", () => {
+        weekData.staff[rowIndex].name = nameInput.value.trim();
+        // 日別ボードが開いてたら名前も更新
+        if (lastOpenedDateStr) {
+          openDayBoard(lastOpenedDateStr);
+        }
+      });
 
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.textContent = "✕";
-    removeBtn.className = "staff-remove-btn";
-    removeBtn.style.marginLeft = "4px";
-    removeBtn.style.fontSize = "11px";
-    removeBtn.addEventListener("click", () => {
-      if (weekData.staff.length <= 1) {
-        alert("スタッフは最低1人は必要です。");
-        return;
-      }
-      if (!confirm(`「${weekData.staff[rowIndex].name || "スタッフ" + (rowIndex + 1)}」を削除しますか？`)) {
-        return;
-      }
-      weekData.staff.splice(rowIndex, 1);
-      renderWeekBody();
-      if (lastOpenedDateStr) {
-        openDayBoard(lastOpenedDateStr);
-      }
-    });
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.textContent = "✕";
+      removeBtn.className = "staff-remove-btn";
+      removeBtn.addEventListener("click", () => {
+        if (weekData.staff.length <= 1) {
+          alert("スタッフは最低1人は必要です。");
+          return;
+        }
+        if (!confirm(`「${weekData.staff[rowIndex].name || "スタッフ" + (rowIndex + 1)}」を削除しますか？`)) {
+          return;
+        }
+        weekData.staff.splice(rowIndex, 1);
+        renderWeekBody();
+        if (lastOpenedDateStr) {
+          openDayBoard(lastOpenedDateStr);
+        }
+      });
 
-    nameTd.appendChild(nameInput);
-    nameTd.appendChild(removeBtn);
-    tr.appendChild(nameTd);
-
-    
-
+      nameTd.appendChild(nameInput);
+      nameTd.appendChild(removeBtn);
+      tr.appendChild(nameTd);
 
       // 時給
       const hourlyTd = document.createElement("td");
@@ -5152,7 +5168,7 @@ activateView("news");
       hourlyTd.appendChild(hourlyInput);
       tr.appendChild(hourlyTd);
 
-      // 各日
+      // 各日の start/end
       currentWeekDates.forEach(dateStr => {
         const td = document.createElement("td");
         td.className = "shift-cell";
@@ -5210,7 +5226,7 @@ activateView("news");
     });
   }
 
-  // ---------- 日別shiftboard ----------
+  // ---------- 日別 shiftboard ----------
   function openDayBoard(dateStr) {
     lastOpenedDateStr = dateStr;
 
@@ -5307,6 +5323,103 @@ activateView("news");
     }
   }
 
+  // ---------- 週別 shiftboard ----------
+  function openWeekBoard() {
+    if (!weekData) return;
+
+    const startStr = currentWeekDates[0];
+    const endStr   = currentWeekDates[currentWeekDates.length - 1];
+    dayBoardTitle.textContent = `週別シフト（${startStr} 〜 ${endStr}）`;
+
+    const slots = [];
+    for (let h = 0; h < 24; h++) {
+      const startMin = h * 60;
+      const endMin = (h + 1) * 60;
+      const label = `${String(h).padStart(2, "0")}-${String(h + 1).padStart(2, "0")}`;
+      slots.push({ startMin, endMin, label });
+    }
+
+    dayBoardTable.innerHTML = "";
+
+    const thead = document.createElement("thead");
+    const headTr = document.createElement("tr");
+    const thName = document.createElement("th");
+    thName.textContent = "スタッフ / 日付";
+    headTr.appendChild(thName);
+
+    slots.forEach(slot => {
+      const th = document.createElement("th");
+      th.textContent = slot.label;
+      headTr.appendChild(th);
+    });
+    thead.appendChild(headTr);
+    dayBoardTable.appendChild(thead);
+
+    const tbodyBoard = document.createElement("tbody");
+
+    let totalMinutes = 0;
+    let totalWage = 0;
+
+    // 行 = スタッフ × 7日
+    weekData.staff.forEach((staff, sIdx) => {
+      currentWeekDates.forEach((dateStr, dayIdx) => {
+        const tr = document.createElement("tr");
+
+        const dObj = toDate(dateStr);
+        const mm = String(dObj.getMonth() + 1).padStart(2, "0");
+        const dd = String(dObj.getDate()).padStart(2, "0");
+        const youbi = getDayLabel(dayIdx);
+
+        const nameTd = document.createElement("td");
+        nameTd.className = "board-staff-name";
+        nameTd.textContent =
+          `${staff.name || `スタッフ${sIdx + 1}`} / ${youbi} ${mm}/${dd}`;
+        tr.appendChild(nameTd);
+
+        const info = staff.days[dateStr] || {};
+        const startMin = timeStrToMin(info.start);
+        const endMin   = timeStrToMin(info.end);
+
+        let minutes = 0;
+        if (startMin != null && endMin != null && endMin > startMin) {
+          minutes = endMin - startMin;
+          totalMinutes += minutes;
+          if (typeof staff.hourly === "number") {
+            totalWage += (minutes / 60) * staff.hourly;
+          }
+        }
+
+        slots.forEach(slot => {
+          const td = document.createElement("td");
+          td.className = "board-slot";
+          if (startMin != null && endMin != null) {
+            if (rangeOverlap(startMin, endMin, slot.startMin, slot.endMin)) {
+              td.classList.add("active");
+            }
+          }
+          tr.appendChild(td);
+        });
+
+        tbodyBoard.appendChild(tr);
+      });
+    });
+
+    dayBoardTable.appendChild(tbodyBoard);
+    dayBoardArea.style.display = "block";
+
+    if (dayBoardSummary) {
+      if (totalMinutes === 0) {
+        dayBoardSummary.textContent = "この週のシフトはまだ未入力です。";
+      } else {
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+        const yen = Math.round(totalWage);
+        dayBoardSummary.textContent =
+          `この週の合計勤務時間：${h}時間${m}分 / 人件費合計：約${yen.toLocaleString()}円`;
+      }
+    }
+  }
+
   function timeStrToMin(str) {
     if (!str) return null;
     const [h, m] = str.split(":").map(n => parseInt(n, 10));
@@ -5376,6 +5489,17 @@ activateView("news");
     closeTimeModal();
   });
 
+  // ---------- ビューボタン（見た目トグル） ----------
+  function setViewMode(mode) {
+    viewDayBtn?.classList.remove("is-active");
+    viewWeekBtn?.classList.remove("is-active");
+    viewMonthBtn?.classList.remove("is-active");
+
+    if (mode === "day")   viewDayBtn?.classList.add("is-active");
+    if (mode === "week")  viewWeekBtn?.classList.add("is-active");
+    if (mode === "month") viewMonthBtn?.classList.add("is-active");
+  }
+
   // ---------- イベント ----------
   weekTodayBtn?.addEventListener("click", () => {
     initWeek(new Date());
@@ -5410,40 +5534,37 @@ activateView("news");
     renderWeekBody();
   });
 
-    // 「この週のシフトを保存」ボタン
+  // 「この週のシフトを保存」ボタン
   saveBtn?.addEventListener("click", async () => {
     if (!weekData) return;
 
-    // ① これまで通りブラウザに保存（ローカル用）
+    // ローカル保存
     saveWeekData(STORAGE_KEY, weekData);
     saveWeekData(LAST_WEEK_KEY, weekData);
 
-    // ② Firestore にも保存（スタッフ用シフト表で読む用）
+    // Firestore にも保存
     try {
-      // storeRef はログイン後にセットされているグローバル変数
       if (!storeRef) {
         alert("店舗IDが未設定のため、Firestoreには保存できません。（一度ログアウトしてログインし直してください）");
         return;
       }
 
-      // 週の開始日（weekData に入ってる想定）
       const weekStartStr = weekData.weekStart || weekStartInput.value;
       if (!weekStartStr) {
         alert("対象週の開始日を選択してください。");
         return;
       }
 
-      // Firestore に保存するデータ
       const payload = {
         weekStart: weekStartStr,
-        templateId: "default-24h",              // とりあえず固定でOK
-        members: weekData.staff || [],          // ← ここ大事：staff → members にして保存
+        templateId: "default-24h",
+        members: weekData.staff || [],
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       };
 
       await storeRef
         .collection("shiftWeeks")
-        .doc(weekStartStr)   // 例：2025-12-08
+        .doc(weekStartStr)
         .set(payload, { merge: true });
 
       alert("この週のシフトをブラウザ ＋ Firestore に保存しました！（スタッフ用シフト表に反映されます）");
@@ -5453,11 +5574,32 @@ activateView("news");
     }
   });
 
-
+  // 「詳細（shiftboard）を開く」→ 日別で開く
   openDayDetailBtn?.addEventListener("click", () => {
-    const dateStr = daySelect.value;
+    const dateStr = daySelect.value || currentWeekDates[0];
     if (!dateStr) return;
+    setViewMode("day");
     openDayBoard(dateStr);
+  });
+
+  // 日別ボタン
+  viewDayBtn?.addEventListener("click", () => {
+    const dateStr = daySelect.value || currentWeekDates[0];
+    if (!dateStr) return;
+    setViewMode("day");
+    openDayBoard(dateStr);
+  });
+
+  // 1週間ボタン
+  viewWeekBtn?.addEventListener("click", () => {
+    setViewMode("week");
+    openWeekBoard();
+  });
+
+  // 1ヶ月ボタン（ダミー）
+  viewMonthBtn?.addEventListener("click", () => {
+    setViewMode("month");
+    alert("月別シフトビューは、あとで Firestore から複数週を集計する形で実装しよう💡\nまずは『1週間ビュー』を試してみてね！");
   });
 
   // ---------- 初期ロード ----------
@@ -5470,8 +5612,12 @@ activateView("news");
     } else {
       initWeek(new Date());
     }
+
+    // 初期モードは「日別」をアクティブに
+    setViewMode("day");
   })();
 })();
+
 
 
     
