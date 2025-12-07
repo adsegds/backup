@@ -2393,6 +2393,52 @@
           </div>
         </section>
       </main>
+
+
+
+
+
+
+  <!-- 5分単位の時間編集モーダル -->
+  <div id="shiftTimeModal" class="shift-time-modal" style="display:none;">
+    <div class="shift-time-modal-backdrop"></div>
+    <div class="shift-time-modal-inner">
+      <h3 id="shiftTimeModalTitle">シフト時間を編集</h3>
+      <p class="shift-time-modal-sub" id="shiftTimeModalSub"></p>
+
+      <div class="shift-time-modal-body">
+        <div class="row">
+          <label for="shiftTimeStart">開始</label>
+          <input id="shiftTimeStart" type="time" step="300" />
+        </div>
+        <div class="row">
+          <label for="shiftTimeEnd">終了</label>
+          <input id="shiftTimeEnd" type="time" step="300" />
+        </div>
+        <p class="hint">
+          ※5分単位（step=300秒）で調整できます。
+        </p>
+      </div>
+
+      <div class="shift-time-modal-footer">
+        <button id="shiftTimeCancelBtn" type="button">キャンセル</button>
+        <button id="shiftTimeSaveBtn" type="button" class="primary">保存して反映</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+      
     </div> <!-- /.layout -->
   </div> <!-- /#ownerApp -->
 
