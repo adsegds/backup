@@ -2349,22 +2349,35 @@
               </table>
             </div>
 
-            <!-- 保存＆日別詳細 -->
-            <div class="shift-week-footer">
-              <button id="shiftWeekSaveBtn" type="button" class="primary">
-                この週のシフトを保存（ブラウザ）
-              </button>
+            <!-- 保存＆日別 / 週別 / 月別 詳細 -->
+<div class="shift-week-footer">
+  <button id="shiftWeekSaveBtn" type="button" class="primary">
+    この週のシフトを保存（ブラウザ）
+  </button>
 
-              <div class="day-detail">
-                <label for="shiftDaySelect">日別の詳細を開く：</label>
-                <select id="shiftDaySelect">
-                  <!-- JSで週の7日分を埋める -->
-                </select>
-                <button id="shiftOpenDayDetailBtn" type="button">
-                  詳細（shiftboard）を開く
-                </button>
-              </div>
-            </div>
+  <div class="day-detail">
+
+    <!-- ビュー切り替え（日別 / 1週間 / 1ヶ月） -->
+    <div class="shiftboard-view-toggle">
+      <button id="shiftViewDayBtn"   type="button" class="sub-btn is-active">日別</button>
+      <button id="shiftViewWeekBtn"  type="button" class="sub-btn">1週間</button>
+      <button id="shiftViewMonthBtn" type="button" class="sub-btn">1ヶ月</button>
+    </div>
+
+    <!-- 基準の日付＋詳細ボタン -->
+    <div class="shiftboard-day-picker">
+      <label for="shiftDaySelect">基準の日付：</label>
+      <select id="shiftDaySelect">
+        <!-- JSで週の7日分を埋める -->
+      </select>
+      <button id="shiftOpenDayDetailBtn" type="button">
+        詳細（shiftboard）を開く
+      </button>
+    </div>
+
+  </div>
+</div>
+
 
             <!-- 日別 shiftboard 表示エリア -->
             <div id="shiftDayBoardArea" class="shift-day-board-area" style="display:none;">
