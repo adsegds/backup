@@ -5323,7 +5323,7 @@ activateView("news");
     }
   }
 
-  // ---------- 週別 shiftboard ----------
+   // ---------- 週別 shiftboard ----------
   function openWeekBoard() {
     if (!weekData) return;
 
@@ -5331,6 +5331,7 @@ activateView("news");
     const endStr   = currentWeekDates[currentWeekDates.length - 1];
     dayBoardTitle.textContent = `週別シフト（${startStr} 〜 ${endStr}）`;
 
+    // 1時間刻みスロット（00-01, 01-02, ... 23-24）
     const slots = [];
     for (let h = 0; h < 24; h++) {
       const startMin = h * 60;
@@ -5341,6 +5342,7 @@ activateView("news");
 
     dayBoardTable.innerHTML = "";
 
+    // ヘッダー
     const thead = document.createElement("thead");
     const headTr = document.createElement("tr");
     const thName = document.createElement("th");
@@ -5360,15 +5362,15 @@ activateView("news");
     let totalMinutes = 0;
     let totalWage = 0;
 
-    // 行 = スタッフ × 7日
-    weekData.staff.forEach((staff, sIdx) => {
-      currentWeekDates.forEach((dateStr, dayIdx) => {
-        const tr = document.createElement("tr");
+    // ✅ 日ごとに「スタッフ1〜n」を並べて、その下に区切り行を入れる
+    currentWeekDates.forEach((dateStr, dayIdx) => {
+      const dObj = toDate(dateStr);
+      const mm = String(dObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(dObj.getDate()).padStart(2, "0");
+      const youbi = getDayLabel(dayIdx); // 月〜日
 
-        const dObj = toDate(dateStr);
-        const mm = String(dObj.getMonth() + 1).padStart(2, "0");
-        const dd = String(dObj.getDate()).padStart(2, "0");
-        const youbi = getDayLabel(dayIdx);
+      weekData.staff.forEach((staff, sIdx) => {
+        const tr = document.createElement("tr");
 
         const nameTd = document.createElement("td");
         nameTd.className = "board-staff-name";
@@ -5402,11 +5404,21 @@ activateView("news");
 
         tbodyBoard.appendChild(tr);
       });
+
+      // 🧱 日ごとの区切り行（スペーサー）
+      const sepTr = document.createElement("tr");
+      sepTr.className = "week-separator-row";
+      const sepTd = document.createElement("td");
+      sepTd.colSpan = slots.length + 1;
+      sepTd.textContent = "";
+      sepTr.appendChild(sepTd);
+      tbodyBoard.appendChild(sepTr);
     });
 
     dayBoardTable.appendChild(tbodyBoard);
     dayBoardArea.style.display = "block";
 
+    // 週合計のサマリー
     if (dayBoardSummary) {
       if (totalMinutes === 0) {
         dayBoardSummary.textContent = "この週のシフトはまだ未入力です。";
@@ -5419,6 +5431,9 @@ activateView("news");
       }
     }
   }
+
+
+    
 
   function timeStrToMin(str) {
     if (!str) return null;
@@ -5630,5 +5645,3 @@ activateView("news");
 
 </body>
 </html>
-
-
