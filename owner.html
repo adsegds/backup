@@ -2183,6 +2183,102 @@
           </section>
         </section>
 
+
+
+
+
+
+ <!-- ⑦ シフト作成（手動＋shiftboard） -->
+        <section id="view-shiftcreate" class="view-panel" style="display:none;">
+          <section class="card">
+            <h2>⑦ シフト作成（手動）</h2>
+            <p class="card-sub">
+              1週間分の「スタッフ × 曜日」のシフト時間と時給を入力します。<br>
+              その後、日別の詳細画面（shiftboard）で5分単位の微調整＆人件費確認ができます。
+            </p>
+
+            <!-- 週・テンプレ選択 -->
+            <div class="shift-week-controls">
+              <div class="row">
+                <label for="shiftWeekStart">対象週（週の開始日）</label>
+                <input id="shiftWeekStart" type="date" />
+                <button id="shiftWeekTodayBtn" type="button">今週に戻す</button>
+              </div>
+
+              <div class="row">
+                <label for="shiftTemplateSelect">テンプレート</label>
+                <select id="shiftTemplateSelect">
+                  <option value="default">デフォルト（1時間刻み 24h）</option>
+                  <!-- 将来：⑧で作ったテンプレと連動させる -->
+                </select>
+              </div>
+
+              <div class="row">
+                <button id="shiftAddStaffBtn" type="button">＋ スタッフ行を追加</button>
+                <button id="shiftCopyLastWeekBtn" type="button">先週のシフトをコピー</button>
+              </div>
+            </div>
+
+            <!-- 週 × スタッフのシフト入力テーブル -->
+            <div class="shift-week-table-wrap">
+              <table class="shift-week-table">
+                <thead>
+                  <tr id="shiftWeekHeaderRow">
+                    <th>スタッフ名</th>
+                    <th>時給（円）</th>
+                    <!-- JSで 曜日＋日付 を埋める -->
+                  </tr>
+                </thead>
+                <tbody id="shiftWeekTbody">
+                  <!-- JSで行を生成 -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 保存＆日別詳細 -->
+            <div class="shift-week-footer">
+              <button id="shiftWeekSaveBtn" type="button" class="primary">
+                この週のシフトを保存（ブラウザ）
+              </button>
+
+              <div class="day-detail">
+                <label for="shiftDaySelect">日別の詳細を開く：</label>
+                <select id="shiftDaySelect">
+                  <!-- JSで週の7日分を埋める -->
+                </select>
+                <button id="shiftOpenDayDetailBtn" type="button">
+                  詳細（shiftboard）を開く
+                </button>
+              </div>
+            </div>
+
+            <!-- 日別 shiftboard 表示エリア -->
+            <div id="shiftDayBoardArea" class="shift-day-board-area" style="display:none;">
+              <h3 id="shiftDayBoardTitle">日別シフト（shiftboard）</h3>
+              <p class="card-sub">
+                セルでざっくり確認して、スタッフ名をクリックすると<br>
+                その日のシフト時間を5分単位で微調整できます。
+              </p>
+
+              <div class="shiftboard-wrapper">
+                <table id="shiftDayBoardTable">
+                  <!-- JSで生成 -->
+                </table>
+              </div>
+
+              <!-- この日の合計勤務時間＆人件費 -->
+              <p id="shiftDayBoardSummary" class="shift-day-summary"></p>
+            </div>
+          </section>
+        </section>
+
+
+
+
+
+
+
+        
         <!-- ⑦ シフト作成（AI） -->
         <section id="view-shiftai" class="view-panel">
           <div class="shiftai-layout">
