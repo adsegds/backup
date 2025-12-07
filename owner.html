@@ -2553,6 +2553,203 @@
         );
     }
 
+
+
+
+
+
+    // =============================
+    // 共通：HTMLエスケープ
+    // =============================
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // =============================
+    // ③ 全員掲示板（削除）
+    // =============================
+    const boardManageList  = document.getElementById("boardManageList");
+    const boardManageEmpty = document.getElementById("boardManageEmpty");
+
+    if (boardManageList && boardManageEmpty) {
+      storeRef
+        .collection(BOARD_COLLECTION)
+        .orderBy("createdAt", "desc")
+        .limit(100)
+        .onSnapshot(
+          (snap) => {
+            boardManageList.innerHTML = "";
+
+            if (snap.empty) {
+              boardManageEmpty.style.display = "block";
+              return;
+            }
+            boardManageEmpty.style.display = "none";
+
+            snap.forEach((doc) => {
+              const data = doc.data() || {};
+              const div  = document.createElement("div");
+              div.className = "report-item";
+
+              const text =
+                data.text ||
+                data.message ||
+                data.body ||
+                "";
+
+              const staffName =
+                data.staffName ||
+                data.author ||
+                data.deviceLabel ||
+                "（名前なし）";
+
+              const createdText = data.createdAt
+                ? formatReportDate(data.createdAt)
+                : "";
+
+              div.innerHTML = `
+                <div class="report-main">
+                  <div class="report-text">${escapeHtml(text).replace(/\n/g, "<br>")}</div>
+                  <div class="report-meta">
+                    <span>${escapeHtml(staffName)}</span>
+                    <span>${createdText}</span>
+                  </div>
+                </div>
+                <div class="report-actions">
+                  <button
+                    type="button"
+                    class="btn-report-small btn-report-delete js-board-delete">
+                    削除
+                  </button>
+                </div>
+              `;
+
+              const delBtn = div.querySelector(".js-board-delete");
+              delBtn.addEventListener("click", async () => {
+                const ok = window.confirm("この掲示板メッセージを削除しますか？");
+                if (!ok) return;
+
+                try {
+                  await storeRef.collection(BOARD_COLLECTION).doc(doc.id).delete();
+                } catch (e) {
+                  console.error("board 削除エラー", e);
+                  alert("削除に失敗しました。");
+                }
+              });
+
+              boardManageList.appendChild(div);
+            });
+          },
+          (err) => {
+            console.error("board 読み込みエラー", err);
+            boardManageEmpty.textContent = "掲示板の読み込みに失敗しました。";
+            boardManageEmpty.style.display = "block";
+          }
+        );
+    }
+
+    // =============================
+    // ④ 写真つきタスク報告（削除）
+    // =============================
+    const photoManageList  = document.getElementById("photoManageList");
+    const photoManageEmpty = document.getElementById("photoManageEmpty");
+
+    if (photoManageList && photoManageEmpty) {
+      storeRef
+        .collection(PHOTO_COLLECTION)
+        .orderBy("createdAt", "desc")
+        .limit(100)
+        .onSnapshot(
+          (snap) => {
+            photoManageList.innerHTML = "";
+
+            if (snap.empty) {
+              photoManageEmpty.style.display = "block";
+              return;
+            }
+            photoManageEmpty.style.display = "none";
+
+            snap.forEach((doc) => {
+              const data = doc.data() || {};
+              const div  = document.createElement("div");
+              div.className = "report-item photo-report-item";
+
+              const imageUrl =
+                data.photourl ||
+                data.photoUrl ||
+                data.photoURL ||
+                data.url ||
+                "";
+
+              const taskLabel = data.taskLabel || "(タスク名なし)";
+              const slotLabel = data.slotId || "";
+              const staffName = data.deviceLabel || "（端末名 未設定）";
+              const bizDate   = data.businessKey || "";
+              const createdText = data.createdAt
+                ? formatReportDate(data.createdAt)
+                : "";
+
+              div.innerHTML = `
+                <div class="report-main photo-report-main">
+                  <div class="photo-thumb">
+                    ${imageUrl ? `<img src="${imageUrl}" alt="">` : ""}
+                  </div>
+                  <div class="photo-info">
+                    <div class="photo-title">${escapeHtml(taskLabel)}</div>
+                    <div class="photo-meta">
+                      <span>${escapeHtml(slotLabel)}</span>
+                      <span>${escapeHtml(bizDate)}</span>
+                      <span>${escapeHtml(staffName)}</span>
+                      <span>${createdText}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="report-actions">
+                  <button
+                    type="button"
+                    class="btn-report-small btn-report-delete js-photo-delete">
+                    削除
+                  </button>
+                </div>
+              `;
+
+              const delBtn = div.querySelector(".js-photo-delete");
+              delBtn.addEventListener("click", async () => {
+                const ok = window.confirm("この写真つき報告を削除しますか？");
+                if (!ok) return;
+
+                try {
+                  await storeRef.collection(PHOTO_COLLECTION).doc(doc.id).delete();
+                  // ※ 画像ファイル（Storage）は今回はそのまま残す
+                } catch (e) {
+                  console.error("taskPhotos 削除エラー", e);
+                  alert("削除に失敗しました。");
+                }
+              });
+
+              photoManageList.appendChild(div);
+            });
+          },
+          (err) => {
+            console.error("taskPhotos 読み込みエラー", err);
+            photoManageEmpty.textContent = "写真つき報告の読み込みに失敗しました。";
+            photoManageEmpty.style.display = "block";
+          }
+        );
+    }
+
+
+
+
+
+   
+
     // =============================
     // シフトAIビュー用のUI制御（週 / 月切り替え）
     // =============================
