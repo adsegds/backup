@@ -4654,7 +4654,486 @@ activateView("news");
     runAnalyticsRef = runAnalytics;
     analyticsDateInputRef = analyticsDateInput;
   });
+
+// ====================================
+// ⑦ シフト作成（手動）＋日別shiftboard
+// ====================================
+(function setupShiftCreate() {
+  const weekStartInput = document.getElementById("shiftWeekStart");
+  const weekTodayBtn = document.getElementById("shiftWeekTodayBtn");
+  const templateSelect = document.getElementById("shiftTemplateSelect");
+  const addStaffBtn = document.getElementById("shiftAddStaffBtn");
+  const copyLastWeekBtn = document.getElementById("shiftCopyLastWeekBtn");
+  const headerRow = document.getElementById("shiftWeekHeaderRow");
+  const tbody = document.getElementById("shiftWeekTbody");
+  const saveBtn = document.getElementById("shiftWeekSaveBtn");
+  const daySelect = document.getElementById("shiftDaySelect");
+  const openDayDetailBtn = document.getElementById("shiftOpenDayDetailBtn");
+  const dayBoardArea = document.getElementById("shiftDayBoardArea");
+  const dayBoardTitle = document.getElementById("shiftDayBoardTitle");
+  const dayBoardTable = document.getElementById("shiftDayBoardTable");
+  const dayBoardSummary = document.getElementById("shiftDayBoardSummary");
+
+  // モーダル要素
+  const timeModal = document.getElementById("shiftTimeModal");
+  const timeModalTitle = document.getElementById("shiftTimeModalTitle");
+  const timeModalSub = document.getElementById("shiftTimeModalSub");
+  const timeStartInput = document.getElementById("shiftTimeStart");
+  const timeEndInput = document.getElementById("shiftTimeEnd");
+  const timeModalCancelBtn = document.getElementById("shiftTimeCancelBtn");
+  const timeModalSaveBtn = document.getElementById("shiftTimeSaveBtn");
+
+  if (!weekStartInput || !headerRow || !tbody) {
+    return;
+  }
+
+  const STORAGE_KEY = "shiftask_weekly_shift_v1";
+  const LAST_WEEK_KEY = "shiftask_weekly_shift_last_v1";
+
+  // weekData = {
+  //   weekStart: "YYYY-MM-DD",
+  //   staff: [
+  //     {
+  //       id: "s_1",
+  //       name: "田中",
+  //       hourly: 1100,
+  //       days: { "YYYY-MM-DD": { start:"09:00", end:"18:00" }, ... }
+  //     }
+  //   ]
+  // }
+
+  let weekData = null;
+  let currentWeekDates = [];
+  let lastOpenedDateStr = null;
+
+  // ---------- 日付ヘルパ ----------
+  function toDate(str) {
+    const [y, m, d] = str.split("-").map(n => parseInt(n, 10));
+    return new Date(y, m - 1, d);
+  }
+
+  function formatDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function getWeekStart(date) {
+    const day = date.getDay(); // 0=日
+    const offset = (day === 0 ? -6 : 1 - day); // 月曜開始
+    const base = new Date(date);
+    base.setDate(base.getDate() + offset);
+    return new Date(base.getFullYear(), base.getMonth(), base.getDate());
+  }
+
+  function getDayLabel(idx) {
+    const labels = ["月", "火", "水", "木", "金", "土", "日"];
+    return labels[idx] || "";
+  }
+
+  // ---------- ストレージ ----------
+  function saveWeekData(key, data) {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      console.warn("saveWeekData error", e);
+    }
+  }
+
+  function loadWeekData(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn("loadWeekData error", e);
+      return null;
+    }
+  }
+
+  // ---------- 週データ初期化 ----------
+  function initWeek(date) {
+    const weekStartDate = getWeekStart(date);
+    const weekStartStr = formatDate(weekStartDate);
+
+    if (!weekData || weekData.weekStart !== weekStartStr) {
+      weekData = {
+        weekStart: weekStartStr,
+        staff: [
+          {
+            id: "s_1",
+            name: "スタッフ1",
+            hourly: 1100,
+            days: {}
+          }
+        ]
+      };
+    }
+
+    currentWeekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStartDate);
+      d.setDate(d.getDate() + i);
+      currentWeekDates.push(formatDate(d));
+    }
+
+    weekStartInput.value = weekStartStr;
+    renderWeekHeader();
+    renderWeekBody();
+    renderDaySelect();
+
+    dayBoardArea.style.display = "none";
+    lastOpenedDateStr = null;
+  }
+
+  function renderWeekHeader() {
+    while (headerRow.children.length > 2) {
+      headerRow.removeChild(headerRow.lastChild);
+    }
+
+    currentWeekDates.forEach((dateStr, idx) => {
+      const th = document.createElement("th");
+      const d = toDate(dateStr);
+      const label = getDayLabel(idx);
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      th.textContent = `${label} ${mm}/${dd}`;
+      th.dataset.date = dateStr;
+      headerRow.appendChild(th);
+    });
+  }
+
+  function renderWeekBody() {
+    tbody.innerHTML = "";
+
+    weekData.staff.forEach((staff, rowIndex) => {
+      const tr = document.createElement("tr");
+
+      // スタッフ名
+      const nameTd = document.createElement("td");
+      nameTd.className = "staff-name-cell";
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.value = staff.name || "";
+      nameInput.placeholder = "スタッフ名";
+      nameInput.addEventListener("input", () => {
+        weekData.staff[rowIndex].name = nameInput.value.trim();
+      });
+      nameTd.appendChild(nameInput);
+      tr.appendChild(nameTd);
+
+      // 時給
+      const hourlyTd = document.createElement("td");
+      hourlyTd.className = "staff-hourly-cell";
+      const hourlyInput = document.createElement("input");
+      hourlyInput.type = "number";
+      hourlyInput.min = "0";
+      hourlyInput.step = "10";
+      hourlyInput.placeholder = "例：1100";
+      hourlyInput.value =
+        typeof staff.hourly === "number" ? staff.hourly : "";
+      hourlyInput.addEventListener("change", () => {
+        const v = parseInt(hourlyInput.value, 10);
+        weekData.staff[rowIndex].hourly = Number.isNaN(v) ? null : v;
+        if (lastOpenedDateStr) {
+          openDayBoard(lastOpenedDateStr);
+        }
+      });
+      hourlyTd.appendChild(hourlyInput);
+      tr.appendChild(hourlyTd);
+
+      // 各日
+      currentWeekDates.forEach(dateStr => {
+        const td = document.createElement("td");
+        td.className = "shift-cell";
+        const wrapper = document.createElement("div");
+        wrapper.className = "time-pair";
+
+        const info = staff.days[dateStr] || {};
+        const startInput = document.createElement("input");
+        startInput.type = "time";
+        startInput.value = info.start || "";
+        const endInput = document.createElement("input");
+        endInput.type = "time";
+        endInput.value = info.end || "";
+
+        startInput.addEventListener("change", () => {
+          setDayTime(rowIndex, dateStr, startInput.value, endInput.value);
+        });
+        endInput.addEventListener("change", () => {
+          setDayTime(rowIndex, dateStr, startInput.value, endInput.value);
+        });
+
+        wrapper.appendChild(startInput);
+        wrapper.appendChild(endInput);
+        td.appendChild(wrapper);
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function setDayTime(staffIndex, dateStr, start, end) {
+    if (!start && !end) {
+      delete weekData.staff[staffIndex].days[dateStr];
+    } else {
+      weekData.staff[staffIndex].days[dateStr] = { start, end };
+    }
+    if (lastOpenedDateStr === dateStr) {
+      openDayBoard(dateStr);
+    }
+  }
+
+  // ---------- 日別セレクト ----------
+  function renderDaySelect() {
+    daySelect.innerHTML = "";
+    currentWeekDates.forEach((dateStr, idx) => {
+      const d = toDate(dateStr);
+      const label = getDayLabel(idx);
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      const opt = document.createElement("option");
+      opt.value = dateStr;
+      opt.textContent = `${label} ${mm}/${dd}（${dateStr}）`;
+      daySelect.appendChild(opt);
+    });
+  }
+
+  // ---------- 日別shiftboard ----------
+  function openDayBoard(dateStr) {
+    lastOpenedDateStr = dateStr;
+
+    const d = toDate(dateStr);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    dayBoardTitle.textContent = `日別シフト（${dateStr} / ${mm}/${dd}）`;
+
+    const slots = [];
+    for (let h = 0; h < 24; h++) {
+      const startMin = h * 60;
+      const endMin = (h + 1) * 60;
+      const label = `${String(h).padStart(2, "0")}-${String(h + 1).padStart(2, "0")}`;
+      slots.push({ startMin, endMin, label });
+    }
+
+    dayBoardTable.innerHTML = "";
+
+    const thead = document.createElement("thead");
+    const headTr = document.createElement("tr");
+    const thName = document.createElement("th");
+    thName.textContent = "スタッフ";
+    headTr.appendChild(thName);
+
+    slots.forEach(slot => {
+      const th = document.createElement("th");
+      th.textContent = slot.label;
+      headTr.appendChild(th);
+    });
+
+    thead.appendChild(headTr);
+    dayBoardTable.appendChild(thead);
+
+    const tbodyBoard = document.createElement("tbody");
+
+    let totalMinutes = 0;
+    let totalWage = 0;
+
+    weekData.staff.forEach((staff, sIdx) => {
+      const tr = document.createElement("tr");
+
+      const nameTd = document.createElement("td");
+      nameTd.className = "board-staff-name";
+      nameTd.textContent = staff.name || `スタッフ${sIdx + 1}`;
+      nameTd.dataset.staffIndex = String(sIdx);
+      nameTd.dataset.date = dateStr;
+      nameTd.addEventListener("click", () => {
+        openTimeModal(sIdx, dateStr);
+      });
+      tr.appendChild(nameTd);
+
+      const info = staff.days[dateStr] || {};
+      const startMin = timeStrToMin(info.start);
+      const endMin = timeStrToMin(info.end);
+
+      let minutes = 0;
+      if (startMin != null && endMin != null && endMin > startMin) {
+        minutes = endMin - startMin;
+        totalMinutes += minutes;
+        if (typeof staff.hourly === "number") {
+          totalWage += (minutes / 60) * staff.hourly;
+        }
+      }
+
+      slots.forEach(slot => {
+        const td = document.createElement("td");
+        td.className = "board-slot";
+
+        if (startMin != null && endMin != null) {
+          if (rangeOverlap(startMin, endMin, slot.startMin, slot.endMin)) {
+            td.classList.add("active");
+          }
+        }
+        tr.appendChild(td);
+      });
+
+      tbodyBoard.appendChild(tr);
+    });
+
+    dayBoardTable.appendChild(tbodyBoard);
+    dayBoardArea.style.display = "block";
+
+    // 合計勤務時間＆人件費
+    if (dayBoardSummary) {
+      if (totalMinutes === 0) {
+        dayBoardSummary.textContent = "この日のシフトは未入力です。";
+      } else {
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+        const yen = Math.round(totalWage);
+        dayBoardSummary.textContent =
+          `この日の合計勤務時間：${h}時間${m}分 / 人件費合計：約${yen.toLocaleString()}円`;
+      }
+    }
+  }
+
+  function timeStrToMin(str) {
+    if (!str) return null;
+    const [h, m] = str.split(":").map(n => parseInt(n, 10));
+    if (Number.isNaN(h) || Number.isNaN(m)) return null;
+    return h * 60 + m;
+  }
+
+  function rangeOverlap(aStart, aEnd, bStart, bEnd) {
+    return aStart < bEnd && bStart < aEnd;
+  }
+
+  // ---------- 5分単位モーダル ----------
+  let modalState = { staffIndex: null, dateStr: null };
+
+  function openTimeModal(staffIndex, dateStr) {
+    modalState.staffIndex = staffIndex;
+    modalState.dateStr = dateStr;
+
+    const staff = weekData.staff[staffIndex];
+    const info = staff.days[dateStr] || {};
+    const start = info.start || "";
+    const end = info.end || "";
+
+    timeModalTitle.textContent = staff.name || `スタッフ${staffIndex + 1}`;
+    timeModalSub.textContent = `${dateStr} のシフト時間を編集`;
+
+    timeStartInput.value = start;
+    timeEndInput.value = end;
+
+    timeModal.classList.add("show");
+    timeModal.style.display = "block";
+  }
+
+  function closeTimeModal() {
+    timeModal.classList.remove("show");
+    timeModal.style.display = "none";
+    modalState.staffIndex = null;
+    modalState.dateStr = null;
+  }
+
+  timeModalCancelBtn?.addEventListener("click", closeTimeModal);
+  timeModal.addEventListener("click", (e) => {
+    if (e.target === timeModal || e.target === timeModal.querySelector(".shift-time-modal-backdrop")) {
+      closeTimeModal();
+    }
+  });
+
+  timeModalSaveBtn?.addEventListener("click", () => {
+    const sIdx = modalState.staffIndex;
+    const dateStr = modalState.dateStr;
+    if (sIdx == null || !dateStr) {
+      closeTimeModal();
+      return;
+    }
+
+    const start = timeStartInput.value;
+    const end = timeEndInput.value;
+
+    if (!start || !end) {
+      delete weekData.staff[sIdx].days[dateStr];
+    } else {
+      weekData.staff[sIdx].days[dateStr] = { start, end };
+    }
+
+    renderWeekBody();
+    openDayBoard(dateStr);
+    closeTimeModal();
+  });
+
+  // ---------- イベント ----------
+  weekTodayBtn?.addEventListener("click", () => {
+    initWeek(new Date());
+  });
+
+  weekStartInput.addEventListener("change", () => {
+    const val = weekStartInput.value;
+    if (!val) return;
+    const d = toDate(val);
+    initWeek(d);
+  });
+
+  addStaffBtn?.addEventListener("click", () => {
+    const id = "s_" + (weekData.staff.length + 1);
+    weekData.staff.push({
+      id,
+      name: `スタッフ${weekData.staff.length + 1}`,
+      hourly: 1100,
+      days: {}
+    });
+    renderWeekBody();
+  });
+
+  copyLastWeekBtn?.addEventListener("click", () => {
+    const last = loadWeekData(LAST_WEEK_KEY);
+    if (!last) {
+      alert("先週のデータが見つかりません。");
+      return;
+    }
+    weekData.staff = last.staff || [];
+    renderWeekHeader();
+    renderWeekBody();
+  });
+
+  saveBtn?.addEventListener("click", () => {
+    if (!weekData) return;
+    saveWeekData(STORAGE_KEY, weekData);
+    saveWeekData(LAST_WEEK_KEY, weekData);
+    alert("この週のシフトをブラウザに保存しました。（仮実装）");
+  });
+
+  openDayDetailBtn?.addEventListener("click", () => {
+    const dateStr = daySelect.value;
+    if (!dateStr) return;
+    openDayBoard(dateStr);
+  });
+
+  // ---------- 初期ロード ----------
+  (function init() {
+    const stored = loadWeekData(STORAGE_KEY);
+    if (stored && stored.weekStart) {
+      weekData = stored;
+      const d = toDate(stored.weekStart);
+      initWeek(d);
+    } else {
+      initWeek(new Date());
+    }
+  })();
+})();
+
+
+    
   </script>
+
+
+
+  
 
 
 </body>
