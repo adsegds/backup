@@ -162,14 +162,17 @@
 }
 
 
-  .shiftboard-table {
-    /* ★ 24時間ぶん + 日付列 + M/H + 人数列 = 最低 1158px */
-    width: 100%;
+   .shiftboard-table {
+    /* ★ 24時間ぶん + 日付列 + M/H + 人数列 = 1158pxで固定 */
+    width: 1158px;
     min-width: 1158px;
+    max-width: 1158px;
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 11px;
+    margin: 0 auto;   /* 真ん中寄せ（いらなければ消してOK） */
   }
+
 
   .shiftboard-table thead {
     background: linear-gradient(to bottom, #fafafa, #f3f4f6);
