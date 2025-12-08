@@ -152,41 +152,39 @@
   /* ========== シフト表 本体 ========== */
 
   .shiftboard-shell {
-    border-top: 1px solid #e2e2e2;
-    border-bottom: 1px solid #e2e2e2;
-    border-left: none;    /* ← 左の枠を消す */
-    border-right: none;   /* ← 右の枠を消す */
+    border: none;            /* ← 外枠の線ぜんぶ消す */
     border-radius: 8px;
     background: #fff;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
   }
 
-    .shiftboard-table {
-    width: auto;             /* ★ ここを 100% → auto に変更 */
+  .shiftboard-table {
+    width: auto;             /* 内容に合わせて伸びる */
     min-width: 1158px;       /* 24時間ぶん + 日付 + M/H + 人数列 */
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 11px;
   }
 
-
   .shiftboard-table thead {
     background: linear-gradient(to bottom, #fafafa, #f3f4f6);
   }
 
-  /* ★ ボーダーの付け方を変更：上・下・右だけに線を出す */
+  /* ★ セルのボーダーだけでグリッドを作る（背景グリッドなし） */
   .shiftboard-table th,
   .shiftboard-table td {
-    border-top: 1px solid #e5e7eb;
-    border-bottom: 1px solid #e5e7eb;
-    border-right: 1px solid #e5e7eb;
-    border-left: none;         /* ← すべてのセルの左ボーダーを消す */
+    border: 1px solid #e5e7eb;
     padding: 4px 3px;
     text-align: center;
     background: transparent;
   }
 
-  /* 一番右の列は右ボーダーも消す → 外枠がなくなる */
+  /* 左右いちばん外の線を消して「右の謎の枠」を消す */
+  .shiftboard-table th:first-child,
+  .shiftboard-table td:first-child {
+    border-left: none;
+  }
+
   .shiftboard-table th:last-child,
   .shiftboard-table td:last-child {
     border-right: none;
@@ -230,27 +228,16 @@
   }
 
   .shiftboard-empty {
-    background: transparent;   /* 空欄もグリッドだけ見せる */
+    background: transparent;
   }
 
   .shiftboard-bar-cell {
     padding: 0;
     background: transparent;
-    height: 34px;              /* 行少し高め */
+    height: 34px;
   }
 
-  /* ★ 縦グリッド（時間の列だけ全部に出す） */
-  .shiftboard-table tbody td.shiftboard-bar-cell,
-  .shiftboard-table tbody td.shiftboard-empty {
-    background-image: repeating-linear-gradient(
-      to right,
-      #f3f4f6 0,
-      #f3f4f6 1px,
-      transparent 1px,
-      transparent 40px   /* 1時間 = 40px ピッチ */
-    );
-    background-size: 40px 100%;
-  }
+  /* ★ 縦グリッド背景は完全になし（何も書かない） */
 
   /* ========== 棒（シフトバー） ========== */
 
@@ -332,6 +319,7 @@
     }
   }
 </style>
+
 
 
 
