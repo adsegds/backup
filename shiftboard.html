@@ -225,17 +225,18 @@
     height: 34px;              /* 行少し高め */
   }
 
-  /* tbody全体に薄い縦グリッド（ローソン端末っぽい） */
-  .shiftboard-table tbody {
-    background-image: repeating-linear-gradient(
-      to right,
-      #f3f4f6 0px,
-      #f3f4f6 1px,
-      transparent 1px,
-      transparent 32px   /* 1時間の幅イメージ・調整OK */
-    );
-    background-size: 32px 100%;
-  }
+  /* 時間の列だけに薄い縦グリッドを出す */
+.shiftboard-table tbody td.shiftboard-bar-cell {
+  background-image: repeating-linear-gradient(
+    to right,
+    #f3f4f6 0px,
+    #f3f4f6 1px,
+    transparent 1px,
+    transparent 32px   /* 1時間分の幅。必要なら32を微調整してOK */
+  );
+  background-size: 32px 100%;
+}
+
 
   /* ========== 棒（シフトバー） ========== */
 
