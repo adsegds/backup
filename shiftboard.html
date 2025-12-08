@@ -336,6 +336,22 @@
 
 
 
+/* ===== 時間の「目印の柱」：6時・12時・18時・0時 ===== */
+/* ヘッダー行（時間ラベル） */
+.shiftboard-table thead th:nth-child(2),   /* 6時 */
+.shiftboard-table thead th:nth-child(8),   /* 12時 */
+.shiftboard-table thead th:nth-child(14),  /* 18時 */
+.shiftboard-table thead th:nth-child(20) { /* 0時 */
+  background-color: #f3f4f6;
+}
+
+/* 本文側のマス（バーが乗るところ） */
+.shiftboard-table tbody td:nth-child(2),
+.shiftboard-table tbody td:nth-child(8),
+.shiftboard-table tbody td:nth-child(14),
+.shiftboard-table tbody td:nth-child(20) {
+  background-color: #f9fafb;
+}
 
 
 
