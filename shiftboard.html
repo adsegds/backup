@@ -16,7 +16,7 @@
     }
 
     .app {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 16px 12px 40px;
     }
@@ -70,57 +70,86 @@
 
     .card {
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
-      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #2e7d32;
+      padding: 8px;
       overflow-x: auto;
     }
 
-    table {
+    /* ============================
+       週別シフト（紙の予定表っぽく）
+       ============================ */
+
+    .shift-week-table {
       width: 100%;
+      min-width: 950px;
       border-collapse: collapse;
-      min-width: 720px;
-    }
-
-    thead th {
-      background: #fafafa;
-      border-bottom: 1px solid #eee;
-      padding: 6px 8px;
-      font-size: 12px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    tbody td {
-      border-bottom: 1px solid #f2f2f2;
-      padding: 6px 8px;
-      font-size: 12px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    tbody tr:nth-child(even) td {
-      background: #fcfcfc;
-    }
-
-    tbody td.staff {
-      text-align: left;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .shift-cell {
-      border-radius: 999px;
-      padding: 2px 6px;
-      display: inline-block;
-      min-width: 80px;
-      background: #f0f4ff;
-      border: 1px solid #d5e0ff;
-    }
-
-    .shift-empty {
-      color: #bbb;
+      table-layout: fixed;
       font-size: 11px;
+      background: #fff;
+    }
+
+    .shift-week-table th,
+    .shift-week-table td {
+      border: 1px solid #b9d8b9;
+      padding: 2px 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .shift-week-table thead th {
+      background: #f5fff5;
+      color: #215c2f;
+      font-weight: 600;
+      text-align: center;
+      border-bottom: 2px solid #2e7d32;
+    }
+
+    /* 日付列 */
+    .shift-week-table td.col-date {
+      width: 80px;
+      text-align: center;
+      background: #f5fff5;
+      font-weight: 600;
+    }
+
+    /* 曜日列 */
+    .shift-week-table td.col-weekday {
+      width: 40px;
+      text-align: center;
+      background: #f5fff5;
+      font-weight: 600;
+    }
+
+    /* 土日カラー */
+    .is-sat {
+      color: #1565c0;
+    }
+    .is-sun {
+      color: #c62828;
+    }
+
+    /* 各時間帯マス */
+    .slot-cell {
+      vertical-align: top;
+      padding: 2px 3px;
+      font-size: 10px;
+      line-height: 1.3;
+    }
+
+    .slot-cell.has-shift {
+      background: #e8f5e9;
+    }
+
+    .slot-cell-empty {
+      color: #bbb;
+      text-align: center;
+    }
+
+    .slot-names {
+      display: block;
+      white-space: normal;
     }
 
     .notice {
@@ -164,14 +193,15 @@
     </div>
 
     <div class="card" id="tableCard" style="display:none;">
-      <table>
+      <!-- ★ 1行＝1日 / 列＝時間帯 -->
+      <table class="shift-week-table">
         <thead>
           <tr id="theadRow">
-            <!-- スタッフ / 月 / 火 ... をJSで -->
+            <!-- 日付 / 曜日 / 時間帯 をJSで -->
           </tr>
         </thead>
         <tbody id="tbody">
-          <!-- 各スタッフの行をJSで -->
+          <!-- 7日分の行をJSで -->
         </tbody>
       </table>
       <div class="notice">
@@ -188,18 +218,17 @@
 
   <script>
     // =============================
-// Firebase 設定
-// =============================
-const firebaseConfig = {
-  apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
-  authDomain: "lawson-workflow.firebaseapp.com",
-  projectId: "lawson-workflow",
-  storageBucket: "lawson-workflow.firebasestorage.app",
-  messagingSenderId: "335371795694",
-  appId: "1:335371795694:web:3b0950a616d368b284c7ff",
-  measurementId: "G-BGENZNZMRC"
-};
-
+    // Firebase 設定
+    // =============================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
+      authDomain: "lawson-workflow.firebaseapp.com",
+      projectId: "lawson-workflow",
+      storageBucket: "lawson-workflow.firebasestorage.app",
+      messagingSenderId: "335371795694",
+      appId: "1:335371795694:web:3b0950a616d368b284c7ff",
+      measurementId: "G-BGENZNZMRC"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -212,15 +241,6 @@ const firebaseConfig = {
       return params.get(name) || "";
     }
 
-    function formatDateLabel(iso) {
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return iso;
-      const m = d.getMonth() + 1;
-      const day = d.getDate();
-      const w = ["日","月","火","水","木","金","土"][d.getDay()];
-      return `${m}/${day} (${w})`;
-    }
-
     function addDays(iso, add) {
       const d = new Date(iso);
       d.setDate(d.getDate() + add);
@@ -229,6 +249,43 @@ const firebaseConfig = {
       const day = String(d.getDate()).padStart(2, "0");
       return `${y}-${m}-${day}`;
     }
+
+    function formatDateLabelShort(iso) {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const m = d.getMonth() + 1;
+      const day = d.getDate();
+      return `${m}/${day}`;
+    }
+
+    function getWeekdayLabel(d) {
+      const w = d.getDay();
+      const labels = ["日","月","火","水","木","金","土"];
+      return labels[w] || "";
+    }
+
+    function timeStrToMin(str) {
+      if (!str) return null;
+      const [h, m] = str.split(":").map(n => parseInt(n, 10));
+      if (Number.isNaN(h) || Number.isNaN(m)) return null;
+      return h * 60 + m;
+    }
+
+    function rangeOverlap(aStart, aEnd, bStart, bEnd) {
+      return aStart < bEnd && bStart < aEnd;
+    }
+
+    // 3時間ごとの時間帯（紙のやつっぽく）
+    const TIME_SLOTS = [
+      { label: "0-3",  startMin:   0, endMin: 180 },
+      { label: "3-6",  startMin: 180, endMin: 360 },
+      { label: "6-9",  startMin: 360, endMin: 540 },
+      { label: "9-12", startMin: 540, endMin: 720 },
+      { label: "12-15",startMin: 720, endMin: 900 },
+      { label: "15-18",startMin: 900, endMin:1080 },
+      { label: "18-21",startMin:1080, endMin:1260 },
+      { label: "21-24",startMin:1260, endMin:1440 }
+    ];
 
     // =============================
     // メイン処理
@@ -253,7 +310,7 @@ const firebaseConfig = {
 
       storeLabel.textContent = `店舗ID: ${storeId}`;
 
-      // 初期値：今日を含む週の月曜日を weekStart にする
+      // 初期値：今日を含む週の月曜日
       const today = new Date();
       const dow = today.getDay(); // 0=日
       const diffToMon = (dow + 6) % 7; // 月=0
@@ -309,49 +366,89 @@ const firebaseConfig = {
           throw new Error("この週のシフトデータにスタッフが登録されていません。");
         }
 
-        // ヘッダー行を作成
+        // ---- ヘッダー：日付 / 曜日 / 時間帯 ----
         theadRow.innerHTML = "";
-        const thStaff = document.createElement("th");
-        thStaff.textContent = "スタッフ";
-        theadRow.appendChild(thStaff);
 
-        const dayKeys = [];
+        const thDate = document.createElement("th");
+        thDate.textContent = "日付";
+        theadRow.appendChild(thDate);
+
+        const thWeekday = document.createElement("th");
+        thWeekday.textContent = "曜";
+        theadRow.appendChild(thWeekday);
+
+        TIME_SLOTS.forEach(slot => {
+          const th = document.createElement("th");
+          th.textContent = slot.label;
+          theadRow.appendChild(th);
+        });
+
+        // 週ラベル
+        const firstIso = addDays(weekStart, 0);
+        const lastIso  = addDays(weekStart, 6);
+        weekLabel.textContent =
+          `${formatDateLabelShort(firstIso)}〜${formatDateLabelShort(lastIso)}`;
+
+        // ---- 本体：7日分の行 ----
+        tbody.innerHTML = "";
+
         for (let i = 0; i < 7; i++) {
           const dayIso = addDays(weekStart, i);
-          dayKeys.push(dayIso);
-          const th = document.createElement("th");
-          th.textContent = formatDateLabel(dayIso);
-          theadRow.appendChild(th);
-        }
+          const dObj = new Date(dayIso);
+          const weekday = getWeekdayLabel(dObj);
+          const w = dObj.getDay();
 
-        weekLabel.textContent = `${formatDateLabel(dayKeys[0])} 〜 ${formatDateLabel(dayKeys[6])}`;
-
-        // 本体
-        tbody.innerHTML = "";
-        members.forEach((m) => {
           const tr = document.createElement("tr");
 
-          const tdName = document.createElement("td");
-          tdName.className = "staff";
-          tdName.textContent = m.name || "(名前未設定)";
-          tr.appendChild(tdName);
+          // 日付
+          const tdDate = document.createElement("td");
+          tdDate.className = "col-date";
+          tdDate.textContent = formatDateLabelShort(dayIso);
+          if (w === 6) tdDate.classList.add("is-sat");
+          if (w === 0) tdDate.classList.add("is-sun");
+          tr.appendChild(tdDate);
 
-          dayKeys.forEach((dayIso) => {
+          // 曜日
+          const tdWeek = document.createElement("td");
+          tdWeek.className = "col-weekday";
+          tdWeek.textContent = weekday;
+          if (w === 6) tdWeek.classList.add("is-sat");
+          if (w === 0) tdWeek.classList.add("is-sun");
+          tr.appendChild(tdWeek);
+
+          // 各時間帯マス
+          TIME_SLOTS.forEach(slot => {
             const td = document.createElement("td");
+            td.className = "slot-cell";
 
-            const dayInfo =
-              (m.days && m.days[dayIso]) ||
-              (m.days && m.days[dayIso.replace(/-/g, "/")]) ||
-              null;
+            const names = [];
 
-            if (dayInfo && dayInfo.start && dayInfo.end) {
+            members.forEach(m => {
+              const dayInfo =
+                (m.days && m.days[dayIso]) ||
+                (m.days && m.days[dayIso.replace(/-/g, "/")]) ||
+                null;
+
+              if (!dayInfo || !dayInfo.start || !dayInfo.end) return;
+
+              const startMin = timeStrToMin(dayInfo.start);
+              const endMin   = timeStrToMin(dayInfo.end);
+              if (startMin == null || endMin == null || endMin <= startMin) return;
+
+              if (rangeOverlap(startMin, endMin, slot.startMin, slot.endMin)) {
+                names.push(m.name || "スタッフ");
+              }
+            });
+
+            if (names.length) {
+              td.classList.add("has-shift");
               const span = document.createElement("span");
-              span.className = "shift-cell";
-              span.textContent = `${dayInfo.start}〜${dayInfo.end}`;
+              span.className = "slot-names";
+              span.innerHTML = names.join("<br>");
               td.appendChild(span);
             } else {
               const span = document.createElement("span");
-              span.className = "shift-empty";
+              span.className = "slot-cell-empty";
               span.textContent = "ーー";
               td.appendChild(span);
             }
@@ -360,7 +457,7 @@ const firebaseConfig = {
           });
 
           tbody.appendChild(tr);
-        });
+        }
 
         tableCard.style.display = "block";
       }
@@ -371,3 +468,4 @@ const firebaseConfig = {
   </script>
 </body>
 </html>
+
