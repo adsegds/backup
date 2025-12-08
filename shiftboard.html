@@ -225,17 +225,19 @@
     height: 34px;              /* 行少し高め */
   }
 
-  /* 時間の列だけに薄い縦グリッドを出す */
-.shiftboard-table tbody td.shiftboard-bar-cell {
+  /* ★ 背景のマス目（時間の列だけ全部に出す） */
+.shiftboard-table tbody td.shiftboard-bar-cell,
+.shiftboard-table tbody td.shiftboard-empty {
   background-image: repeating-linear-gradient(
     to right,
     #f3f4f6 0px,
     #f3f4f6 1px,
     transparent 1px,
-    transparent 32px   /* 1時間分の幅。必要なら32を微調整してOK */
+    transparent 32px   /* 1時間の幅。必要ならここだけ微調整でOK */
   );
   background-size: 32px 100%;
 }
+
 
 
   /* ========== 棒（シフトバー） ========== */
