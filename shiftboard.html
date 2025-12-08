@@ -152,15 +152,18 @@
   /* ========== シフト表 本体 ========== */
 
   .shiftboard-shell {
-    border: none;            /* ← 外枠の線ぜんぶ消す */
+    border-top: 1px solid #e2e2e2;
+    border-bottom: 1px solid #e2e2e2;
+    border-left: none;      /* 左枠なし */
+    border-right: none;     /* 右枠なし */
     border-radius: 8px;
     background: #fff;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
   }
 
   .shiftboard-table {
-    width: auto;             /* 内容に合わせて伸びる */
-    min-width: 1158px;       /* 24時間ぶん + 日付 + M/H + 人数列 */
+    width: 100%;            /* ★ カードの横幅いっぱいに広げる */
+    min-width: 1158px;      /* 狭い画面ではスクロール */
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 11px;
@@ -170,21 +173,19 @@
     background: linear-gradient(to bottom, #fafafa, #f3f4f6);
   }
 
-  /* ★ セルのボーダーだけでグリッドを作る（背景グリッドなし） */
+  /* セルのボーダーだけでグリッドを作る（背景グリッドは無し） */
   .shiftboard-table th,
   .shiftboard-table td {
-    border: 1px solid #e5e7eb;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    border-left: none;
     padding: 4px 3px;
     text-align: center;
     background: transparent;
   }
 
-  /* 左右いちばん外の線を消して「右の謎の枠」を消す */
-  .shiftboard-table th:first-child,
-  .shiftboard-table td:first-child {
-    border-left: none;
-  }
-
+  /* 一番右の列は右ボーダーも消す → 外側の線が消える */
   .shiftboard-table th:last-child,
   .shiftboard-table td:last-child {
     border-right: none;
@@ -215,14 +216,15 @@
   }
 
   .shiftboard-col-hour {
-    width: 40px;              /* 1時間 = 40px で固定 */
+    width: 40px;              /* 1時間 = 40px */
     font-weight: 500;
     color: #4b5563;
   }
 
+  /* 右側2列を少し広めにして、全体の余白を吸収させる */
   .shiftboard-col-mh,
   .shiftboard-col-people {
-    width: 60px;
+    width: 80px;              /* ★ ちょい広げる */
     background: #fafafa;
     font-weight: 600;
   }
@@ -237,7 +239,8 @@
     height: 34px;
   }
 
-  /* ★ 縦グリッド背景は完全になし（何も書かない） */
+  /* ★ ここで縦グリッド背景は一切なし（削除） */
+  /* （何も書かないことで縦線ゼロ） */
 
   /* ========== 棒（シフトバー） ========== */
 
@@ -248,7 +251,7 @@
     background: linear-gradient(90deg, #eef2ff, #e0f2fe);
     border: 1px solid rgba(129, 140, 248, 0.45);
     display: flex;
-    flex-direction: column;      /* 名前↑ 時間↓ の縦並び */
+    flex-direction: column;      /* 名前↑ 時間↓ */
     align-items: center;
     justify-content: center;
     gap: 2px;
@@ -319,6 +322,7 @@
     }
   }
 </style>
+
 
 
 
