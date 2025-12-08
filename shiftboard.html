@@ -161,13 +161,14 @@
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
   }
 
-  .shiftboard-table {
-    width: 100%;
-    min-width: 1158px;    /* 24h + 日付 + M/H + 人数 */
+    .shiftboard-table {
+    width: auto;             /* ★ ここを 100% → auto に変更 */
+    min-width: 1158px;       /* 24時間ぶん + 日付 + M/H + 人数列 */
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 11px;
   }
+
 
   .shiftboard-table thead {
     background: linear-gradient(to bottom, #fafafa, #f3f4f6);
