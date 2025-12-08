@@ -151,39 +151,44 @@
 
   /* ========== シフト表 本体 ========== */
 
- .shiftboard-shell {
-  border-top: 1px solid #e2e2e2;
-  border-bottom: 1px solid #e2e2e2;
-  border-left: none;   /* ← 追加 */
-  border-right: none;  /* ← 追加 */
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-}
+  .shiftboard-shell {
+    border-top: 1px solid #e2e2e2;
+    border-bottom: 1px solid #e2e2e2;
+    border-left: none;    /* ← 左の枠を消す */
+    border-right: none;   /* ← 右の枠を消す */
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  }
 
-
-   .shiftboard-table {
-    /* ★ 24時間ぶん + 日付列 + M/H + 人数列 = 1158pxで固定 */
-    width: 1158px;
-    min-width: 1158px;
-    max-width: 1158px;
+  .shiftboard-table {
+    width: 100%;
+    min-width: 1158px;    /* 24h + 日付 + M/H + 人数 */
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 11px;
-    margin: 0 auto;   /* 真ん中寄せ（いらなければ消してOK） */
   }
-
 
   .shiftboard-table thead {
     background: linear-gradient(to bottom, #fafafa, #f3f4f6);
   }
 
+  /* ★ ボーダーの付け方を変更：上・下・右だけに線を出す */
   .shiftboard-table th,
   .shiftboard-table td {
-    border: 1px solid #e5e7eb;   /* 全マスに線を出す（グリッド） */
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    border-left: none;         /* ← すべてのセルの左ボーダーを消す */
     padding: 4px 3px;
     text-align: center;
     background: transparent;
+  }
+
+  /* 一番右の列は右ボーダーも消す → 外枠がなくなる */
+  .shiftboard-table th:last-child,
+  .shiftboard-table td:last-child {
+    border-right: none;
   }
 
   .shiftboard-col-date {
@@ -211,7 +216,7 @@
   }
 
   .shiftboard-col-hour {
-    width: 40px;              /* ★ 1時間 = 40px で固定 */
+    width: 40px;              /* 1時間 = 40px で固定 */
     font-weight: 500;
     color: #4b5563;
   }
@@ -241,7 +246,7 @@
       #f3f4f6 0,
       #f3f4f6 1px,
       transparent 1px,
-      transparent 40px   /* ← 1時間 = 40px ピッチ */
+      transparent 40px   /* 1時間 = 40px ピッチ */
     );
     background-size: 40px 100%;
   }
@@ -298,7 +303,7 @@
     }
 
     .app {
-      max-width: none;   /* 用紙いっぱい使う */
+      max-width: none;
       margin: 0;
       padding: 0;
     }
@@ -322,32 +327,12 @@
     .shiftboard-bar {
       height: 22px;
       padding: 0 6px;
-      font-size: 10px;  /* 少しだけ縮めて詰める */
+      font-size: 10px;
     }
   }
-
-
-
-  /* ===== テーブルの「端っこの縦線」を消す ===== */
-
-  /* 一番左のセルは左側の枠線を消す */
-  .shiftboard-table th:first-child,
-  .shiftboard-table td:first-child {
-    border-left: none;
-  }
-
-  /* 一番右のセルは右側の枠線を消す */
-  .shiftboard-table th:last-child,
-  .shiftboard-table td:last-child {
-    border-right: none;
-  }
-
-
-
-
-
-  
 </style>
+
+
 
 
 
