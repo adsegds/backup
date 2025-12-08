@@ -325,6 +325,28 @@
       font-size: 10px;  /* 少しだけ縮めて詰める */
     }
   }
+
+
+
+  /* ===== テーブルの「端っこの縦線」を消す ===== */
+
+  /* 一番左のセルは左側の枠線を消す */
+  .shiftboard-table th:first-child,
+  .shiftboard-table td:first-child {
+    border-left: none;
+  }
+
+  /* 一番右のセルは右側の枠線を消す */
+  .shiftboard-table th:last-child,
+  .shiftboard-table td:last-child {
+    border-right: none;
+  }
+
+
+
+
+
+  
 </style>
 
 
