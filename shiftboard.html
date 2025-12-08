@@ -5,373 +5,319 @@
   <title>シフト表（スタッフ用）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f5f5;
+    color: #111;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  .app {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 16px 12px 40px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .meta {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .controls input[type="date"] {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 13px;
+  }
+
+  .controls button {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: none;
+    background: #111;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .controls button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+    padding: 10px 10px 12px;
+    overflow-x: auto;  /* 画面が狭いPCだけ横スクロール */
+  }
+
+  .card h2 {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .card-sub {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: #666;
+  }
+
+  .error {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #b00020;
+  }
+
+  /* ========== シフト表ツールバー ========== */
+
+  .shiftboard-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0 10px;
+    font-size: 12px;
+  }
+
+  .shiftboard-week-control {
+    display: flex;
+    gap: 4px;
+  }
+
+  .shiftboard-week-control button {
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid #ddd;
+    background: #f9fafb;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .shiftboard-week-control button:hover {
+    background: #fff;
+  }
+
+  .shiftboard-meta {
+    font-size: 12px;
+    color: #555;
+  }
+
+  .shiftboard-actions {
+    margin-left: auto;
+  }
+
+  .shiftboard-actions button {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid #ddd;
+    background: #f9fafb;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .shiftboard-actions button:hover {
+    background: #fff;
+  }
+
+  /* ========== シフト表 本体 ========== */
+
+  .shiftboard-shell {
+    border: 1px solid #e2e2e2;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  }
+
+  .shiftboard-table {
+    width: 100%;              /* PCでは1画面に収める想定 */
+    min-width: 960px;         /* あまり潰れないように */
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 11px;
+  }
+
+  .shiftboard-table thead {
+    background: linear-gradient(to bottom, #fafafa, #f3f4f6);
+  }
+
+  .shiftboard-table th,
+  .shiftboard-table td {
+    border: 1px solid #e5e7eb;   /* 全マスに線を出す（グリッド） */
+    padding: 4px 3px;
+    text-align: center;
+    background: transparent;
+  }
+
+  .shiftboard-col-date {
+    width: 78px;
+    background: #fafafa;
+    font-weight: 600;
+    vertical-align: top;
+  }
+
+  .shiftboard-date-main {
+    font-size: 12px;
+  }
+
+  .shiftboard-date-week {
+    font-size: 11px;
+    color: #555;
+  }
+
+  .shiftboard-date-week.sat {
+    color: #2563eb;
+  }
+
+  .shiftboard-date-week.sun {
+    color: #ef4444;
+  }
+
+  .shiftboard-col-hour {
+    width: 30px;
+    font-weight: 500;
+    color: #4b5563;
+  }
+
+  .shiftboard-col-mh,
+  .shiftboard-col-people {
+    width: 60px;
+    background: #fafafa;
+    font-weight: 600;
+  }
+
+  .shiftboard-empty {
+    background: transparent;   /* 空欄もグリッドだけ見せる */
+  }
+
+  .shiftboard-bar-cell {
+    padding: 0;
+    background: transparent;
+    height: 34px;              /* 行少し高め */
+  }
+
+  /* tbody全体に薄い縦グリッド（ローソン端末っぽい） */
+  .shiftboard-table tbody {
+    background-image: repeating-linear-gradient(
+      to right,
+      #f3f4f6 0px,
+      #f3f4f6 1px,
+      transparent 1px,
+      transparent 32px   /* 1時間の幅イメージ・調整OK */
+    );
+    background-size: 32px 100%;
+  }
+
+  /* ========== 棒（シフトバー） ========== */
+
+  .shiftboard-bar {
+    height: 26px;
+    margin: 1px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #eef2ff, #e0f2fe);
+    border: 1px solid rgba(129, 140, 248, 0.45);
+    display: flex;
+    flex-direction: column;      /* 名前↑ 時間↓ の縦並び */
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    font-size: 11px;
+  }
+
+  .shiftboard-bar-name {
+    display: block;
+    font-weight: 600;
+    line-height: 1.1;
+    color: #111827;
+  }
+
+  .shiftboard-bar-time {
+    display: block;
+    font-size: 10px;
+    line-height: 1.1;
+    color: #4b5563;
+  }
+
+  @media (max-width: 640px) {
+    header h1 {
+      font-size: 16px;
+    }
+    .app {
+      padding-inline: 8px;
+    }
+  }
+
+  /* ========== 印刷用レイアウト ========== */
+  @media print {
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
-      color: #111;
-      line-height: 1.6;
-      font-size: 14px;
+      background: #fff;
+      font-size: 11px;
     }
 
     .app {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 16px 12px 40px;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    header h1 {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .meta {
-      font-size: 12px;
-      color: #666;
-    }
-
-    .controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    .controls input[type="date"] {
-      padding: 4px 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background: #fff;
-      font-size: 13px;
-    }
-
-    .controls button {
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: none;
-      background: #111;
-      color: #fff;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .controls button:disabled {
-      opacity: 0.4;
-      cursor: default;
+      max-width: none;   /* 用紙いっぱい使う */
+      margin: 0;
+      padding: 0;
     }
 
     .card {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
-      padding: 10px 10px 12px;
-      overflow-x: auto;
-    }
-
-    .card h2 {
-      font-size: 15px;
-      margin-bottom: 4px;
-    }
-
-    .card-sub {
-      font-size: 12px;
-      color: #555;
-      margin-bottom: 8px;
-    }
-
-    .hint {
-      font-size: 11px;
-      color: #666;
-    }
-
-    .error {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #b00020;
-    }
-
-    /* ========== シフト表デザイン ========== */
-
-    .shiftboard-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 8px 0 10px;
-      font-size: 12px;
-    }
-
-    .shiftboard-week-control {
-      display: flex;
-      gap: 4px;
-    }
-
-    .shiftboard-week-control button {
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid #ddd;
-      background: #f9fafb;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    .shiftboard-week-control button:hover {
-      background: #fff;
-    }
-
-    .shiftboard-meta {
-      font-size: 12px;
-      color: #555;
-    }
-
-    .shiftboard-actions {
-      margin-left: auto;
-    }
-
-    .shiftboard-actions button {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #ddd;
-      background: #f9fafb;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    .shiftboard-actions button:hover {
-      background: #fff;
+      box-shadow: none;
+      border-radius: 0;
+      overflow: visible;
     }
 
     .shiftboard-shell {
-      border: 1px solid #e2e2e2;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+      box-shadow: none;
+      border-radius: 0;
     }
 
     .shiftboard-table {
       width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-      font-size: 11px;
-      min-width: 960px;
-    }
-
-    .shiftboard-table thead {
-      background: linear-gradient(to bottom, #fafafa, #f3f4f6);
-    }
-
-    .shiftboard-table th,
-    .shiftboard-table td {
-      border: 1px solid #e5e5e5;
-      padding: 2px 3px;
-      text-align: center;
-    }
-
-    .shiftboard-col-date {
-      width: 78px;
-      background: #fafafa;
-      font-weight: 600;
-      vertical-align: top;
-    }
-
-    .shiftboard-date-main {
-      font-size: 12px;
-    }
-
-    .shiftboard-date-week {
-      font-size: 11px;
-      color: #555;
-    }
-
-    .shiftboard-date-week.sat {
-      color: #2563eb;
-    }
-
-    .shiftboard-date-week.sun {
-      color: #ef4444;
-    }
-
-    .shiftboard-col-hour {
-      width: 30px;
-      font-weight: 500;
-      color: #4b5563;
-    }
-
-    .shiftboard-col-mh,
-    .shiftboard-col-people {
-      width: 60px;
-      background: #fafafa;
-      font-weight: 600;
-    }
-
-    .shiftboard-empty {
-      background: #fff;
-    }
-
-    .shiftboard-bar-cell {
-      padding: 0;
-      background: #f9fafb;
+      min-width: 0;
     }
 
     .shiftboard-bar {
-      height: 24px;
-      margin: 1px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #eef2ff, #e0f2fe);
-      border: 1px solid rgba(129, 140, 248, 0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 0 8px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+      height: 22px;
+      padding: 0 6px;
+      font-size: 10px;  /* 少しだけ縮めて詰める */
     }
-
-    .shiftboard-bar-name {
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .shiftboard-bar-time {
-      font-size: 10px;
-      color: #4b5563;
-    }
-
-    @media (max-width: 640px) {
-      header h1 {
-        font-size: 16px;
-      }
-      .app {
-        padding-inline: 8px;
-      }
-    }
-
-
-
-
-
-
-
-/* ========== シフト表 読みやすさ調整 ========== */
-
-/* 1週間ボードを横に広げる（2hでも文字が読めるように） */
-.shiftboard-shell {
-  overflow-x: visible;        /* 画面より広くなったら横スクロール */
-}
-
-.shiftboard-table {
-  width: 100%;             /* カードの幅に合わせる */
-  max-width: 1300px;       /* ★保険で上限だけ決めとく（お好みで） */
-}
-
-/* 行の高さを上げる */
-.shiftboard-table th,
-.shiftboard-table td {
-  padding: 4px 3px;        /* ちょっと上下に余裕を持たせる */
-}
-
-.shiftboard-bar-cell {
-  height: 34px;            /* もともとより 10px くらい高くするイメージ */
-}
-
-/* 棒そのものを太く＆中身を見やすく */
-.shiftboard-bar {
-  height: 26px;            /* 棒の高さ */
-  padding: 0 10px;         /* 左右の余白 */
-  font-size: 11px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-}
-
-/* 名前と時間を2段にしても読みやすく */
-.shiftboard-bar-name {
-  display: block;
-  line-height: 1.1;
-}
-
-.shiftboard-bar-time {
-  display: block;
-  font-size: 10px;
-  line-height: 1.1;
-}
-
-/* ★ 背景のマス目（ローソン端末っぽい薄いグリッド） */
-.shiftboard-table tbody td.shiftboard-bar-cell {
-  background-image:
-    linear-gradient(to right, #e5e7eb 1px, transparent 1px);
-  background-size: 32px 100%;  /* 1時間の幅に合わせて微調整してOK */
-}
-
-
-
-
-
-
-    
-
-
-
-
-
-/* ========== 印刷用レイアウト ========== */
-@media print {
-  body {
-    background: #fff;
-    font-size: 11px;
   }
+</style>
 
-  .app {
-    max-width: none;     /* 用紙いっぱい使う */
-    margin: 0;
-    padding: 0;
-  }
-
-  .card {
-    box-shadow: none;
-    border-radius: 0;
-  }
-
-  .shiftboard-shell {
-    overflow: visible !important;   /* 印刷時は絶対スクロール禁止 */
-  }
-
-  .shiftboard-table {
-    width: 100%;        /* 用紙幅にフィット */
-    max-width: none;
-  }
-
-  .shiftboard-bar {
-    height: 22px;
-    padding: 0 6px;
-    font-size: 10px;    /* 少しだけ縮めて情報を詰める */
-  }
-}
-
-
-
-
-
-
-
-
-    
-
-
-
-
-    
-  </style>
 </head>
 <body>
   <div class="app">
