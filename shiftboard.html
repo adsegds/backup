@@ -318,6 +318,56 @@
 
 
 
+    
+
+
+
+
+
+/* ========== 印刷用レイアウト ========== */
+@media print {
+  body {
+    background: #fff;
+    font-size: 11px;
+  }
+
+  .app {
+    max-width: none;     /* 用紙いっぱい使う */
+    margin: 0;
+    padding: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .shiftboard-shell {
+    overflow: visible !important;   /* 印刷時は絶対スクロール禁止 */
+  }
+
+  .shiftboard-table {
+    width: 100%;        /* 用紙幅にフィット */
+    max-width: none;
+  }
+
+  .shiftboard-bar {
+    height: 22px;
+    padding: 0 6px;
+    font-size: 10px;    /* 少しだけ縮めて情報を詰める */
+  }
+}
+
+
+
+
+
+
+
+
+    
+
+
 
 
     
