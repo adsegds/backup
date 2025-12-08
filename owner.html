@@ -5121,7 +5121,7 @@ activateView("news");
       const nameInput = document.createElement("input");
       nameInput.type = "text";
       nameInput.value = staff.name || "";
-      nameInput.placeholder = "例：高橋さん";
+      nameInput.placeholder = "例：〇〇さん";
       nameInput.addEventListener("input", () => {
         weekData.staff[rowIndex].name = nameInput.value.trim();
         // 日別ボードが開いてたら名前も更新
