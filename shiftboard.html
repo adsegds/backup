@@ -70,54 +70,70 @@
 
     .card {
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
-      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #2e7d32; /* 端末っぽく緑の枠 */
+      padding: 8px;
       overflow-x: auto;
     }
 
-    table {
+    /* ============================
+       シフト表（ローソン端末風）
+       ============================ */
+
+    .shift-week-table {
       width: 100%;
+      min-width: 900px;
       border-collapse: collapse;
-      min-width: 720px;
+      table-layout: fixed;
+      background: #ffffff;
+      font-size: 11px;
     }
 
-    thead th {
-      background: #fafafa;
-      border-bottom: 1px solid #eee;
-      padding: 6px 8px;
-      font-size: 12px;
-      text-align: center;
+    .shift-week-table th,
+    .shift-week-table td {
+      border: 1px solid #b9d8b9;  /* 薄い緑の罫線 */
+      padding: 2px 4px;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    tbody td {
-      border-bottom: 1px solid #f2f2f2;
-      padding: 6px 8px;
-      font-size: 12px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    tbody tr:nth-child(even) td {
-      background: #fcfcfc;
-    }
-
-    tbody td.staff {
-      text-align: left;
+    .shift-week-table thead th {
+      background: #f5fff5;
+      color: #215c2f;
       font-weight: 600;
-      white-space: nowrap;
+      text-align: center;
+      border-bottom: 2px solid #2e7d32;
     }
 
+    /* 左端：スタッフ名列 */
+    .shift-week-table td.staff {
+      background: #f5fff5;
+      font-weight: 600;
+      text-align: left;
+      width: 110px;
+    }
+
+    /* 土日カラー */
+    .shift-week-table .is-sat {
+      color: #1565c0;   /* 青 */
+    }
+    .shift-week-table .is-sun {
+      color: #c62828;   /* 赤 */
+    }
+
+    /* シフトありセル */
     .shift-cell {
-      border-radius: 999px;
-      padding: 2px 6px;
-      display: inline-block;
-      min-width: 80px;
-      background: #f0f4ff;
-      border: 1px solid #d5e0ff;
+      display: block;
+      padding: 0 2px;
+      border-radius: 2px;
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      font-weight: 600;
+      text-align: center;
     }
 
+    /* シフトなしセル */
     .shift-empty {
       color: #bbb;
       font-size: 11px;
@@ -164,7 +180,8 @@
     </div>
 
     <div class="card" id="tableCard" style="display:none;">
-      <table>
+      <!-- ★ class を追加 -->
+      <table class="shift-week-table">
         <thead>
           <tr id="theadRow">
             <!-- スタッフ / 月 / 火 ... をJSで -->
@@ -188,18 +205,17 @@
 
   <script>
     // =============================
-// Firebase 設定
-// =============================
-const firebaseConfig = {
-  apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
-  authDomain: "lawson-workflow.firebaseapp.com",
-  projectId: "lawson-workflow",
-  storageBucket: "lawson-workflow.firebasestorage.app",
-  messagingSenderId: "335371795694",
-  appId: "1:335371795694:web:3b0950a616d368b284c7ff",
-  measurementId: "G-BGENZNZMRC"
-};
-
+    // Firebase 設定
+    // =============================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
+      authDomain: "lawson-workflow.firebaseapp.com",
+      projectId: "lawson-workflow",
+      storageBucket: "lawson-workflow.firebasestorage.app",
+      messagingSenderId: "335371795694",
+      appId: "1:335371795694:web:3b0950a616d368b284c7ff",
+      measurementId: "G-BGENZNZMRC"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -321,6 +337,11 @@ const firebaseConfig = {
           dayKeys.push(dayIso);
           const th = document.createElement("th");
           th.textContent = formatDateLabel(dayIso);
+
+          const w = new Date(dayIso).getDay();
+          if (w === 6) th.classList.add("is-sat");
+          if (w === 0) th.classList.add("is-sun");
+
           theadRow.appendChild(th);
         }
 
@@ -338,6 +359,10 @@ const firebaseConfig = {
 
           dayKeys.forEach((dayIso) => {
             const td = document.createElement("td");
+
+            const w = new Date(dayIso).getDay();
+            if (w === 6) td.classList.add("is-sat");
+            if (w === 0) td.classList.add("is-sun");
 
             const dayInfo =
               (m.days && m.days[dayIso]) ||
