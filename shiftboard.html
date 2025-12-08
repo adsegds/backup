@@ -257,6 +257,70 @@
         padding-inline: 8px;
       }
     }
+
+
+
+
+
+
+
+/* ========== シフト表 読みやすさ調整 ========== */
+
+/* 1週間ボードを横に広げる（2hでも文字が読めるように） */
+.shiftboard-shell {
+  overflow-x: auto;        /* 画面より広くなったら横スクロール */
+}
+
+.shiftboard-table {
+  width: 1600px;           /* ★ここがポイント：全体の横幅 */
+  /* 1400〜1800くらいで好みの数字に変えてOK */
+}
+
+/* 行の高さを上げる */
+.shiftboard-table th,
+.shiftboard-table td {
+  padding: 4px 3px;        /* ちょっと上下に余裕を持たせる */
+}
+
+.shiftboard-bar-cell {
+  height: 34px;            /* もともとより 10px くらい高くするイメージ */
+}
+
+/* 棒そのものを太く＆中身を見やすく */
+.shiftboard-bar {
+  height: 26px;            /* 棒の高さ */
+  padding: 0 10px;         /* 左右の余白 */
+  font-size: 11px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+/* 名前と時間を2段にしても読みやすく */
+.shiftboard-bar-name {
+  display: block;
+  line-height: 1.1;
+}
+
+.shiftboard-bar-time {
+  display: block;
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+/* ★ 背景のマス目（ローソン端末っぽい薄いグリッド） */
+.shiftboard-table tbody td.shiftboard-bar-cell {
+  background-image:
+    linear-gradient(to right, #e5e7eb 1px, transparent 1px);
+  background-size: 32px 100%;  /* 1時間の幅に合わせて微調整してOK */
+}
+
+
+
+
+
+
+
+
+    
   </style>
 </head>
 <body>
