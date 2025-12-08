@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>シフト表（スタッフ用）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
+<style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
@@ -156,37 +156,12 @@
     border-radius: 8px;
     background: #fff;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-    position: relative;   /* ★ グリッド用に追加 */
-    overflow: hidden;
-  }
-
-  /* ★ 時間エリア全体に縦グリッドを引く */
-  .shiftboard-shell::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-
-    /* 左：日付列(78px) をスキップ */
-    left: 78px;
-
-    /* 右：M/H(60) + 複員人数(60) = 120px を除外 */
-    right: 120px;
-
-    pointer-events: none;
-
-    background-image: repeating-linear-gradient(
-      to right,
-      #f3f4f6 0,
-      #f3f4f6 1px,
-      transparent 1px,
-      transparent calc(100% / 24)   /* ← 24等分して1時間幅にする */
-    );
   }
 
   .shiftboard-table {
-    width: 100%;              /* PCでは1画面に収める想定 */
-    min-width: 960px;         /* あまり潰れないように */
+    /* ★ 24時間ぶん + 日付列 + M/H + 人数列 = 最低 1158px */
+    width: 100%;
+    min-width: 1158px;
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 11px;
@@ -229,7 +204,7 @@
   }
 
   .shiftboard-col-hour {
-    width: 30px;
+    width: 40px;              /* ★ 1時間 = 40px で固定 */
     font-weight: 500;
     color: #4b5563;
   }
@@ -249,6 +224,19 @@
     padding: 0;
     background: transparent;
     height: 34px;              /* 行少し高め */
+  }
+
+  /* ★ 縦グリッド（時間の列だけ全部に出す） */
+  .shiftboard-table tbody td.shiftboard-bar-cell,
+  .shiftboard-table tbody td.shiftboard-empty {
+    background-image: repeating-linear-gradient(
+      to right,
+      #f3f4f6 0,
+      #f3f4f6 1px,
+      transparent 1px,
+      transparent 40px   /* ← 1時間 = 40px ピッチ */
+    );
+    background-size: 40px 100%;
   }
 
   /* ========== 棒（シフトバー） ========== */
@@ -331,6 +319,8 @@
     }
   }
 </style>
+
+
 
 
 </head>
