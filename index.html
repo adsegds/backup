@@ -1823,6 +1823,64 @@ if (loginStoreIdInput) {
           return;
         }
 
+
+
+
+        // =============================
+        // 端末ラベル（レジ横iPad とか）
+        // =============================
+        let currentDeviceLabel = "未設定";
+        const deviceLabelDisplay = document.getElementById("deviceLabelDisplay");
+        const deviceLabelInput   = document.getElementById("deviceLabelInput");
+        const deviceLabelSaveBtn = document.getElementById("deviceLabelSaveBtn");
+        const DEVICE_LABEL_KEY   = "nb_lawson_device_label";
+
+        function loadDeviceLabel() {
+          const saved = localStorage.getItem(DEVICE_LABEL_KEY);
+          if (saved && saved.trim() !== "") {
+            currentDeviceLabel = saved.trim();
+            if (deviceLabelDisplay) deviceLabelDisplay.textContent = currentDeviceLabel;
+            if (deviceLabelInput)   deviceLabelInput.value = currentDeviceLabel;
+          } else {
+            currentDeviceLabel = "未設定";
+            if (deviceLabelDisplay) deviceLabelDisplay.textContent = "未設定";
+          }
+        }
+
+        function saveDeviceLabel() {
+          if (!deviceLabelInput) return;
+          const value = deviceLabelInput.value.trim();
+          if (!value) {
+            alert("端末ラベルを入力してください（例：レジ横iPad）");
+            return;
+          }
+          currentDeviceLabel = value;
+          localStorage.setItem(DEVICE_LABEL_KEY, value);
+          if (deviceLabelDisplay) deviceLabelDisplay.textContent = value;
+        }
+
+        if (deviceLabelSaveBtn) {
+          deviceLabelSaveBtn.addEventListener("click", saveDeviceLabel);
+        }
+        if (deviceLabelInput) {
+          deviceLabelInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              saveDeviceLabel();
+            }
+          });
+        }
+
+        loadDeviceLabel();
+
+
+
+
+
+
+
+
+        
         
         // 店舗ID / パスワード表示（※ index.html には非表示だけど一応）
         const storeIdDisplay = document.getElementById("storeIdDisplay");
