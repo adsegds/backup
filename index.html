@@ -2520,7 +2520,6 @@ async function loadTaskDefinitions() {
 
   // 🆕 写真必須タスクは、写真アップロードが終わるまでロック
   if (target.dataset.photoLock === "1" && target.dataset.photoUploaded !== "1") {
-    // まだ写真がアップされてない
     e.preventDefault?.();
     target.checked = false;
     alert("このタスクは写真アップロードが必要です。\n先に写真をアップしてください。");
@@ -2529,19 +2528,41 @@ async function loadTaskDefinitions() {
 
   if (applyingRemote) return;
 
+  const li = target.closest(".task-item");
+  const slotId = li?.dataset.slotId || null;
+  const taskLabel =
+    li?.dataset.taskLabel ||
+    li?.querySelector(".task-text")?.textContent ||
+    null;
+  const taskId = target.dataset.taskId || null;
+
+  // ★ 先に保存・完了率更新
   saveTasksToFirestore();
   updateCompletionUI();
 
-  const taskId = target.dataset.taskId || null;
-  const taskLabel =
-    target.closest(".task-item")?.querySelector(".task-text")?.textContent || null;
-
+  // ★ まずチェックしたログ（共通）
   logChecklistAction({
     taskId,
     taskLabel,
     action: target.checked ? "check" : "uncheck"
   });
+
+  // ★ チェックが ON になったときだけ、スタッフ選択モーダル
+  if (target.checked && slotId) {
+    openStaffSelectModal(slotId, taskLabel || "").then((staffName) => {
+      if (!staffName) return; // キャンセル or シフトなし
+
+      // 追加ログ：誰がやったか
+      logChecklistAction({
+        taskId,
+        taskLabel,
+        action: "checkedByStaff",
+        extra: { staffName, slotId },
+      });
+    });
+  }
 });
+
 
 
 
