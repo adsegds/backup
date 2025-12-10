@@ -1853,8 +1853,8 @@ if (loginStoreIdInput) {
       // =============================
       // 本体初期化（STORE_ID / storeRef がセット済みで呼ぶ）
       // =============================
-      function startApp() {
-　　　　// ★ storeRef がなければ何もしない（安全ガード）
+       async function startApp() {
+        // ★ storeRef がなければ何もしない（安全ガード）
         if (!STORE_ID || !storeRef) {
           console.warn("STORE_ID / storeRef 未設定のため、startApp を中止します。");
           showLogin();
@@ -1914,7 +1914,8 @@ if (loginStoreIdInput) {
 
 
 
-
+// 🆕 今日のシフトを Firestore から読み込み
+        await loadTodayShiftStaff();
 
 
 
