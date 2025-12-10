@@ -1148,6 +1148,86 @@ body.app-ready .app {
 
 
 
+    /* ===== スタッフ選択モーダル ===== */
+.staff-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-size: 14px;
+}
+
+.staff-modal.hidden {
+  display: none;
+}
+
+.staff-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.staff-modal-body {
+  position: relative;
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 8px;
+  min-width: 260px;
+  max-width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.staff-modal-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.staff-modal-sub {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.staff-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.staff-modal-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  text-align: left;
+}
+
+.staff-modal-item:hover {
+  background: #f3f4f6;
+}
+
+.staff-modal-cancel {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
