@@ -1687,6 +1687,45 @@ function resolveStoreId() {
       return `${yy}-${mm}-${dd}`;
     }
 
+
+
+
+
+// =============================
+// シフト（今日の担当者一覧）
+// =============================
+let shiftStaffBySlot = {};  // 例：{ "t12-14": ["田中", "佐藤"], ... }
+
+async function loadTodayShiftStaff() {
+  if (!STORE_ID || !storeRef) {
+    console.warn("storeRef 未設定のためシフト読み込みスキップ");
+    shiftStaffBySlot = {};
+    return;
+  }
+
+  const businessKey = getCurrentBusinessKey(); // 例：2025-12-11
+
+  try {
+    const doc = await storeRef.collection("shifts").doc(businessKey).get();
+    if (doc.exists) {
+      const data = doc.data() || {};
+      shiftStaffBySlot = data.slots || {};
+    } else {
+      shiftStaffBySlot = {};
+    }
+    console.log("シフト読込完了 shiftStaffBySlot =", shiftStaffBySlot);
+  } catch (e) {
+    console.error("シフト情報読み込みエラー", e);
+    shiftStaffBySlot = {};
+  }
+}
+
+
+
+
+
+    
+
     // =============================
     // 7:00 自動リセット
     // =============================
