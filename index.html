@@ -1512,6 +1512,31 @@ body.app-ready .app {
     <div class="footer-note">
       迷ったら：Aタスク → 前陳 → 清掃 の順で動けばOK。
     </div>
+
+
+
+
+
+
+<!-- ===== スタッフ選択モーダル ===== -->
+<div id="staffSelectModal" class="staff-modal hidden">
+  <div class="staff-modal-backdrop"></div>
+  <div class="staff-modal-body">
+    <h3 class="staff-modal-title">誰がこのタスクをやりましたか？</h3>
+    <p class="staff-modal-sub" id="staffModalInfo"></p>
+    <div id="staffModalList" class="staff-modal-list">
+      <!-- 候補ボタンがJSで差し込まれる -->
+    </div>
+    <button type="button" id="staffModalCancel" class="staff-modal-cancel">
+      キャンセル
+    </button>
+  </div>
+</div>
+
+
+
+
+    
   </div>
 
     <!-- Firebase SDK -->
