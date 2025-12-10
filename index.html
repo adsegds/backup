@@ -2286,6 +2286,11 @@ function buildTasksFromDefinition(slotId, ul, tasks, groupLabel) {
   ul.innerHTML = "";
   tasks.forEach((text, index) => {
     const li = document.createElement("li");
+    li.className = "task-item";
+    li.dataset.slotId = slotId;        // ← 追加
+    li.dataset.taskType = groupLabel;  // ← 追加
+    li.dataset.taskLabel = text;       // ← 追加
+
     li.innerHTML = `
       <label class="task-item">
         <input type="checkbox">
@@ -2303,6 +2308,7 @@ function buildTasksFromDefinition(slotId, ul, tasks, groupLabel) {
     ul.appendChild(li);
   });
 }
+
 
 // ★ Aタスク専用：写真必須対応版
 function buildATasksWithPhoto(slotId, ulA, photoTasks, tasksA) {
