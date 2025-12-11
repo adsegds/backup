@@ -5709,7 +5709,10 @@ activateView("news");
 
     // 「この週のシフトを保存」ボタン
   saveBtn?.addEventListener("click", async () => {
-    if (!weekData) return;
+  if (!weekData) {
+    alert("この週のシフトが未入力です。");
+    return;
+  }
 
     // ローカル保存
     saveWeekData(STORAGE_KEY, weekData);
