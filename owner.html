@@ -1794,27 +1794,31 @@
       </div>
     </div>
 
-        <!-- ▼ 新規登録フォーム（signup.html へ飛ばすだけ） -->
-    <div id="registerForm" class="login-form" style="display:none;">
-      <p class="login-sub" style="margin-bottom: 16px;">
-        新規登録は専用ページから行います。<br>
-        下のボタンを押すと、新規登録ページ（signup.html）が開きます。
-      </p>
+ <!-- ▼ 新規登録フォーム（signup.html へ飛ばすだけ） -->
+<div id="registerForm" class="login-form" style="display:none;">
+  <p class="login-sub" style="margin-bottom: 16px;">
+    新規登録は専用ページから行います。<br>
+    下のボタンを押すと、新規登録ページ（signup.html）が開きます。
+  </p>
 
-      <div class="login-btn-row">
-        <button id="ownerRegisterBtn" class="login-btn" type="button">
-          🌟 新規登録ページを開く
-        </button>
-      </div>
-    </div>
+  <div class="login-btn-row">
+    <button
+      id="ownerRegisterBtn"
+      class="login-btn"
+      type="button"
+      onclick="window.open('signup.html', '_blank')"
+    >
+      🌟 新規登録ページを開く
+    </button>
+  </div>
+</div>
 
+<p id="ownerLoginError" class="login-error"></p>
 
-    <p id="ownerLoginError" class="login-error"></p>
-
-    <p class="login-note">
-      ※ログイン状態は同じ端末・同じブラウザで約15時間維持されます。<br>
-      ※時間が経つと自動的にログアウトされます。
-    </p>
+<p class="login-note">
+  ※ログイン状態は同じ端末・同じブラウザで約15時間維持されます。<br>
+  ※時間が経つと自動的にログアウトされます。
+</p>
   </div>
 
 
