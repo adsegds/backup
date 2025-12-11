@@ -296,23 +296,24 @@
             });
 
           // ★ メールアドレスが入力されているときだけ、お礼メールを送る
-          if (email) {
-            try {
-              await fetch(
-                "https://us-central1-lawson-workflow.cloudfunctions.net/sendSignupMail",
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ storeId, email })
-                }
-              );
-            } catch (mailErr) {
-              console.warn(
-                "メール送信に失敗しましたが、登録自体は完了しています:",
-                mailErr
-              );
-            }
-          }
+if (email) {
+  try {
+    await fetch(
+      "https://sendsignupmail-tzkim55q4a-uc.a.run.app",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storeId, email })
+      }
+    );
+  } catch (mailErr) {
+    console.warn(
+      "メール送信に失敗しましたが、登録自体は完了しています:",
+      mailErr
+    );
+  }
+}
+
 
           statusEl.textContent =
             "登録が完了しました！管理者ログイン画面に戻って、店舗IDと管理者パスワードでログインしてください。";
