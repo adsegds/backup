@@ -3168,42 +3168,7 @@ async function saveShiftForChecklist(slotsMap, targetDate) {
 
 
 
-  // =============================
-  // 「今日のシフトをチェックリストに流す（テスト）」ボタン
-  // =============================
-  const testShiftBtn = document.getElementById("testShiftLinkBtn");
-  if (testShiftBtn) {
-    testShiftBtn.addEventListener("click", async () => {
-      try {
-        // ログイン中の storeId を取得（localStorage の STORE_KEY を利用）
-        const storeId = localStorage.getItem(STORE_KEY);
-        if (!storeId) {
-          alert("店舗IDが取得できませんでした（いったんログアウト→再ログインしてみてください）");
-          return;
-        }
-
-        // 今日の営業日キー（YYYY-MM-DD）
-        const today = new Date();
-        const businessKey = getBusinessKeyForDate(today);
-
-        // ★ まずはダミーデータでテスト
-        //    → この形は「この前 Firestore で手打ちしたデータ」と同じ構造
-        const slotsMap = {
-          "t6-8": ["田中", "佐藤"],
-          "t12-14": ["田中"],
-        };
-
-        await saveShiftForChecklist(storeId, businessKey, slotsMap);
-
-        alert(
-          `stores/${storeId}/shifts/${businessKey} にテストデータを書き込みました！\n\nFirestore で確認してみてね。`
-        );
-      } catch (err) {
-        console.error("testShiftLinkBtn error:", err);
-        alert("シフト連携テストでエラーが起きました。コンソールを確認してください。");
-      }
-    });
-  }
+  /
 
 
 
