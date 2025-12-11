@@ -2456,67 +2456,83 @@ if (openShiftBtn) {
 
 
 // =============================
-// 今の時間帯ジャンプバナー
+// 今の時間＋今の時間帯ジャンプ
 // =============================
 function initJumpBanner() {
-  const statusEl = document.getElementById("jumpStatusText");
-  const btn = document.getElementById("jumpToCurrentBtn");
-  if (!statusEl || !btn) return; // 要素が無ければ何もしない
+  const timeDisplayEl = document.getElementById("time-display");
+  const jumpBtn = document.getElementById("jumpNowSlotBtn");
 
-  try {
+  if (!timeDisplayEl || !jumpBtn) return;
+
+  const RESET_HOUR_FOR_BANNER = 7; // ← 名前変えた
+
+  const weekNames = ["日", "月", "火", "水", "木", "金", "土"];
+  const z2 = (n) => String(n).padStart(2, "0");
+
+  function updateTimeArea() {
     const now = new Date();
-    const h = now.getHours();
-    const m = String(now.getMinutes()).padStart(2, "0");
 
-    // いまの時間帯ID（例: "t12-14" など）
-    const slotId = getCurrentSlotIdByHour(h);
+    // 現在時刻
+    const y = now.getFullYear();
+    const m = z2(now.getMonth() + 1);
+    const d = z2(now.getDate());
+    const w = weekNames[now.getDay()];
+    const hh = z2(now.getHours());
+    const mm = z2(now.getMinutes());
+    const ss = z2(now.getSeconds());
 
-    // ラベル（「6:00〜8:00」みたいなやつ）を timeSlotConfigs から取る
-    let slotLabel = "";
-    if (Array.isArray(timeSlotConfigs)) {
-      const hit = timeSlotConfigs.find(
-        (s) => String(s.id) === String(slotId)
-      );
-      if (hit) slotLabel = hit.label || "";
+    // 今日の営業日（7:00切替）
+    const biz = new Date(now);
+    if (now.getHours() < RESET_HOUR_FOR_BANNER) {
+      biz.setDate(biz.getDate() - 1);
     }
+    const by = biz.getFullYear();
+    const bm = z2(biz.getMonth() + 1);
+    const bd = z2(biz.getDate());
+
+    // 次のリセット
+    const nextReset = new Date(biz);
+    nextReset.setDate(nextReset.getDate() + 1);
+    nextReset.setHours(RESET_HOUR_FOR_BANNER, 0, 0, 0);
+    const nrM = z2(nextReset.getMonth() + 1);
+    const nrD = z2(nextReset.getDate());
+    const nrW = weekNames[nextReset.getDay()];
+    const nrH = z2(nextReset.getHours());
+    const nrMin = z2(nextReset.getMinutes());
+
+    timeDisplayEl.innerHTML =
+      `現在時刻： ${y}/${m}/${d}(${w}) ${hh}:${mm}:${ss}<br>` +
+      `今日の営業日： ${by}-${bm}-${bd}（${RESET_HOUR_FOR_BANNER}:00切替）<br>` +
+      `次のリセット： ${nrM}/${nrD}(${nrW}) ${nrH}:${nrMin}`;
+  }
+
+  updateTimeArea();
+  setInterval(updateTimeArea, 1000);
+
+  jumpBtn.addEventListener("click", () => {
+    const now = new Date();
+    const hour = now.getHours();
+
+    const slotId = getCurrentSlotIdByHour(hour); // ← ここも大事
 
     if (!slotId) {
-      statusEl.textContent = `現在 ${h}:${m} ／ 該当する時間帯がありません`;
-      btn.disabled = true;
+      alert("今の時間帯に対応する欄が見つかりませんでした。");
       return;
     }
 
-    if (slotLabel) {
-      statusEl.textContent = `現在 ${h}:${m} ／ 「${slotLabel}」の時間帯です`;
-    } else {
-      statusEl.textContent = `現在 ${h}:${m} のタスク帯にジャンプできます`;
+    const target =
+      document.querySelector(`[data-slot="${slotId}"]`) ||
+      document.getElementById(slotId);
+
+    if (!target) {
+      alert("今の時間帯の欄がまだ作られていません。");
+      return;
     }
 
-    // ボタン有効化 ＋ クリック時にスクロール
-    btn.disabled = false;
-    btn.addEventListener("click", () => {
-      const el = document.getElementById(slotId);
-      if (!el) return;
-
-      const header =
-        document.querySelector(".top-bar") ||
-        document.querySelector("header");
-      const headerHeight = header ? header.offsetHeight : 80;
-
-      const rect = el.getBoundingClientRect();
-      const targetY = rect.top + window.scrollY - headerHeight - 10;
-
-      window.scrollTo({
-        top: targetY,
-        behavior: "smooth",
-      });
-    });
-  } catch (e) {
-    console.error("ジャンプバナー初期化エラー:", e);
-    statusEl.textContent = "現在時刻の取得に失敗しました";
-    btn.disabled = true;
-  }
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
+
 
 
 
@@ -2526,6 +2542,13 @@ function initJumpBanner() {
         // タスク定義 & チェック状態
         const checkboxMap = new Map();
         let latestCheckedIds = new Set();
+
+
+　　　　// ★ ここでは null にしておく（storeRef セット前なので）
+        let taskDocRef = null;
+        let applyingRemote = false;
+
+         
 
         const taskDocRef = storeRef.collection("tasks").doc("main");
         let applyingRemote = false;
