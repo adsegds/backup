@@ -2511,7 +2511,7 @@ function initJumpBanner() {
 
   if (!timeDisplayEl || !jumpBtn) return;
 
-  const RESET_HOUR_FOR_BANNER = 7; // ← 名前変えた
+  const RESET_HOUR_FOR_BANNER = 7;
 
   const weekNames = ["日", "月", "火", "水", "木", "金", "土"];
   const z2 = (n) => String(n).padStart(2, "0");
@@ -2556,11 +2556,11 @@ function initJumpBanner() {
   updateTimeArea();
   setInterval(updateTimeArea, 1000);
 
+  // ⭐ ここだけ差し替え（この中に全部まとめる）
   jumpBtn.addEventListener("click", () => {
     const now = new Date();
     const hour = now.getHours();
-
-    const slotId = getCurrentSlotIdByHour(hour); // ← ここも大事
+    const slotId = getCurrentSlotIdByHour(hour);
 
     if (!slotId) {
       alert("今の時間帯に対応する欄が見つかりませんでした。");
@@ -2576,7 +2576,19 @@ function initJumpBanner() {
       return;
     }
 
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    // ⭐ ヘッダーの高さを自動取得
+    const header =
+      document.querySelector(".top-bar") ||
+      document.querySelector("header");
+    const headerHeight = header ? header.offsetHeight : 80;
+
+    const rect = target.getBoundingClientRect();
+    const targetY = rect.top + window.scrollY - headerHeight - 10; // ここは好みで調整
+
+    window.scrollTo({
+      top: targetY,
+      behavior: "smooth",
+    });
   });
 }
 
