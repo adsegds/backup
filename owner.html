@@ -3079,10 +3079,20 @@ async function saveShiftForChecklist(slotsMap, targetDate) {
     return;
   }
 
-  const businessKey =
-    targetDate instanceof Date
-      ? getBusinessKeyForDate(targetDate)
-      : getBusinessKeyForDate(); // ← 今日の営業日
+  let businessKey;
+
+  // Date オブジェクトで来た場合
+  if (targetDate instanceof Date) {
+    businessKey = getBusinessKeyForDate(targetDate);
+
+  // "YYYY-MM-DD" 文字列で来た場合（週シフトから）
+  } else if (typeof targetDate === "string" && targetDate.length === 10) {
+    businessKey = targetDate;
+
+  // それ以外は「今日の営業日」
+  } else {
+    businessKey = getBusinessKeyForDate();
+  }
 
   await storeRef
     .collection("shifts")
