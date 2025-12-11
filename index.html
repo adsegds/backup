@@ -2811,17 +2811,20 @@ async function loadTaskDefinitions() {
 
 
 
-        function saveTasksToFirestore() {
-          const checkedIds = [];
-          checkboxMap.forEach((cb, id) => {
-            if (cb.checked) checkedIds.push(id);
-          });
-          const businessKey = getCurrentBusinessKey();
-          taskDocRef.set(
-            { checkedIds, businessKey },
-            { merge: true }
-          );
-        }
+       function saveTasksToFirestore() {
+  if (!taskDocRef) return;  // ★ ログイン前は何もしない
+
+  const checkedIds = [];
+  checkboxMap.forEach((cb, id) => {
+    if (cb.checked) checkedIds.push(id);
+  });
+  const businessKey = getCurrentBusinessKey();
+  taskDocRef.set(
+    { checkedIds, businessKey },
+    { merge: true }
+  );
+}
+
 
         taskDocRef.onSnapshot((doc) => {
           const data = doc.exists ? doc.data() : {};
