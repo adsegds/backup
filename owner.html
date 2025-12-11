@@ -3002,18 +3002,7 @@ const PHOTO_COLLECTION = "photoReports";
 
 
 
-  // =============================
-  // シフト → チェックリスト連携用ユーティリティ
-  // =============================
-
-  // 日付から "YYYY-MM-DD" の営業日キーを作る（今はカレンダー通り）
-  function getBusinessKeyForDate(date) {
-    const d = new Date(date);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
+ 
 
   
 
@@ -3050,68 +3039,65 @@ const PHOTO_COLLECTION = "photoReports";
     storeRef = db.collection("stores").doc(existingSession.storeId);
   }
 
-  // =======================================
-  // 6:00切り替えの「今日の営業日」
-  // =======================================
-  function getCurrentBusinessKey() {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = now.getMonth();
-    const d = now.getDate();
-    const base = new Date(y, m, d);
-    if (now.getHours() < 7) {
-      base.setDate(base.getDate() - 1);
-    }
-    const yy = base.getFullYear();
-    const mm = String(base.getMonth() + 1).padStart(2, "0");
-    const dd = String(base.getDate()).padStart(2, "0");
-    return `${yy}-${mm}-${dd}`;
+ // 6:00切り替えの「今日の営業日」
+function getCurrentBusinessKey() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const d = now.getDate();
+  const base = new Date(y, m, d);
+  if (now.getHours() < 7) {
+    base.setDate(base.getDate() - 1);
+  }
+  const yy = base.getFullYear();
+  const mm = String(base.getMonth() + 1).padStart(2, "0");
+  const dd = String(base.getDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
+// date: Date を渡した時用（何も渡さなければ 「今日の営業日」）
+function getBusinessKeyForDate(date) {
+  if (date instanceof Date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;  // 例: 2025-12-11
+  }
+  // デフォルトは「今日の営業日」
+  return getCurrentBusinessKey();
+}
+
+// slotsMap 形式：{ "t6-8": ["田中","佐藤"], ... }
+async function saveShiftForChecklist(slotsMap, targetDate) {
+  if (!storeRef) {
+    alert("storeRef が未設定です（店舗情報がまだ読み込まれていません）。");
+    return;
   }
 
-  // =======================================
-  // チェックリスト連携用：シフトを書き込む
-  // =======================================
-  // date: Date を渡した時用（何も渡さなければ getCurrentBusinessKey と同じ扱い）
-  function getBusinessKeyForDate(date) {
-    if (date instanceof Date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;  // 例: 2025-12-11
-    }
-    // デフォルトは「今日の営業日」（朝7:00までは前日扱い）に合わせる
-    return getCurrentBusinessKey();
+  if (!slotsMap || typeof slotsMap !== "object") {
+    console.warn("slotsMap が不正です:", slotsMap);
+    return;
   }
 
-  // slotsMap 形式：{ "t6-8": ["田中","佐藤"], "t12-14":["田中"], ... }
-  async function saveShiftForChecklist(slotsMap, targetDate) {
-    if (!storeRef) {
-      alert("storeRef が未設定です（店舗情報がまだ読み込まれていません）。");
-      return;
-    }
+  const businessKey =
+    targetDate instanceof Date
+      ? getBusinessKeyForDate(targetDate)
+      : getBusinessKeyForDate(); // ← 今日の営業日
 
-    if (!slotsMap || typeof slotsMap !== "object") {
-      console.warn("slotsMap が不正です:", slotsMap);
-      return;
-    }
+  await storeRef
+    .collection("shifts")
+    .doc(businessKey)
+    .set(
+      {
+        slots: slotsMap,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
 
-    const businessKey =
-      targetDate instanceof Date
-        ? getBusinessKeyForDate(targetDate)
-        : getBusinessKeyForDate(); // ← 今日の営業日
+  console.log("✅ チェックリスト用シフトを書き込みました:", businessKey, slotsMap);
+}
 
-    await storeRef
-      .collection("shifts")
-      .doc(businessKey)
-      .set(
-        {
-          slots: slotsMap,
-        },
-        { merge: true } // 既存があっても上書きマージ
-      );
-
-    console.log("✅ チェックリスト用シフトを書き込みました:", businessKey, slotsMap);
-  }
 
 
 
