@@ -2825,29 +2825,7 @@ async function loadTaskDefinitions() {
 }
 
 
-        taskDocRef.onSnapshot((doc) => {
-          const data = doc.exists ? doc.data() : {};
-          const storedKey  = data.businessKey;
-          const currentKey = getCurrentBusinessKey();
-
-          if (storedKey !== currentKey) {
-            taskDocRef.set(
-              { checkedIds: [], businessKey: currentKey },
-              { merge: true }
-            );
-            latestCheckedIds = new Set();
-          } else {
-            latestCheckedIds = new Set(data.checkedIds || []);
-          }
-
-          applyingRemote = true;
-          checkboxMap.forEach((cb, id) => {
-            cb.checked = latestCheckedIds.has(id);
-          });
-          applyingRemote = false;
-
-          updateCompletionUI();
-        });
+        
 
         // ログ共通関数
         async function logChecklistAction({ taskId, taskLabel, action, extra }) {
