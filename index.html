@@ -2145,6 +2145,72 @@ if (loginStoreIdInput) {
         });
 
 
+        // =============================
+        // 文字サイズ切り替え（小／中／大）
+        // =============================
+        const FONT_SIZE_KEY = "lw_fontSize";
+
+        // ヘッダー & メニューの「小／中／大」全部まとめて取得
+        const fontSizeButtons = document.querySelectorAll('button[data-size]');
+
+        function applyFontSize(size) {
+          const root = document.documentElement; // <html> をターゲット
+
+          // いったん全部はずす
+          root.classList.remove("font-small", "font-medium", "font-large");
+
+          // size に応じてクラス付け
+          switch (size) {
+            case "small":
+              root.classList.add("font-small");
+              break;
+            case "large":
+              root.classList.add("font-large");
+              break;
+            default:
+              size = "medium";
+              root.classList.add("font-medium");
+              break;
+          }
+
+          // ローカル保存（次回も同じサイズで開く）
+          try {
+            localStorage.setItem(FONT_SIZE_KEY, size);
+          } catch (e) {
+            console.warn("font size save error:", e);
+          }
+
+          // ボタン側の見た目（選択状態）
+          fontSizeButtons.forEach((btn) => {
+            if (btn.dataset.size === size) {
+              btn.classList.add("is-active");
+            } else {
+              btn.classList.remove("is-active");
+            }
+          });
+        }
+
+        // ボタンにイベント付与
+        if (fontSizeButtons.length) {
+          fontSizeButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const size = btn.dataset.size || "medium";
+              applyFontSize(size);
+            });
+          });
+
+          // 初期表示：保存済み or medium
+          let initialSize = "medium";
+          try {
+            const saved = localStorage.getItem(FONT_SIZE_KEY);
+            if (saved === "small" || saved === "medium" || saved === "large") {
+              initialSize = saved;
+            }
+          } catch (e) {
+            console.warn("font size load error:", e);
+          }
+          applyFontSize(initialSize);
+        }
 
 
 
