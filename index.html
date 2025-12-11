@@ -2420,6 +2420,8 @@ if (openShiftBtn) {
           { id: "t3-5",  label: "3:00〜5:00",  note: "早朝",         fromHour: 3,  toHour: 5  }
         ];
 
+         let timeSlotIds = [];
+
         timeSlotIds = timeSlotConfigs.map((s) => s.id);
 
         // DOMに timeSlotConfigs を反映（タイトル・サブタイトル・セクションID / nav）
