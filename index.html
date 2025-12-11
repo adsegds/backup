@@ -3389,12 +3389,16 @@ document.body.addEventListener("click", async (e) => {
         }
 
         // ★ ここで timeSlots を読み込み → その後にバーとタスクを構築
-        loadTimeSlotsConfig().then(() => {
-          initializeProgressBars();
-          loadTaskDefinitions().then(updateCompletionUI);
-        });
+        // ★ ここで timeSlots を読み込み → その後にバーとタスクを構築
+loadTimeSlotsConfig().then(() => {
+  initializeProgressBars();
+  loadTaskDefinitions().then(() => {
+    updateCompletionUI();
+    initJumpBanner();   // ← ここでジャンプバナーを動かす
+  });
+});
 
-        setupDailyResetAt7AM();
+setupDailyResetAt7AM();
       } // startApp ここまで
 
 
