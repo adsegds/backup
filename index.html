@@ -2150,6 +2150,7 @@ function openShiftBoard() {
 const openShiftFromMenu = document.getElementById("openShiftFromMenu");
 if (openShiftFromMenu) {
   openShiftFromMenu.addEventListener("click", () => {
+    closeAppMenu();
     openShiftBoard();
   });
 }
