@@ -2974,16 +2974,25 @@ const PHOTO_COLLECTION = "photoReports";
     measurementId: "G-BGENZNZMRC"
   };
 
-  firebase.initializeApp(firebaseConfig);
+
+
+
+
+
+ firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
 
-  // ▼ セッションから店舗IDを復元して storeRef を作る
+  // =======================================
+  // ▼ セッションから店舗IDを復元して storeRef を作る（★1回だけ）
+  // =======================================
   const existingSession = getSavedSession();
   if (existingSession && existingSession.storeId) {
     storeRef = db.collection("stores").doc(existingSession.storeId);
   }
 
+  // =======================================
   // 6:00切り替えの「今日の営業日」
+  // =======================================
   function getCurrentBusinessKey() {
     const now = new Date();
     const y = now.getFullYear();
@@ -2999,7 +3008,56 @@ const PHOTO_COLLECTION = "photoReports";
     return `${yy}-${mm}-${dd}`;
   }
 
-  // date input の値（YYYY-MM-DD） → businessKey
+  // =======================================
+  // チェックリスト連携用：シフトを書き込む
+  // =======================================
+  // date: Date を渡した時用（何も渡さなければ getCurrentBusinessKey と同じ扱い）
+  function getBusinessKeyForDate(date) {
+    if (date instanceof Date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;  // 例: 2025-12-11
+    }
+    // デフォルトは「今日の営業日」（朝7:00までは前日扱い）に合わせる
+    return getCurrentBusinessKey();
+  }
+
+  // slotsMap 形式：{ "t6-8": ["田中","佐藤"], "t12-14":["田中"], ... }
+  async function saveShiftForChecklist(slotsMap, targetDate) {
+    if (!storeRef) {
+      alert("storeRef が未設定です（店舗情報がまだ読み込まれていません）。");
+      return;
+    }
+
+    if (!slotsMap || typeof slotsMap !== "object") {
+      console.warn("slotsMap が不正です:", slotsMap);
+      return;
+    }
+
+    const businessKey =
+      targetDate instanceof Date
+        ? getBusinessKeyForDate(targetDate)
+        : getBusinessKeyForDate(); // ← 今日の営業日
+
+    await storeRef
+      .collection("shifts")
+      .doc(businessKey)
+      .set(
+        {
+          slots: slotsMap,
+        },
+        { merge: true } // 既存があっても上書きマージ
+      );
+
+    console.log("✅ チェックリスト用シフトを書き込みました:", businessKey, slotsMap);
+  }
+
+
+
+
+
+// date input の値（YYYY-MM-DD） → businessKey
   function businessKeyFromDateInput(dateStr) {
     if (!dateStr) return null;
     return dateStr;
