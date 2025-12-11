@@ -3015,25 +3015,7 @@ const PHOTO_COLLECTION = "photoReports";
     return `${y}-${m}-${day}`;
   }
 
-  // シフト情報を Firestore の /shifts/{営業日} に保存
-  async function saveShiftForChecklist(storeId, businessKey, slotsMap) {
-    if (!storeId) throw new Error("storeId がありません");
-    if (!businessKey) throw new Error("businessKey がありません");
-
-    const ref = db
-      .collection("stores")
-      .doc(storeId)
-      .collection("shifts")
-      .doc(businessKey);
-
-    await ref.set(
-      {
-        slots: slotsMap,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
-  }
+  
 
 
 
