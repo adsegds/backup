@@ -2990,6 +2990,68 @@ const PHOTO_COLLECTION = "photoReports";
  firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
 
+
+
+
+
+  // =============================
+  // シフト → チェックリスト連携用ユーティリティ
+  // =============================
+
+  // 日付から "YYYY-MM-DD" の営業日キーを作る（今はカレンダー通り）
+  function getBusinessKeyForDate(date) {
+    const d = new Date(date);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  // シフト情報を Firestore の /shifts/{営業日} に保存
+  async function saveShiftForChecklist(storeId, businessKey, slotsMap) {
+    if (!storeId) throw new Error("storeId がありません");
+    if (!businessKey) throw new Error("businessKey がありません");
+
+    const ref = db
+      .collection("stores")
+      .doc(storeId)
+      .collection("shifts")
+      .doc(businessKey);
+
+    await ref.set(
+      {
+        slots: slotsMap,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
   // =======================================
   // ▼ セッションから店舗IDを復元して storeRef を作る（★1回だけ）
   // =======================================
@@ -3117,13 +3179,7 @@ const PHOTO_COLLECTION = "photoReports";
     });
   }
 
-  // ★ 新規登録ボタン（owner.html → signup.html）
-  const ownerRegisterBtn = document.getElementById("ownerRegisterBtn");
-  if (ownerRegisterBtn) {
-    ownerRegisterBtn.addEventListener("click", () => {
-      window.location.href = "signup.html";
-    });
-  }
+  
 
   // ←この下に、もともとの loginWrap〜 いろいろ続いてる
 
