@@ -1984,13 +1984,44 @@ if (loginStoreIdInput) {
       // 本体初期化（STORE_ID / storeRef がセット済みで呼ぶ）
       // =============================
        async function startApp() {
-        // ★ storeRef がなければ何もしない（安全ガード）
-        if (!STORE_ID || !storeRef) {
-          console.warn("STORE_ID / storeRef 未設定のため、startApp を中止します。");
-          showLogin();
-          setAppReady();
-          return;
-        }
+  // ★ storeRef がなければ何もしない（安全ガード）
+  if (!STORE_ID || !storeRef) {
+    console.warn("STORE_ID / storeRef 未設定のため、startApp を中止します。");
+    showLogin();
+    setAppReady();
+    return;
+  }
+
+  // ★ ここで初めて taskDocRef をセット
+  taskDocRef = storeRef.collection("tasks").doc("main");
+
+  // ★ さっき切り取った onSnapshot をここに貼る
+  taskDocRef.onSnapshot((doc) => {
+    const data = doc.exists ? doc.data() : {};
+    const storedKey  = data.businessKey;
+    const currentKey = getCurrentBusinessKey();
+
+    if (storedKey !== currentKey) {
+      taskDocRef.set(
+        { checkedIds: [], businessKey: currentKey },
+        { merge: true }
+      );
+      latestCheckedIds = new Set();
+    } else {
+      latestCheckedIds = new Set(data.checkedIds || []);
+    }
+
+    applyingRemote = true;
+    checkboxMap.forEach((cb, id) => {
+      cb.checked = latestCheckedIds.has(id);
+    });
+    applyingRemote = false;
+
+    updateCompletionUI();
+  });
+
+  // ここから下に、端末ラベル・シフト読み込み・handover・お知らせ…が続く
+
 
 
 
