@@ -2452,6 +2452,77 @@ if (openShiftBtn) {
           applyTimeSlotsToUI();
         }
 
+
+
+
+// =============================
+// 今の時間帯ジャンプバナー
+// =============================
+function initJumpBanner() {
+  const statusEl = document.getElementById("jumpStatusText");
+  const btn = document.getElementById("jumpToCurrentBtn");
+  if (!statusEl || !btn) return; // 要素が無ければ何もしない
+
+  try {
+    const now = new Date();
+    const h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, "0");
+
+    // いまの時間帯ID（例: "t12-14" など）
+    const slotId = getCurrentSlotIdByHour(h);
+
+    // ラベル（「6:00〜8:00」みたいなやつ）を timeSlotConfigs から取る
+    let slotLabel = "";
+    if (Array.isArray(timeSlotConfigs)) {
+      const hit = timeSlotConfigs.find(
+        (s) => String(s.id) === String(slotId)
+      );
+      if (hit) slotLabel = hit.label || "";
+    }
+
+    if (!slotId) {
+      statusEl.textContent = `現在 ${h}:${m} ／ 該当する時間帯がありません`;
+      btn.disabled = true;
+      return;
+    }
+
+    if (slotLabel) {
+      statusEl.textContent = `現在 ${h}:${m} ／ 「${slotLabel}」の時間帯です`;
+    } else {
+      statusEl.textContent = `現在 ${h}:${m} のタスク帯にジャンプできます`;
+    }
+
+    // ボタン有効化 ＋ クリック時にスクロール
+    btn.disabled = false;
+    btn.addEventListener("click", () => {
+      const el = document.getElementById(slotId);
+      if (!el) return;
+
+      const header =
+        document.querySelector(".top-bar") ||
+        document.querySelector("header");
+      const headerHeight = header ? header.offsetHeight : 80;
+
+      const rect = el.getBoundingClientRect();
+      const targetY = rect.top + window.scrollY - headerHeight - 10;
+
+      window.scrollTo({
+        top: targetY,
+        behavior: "smooth",
+      });
+    });
+  } catch (e) {
+    console.error("ジャンプバナー初期化エラー:", e);
+    statusEl.textContent = "現在時刻の取得に失敗しました";
+    btn.disabled = true;
+  }
+}
+
+
+
+
+
+         
         // タスク定義 & チェック状態
         const checkboxMap = new Map();
         let latestCheckedIds = new Set();
