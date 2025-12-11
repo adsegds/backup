@@ -5769,6 +5769,173 @@ activateView("news");
     openWeekBoard();
   });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // ---------- 週シフトをチェックリスト用 /shifts に連携 ----------
+  async function syncWeekToChecklist() {
+    if (!storeRef) {
+      alert("ログイン情報がありません。いったんログアウト→ログインし直してください。");
+      return;
+    }
+    if (!weekData || !currentWeekDates.length) {
+      alert("この週のシフトがまだ入力されていません。");
+      return;
+    }
+
+    // まず時間帯設定を取得（settings/timeSlots）
+    const timeSlotsDoc = await storeRef
+      .collection("settings")
+      .doc("timeSlots")
+      .get();
+
+    let rawSlots = [];
+    if (timeSlotsDoc.exists && Array.isArray(timeSlotsDoc.data().slots)) {
+      rawSlots = timeSlotsDoc.data().slots;
+    } else {
+      // まだ時間帯設定がなければ、ざっくりデフォルト（t6-8 など）
+      rawSlots = [
+        { id: "t6-8"   },
+        { id: "t9-11"  },
+        { id: "t12-14" },
+        { id: "t15-17" },
+        { id: "t18-20" },
+        { id: "t21-23" },
+        { id: "t0-2"   },
+        { id: "t3-5"   },
+      ];
+    }
+
+    // スロットを「開始/終了分」に正規化
+    function normalizeSlot(s, idx) {
+      let startStr = s.start || null;
+      let endStr   = s.end   || null;
+
+      // start/end が無い場合は id や _raw から推測
+      if (!startStr || !endStr) {
+        const id = s.id || "";
+        // 例: t6-8 → 06:00〜08:00
+        const m = /^t(\d+)-(\d+)$/.exec(id);
+        if (m) {
+          startStr = `${String(m[1]).padStart(2, "0")}:00`;
+          endStr   = `${String(m[2]).padStart(2, "0")}:00`;
+        } else if (s._raw) {
+          // 例: "06:00-09:00 朝の立ち上げ"
+          const parts = s._raw.split(/\s+/);
+          const range = parts[0] || "";
+          const [fromRaw, toRaw] = range.split("-");
+          if (fromRaw && toRaw) {
+            startStr = fromRaw;
+            endStr   = toRaw;
+          }
+        }
+      }
+
+      if (!startStr || !endStr) return null;
+
+      const startMin = timeStrToMin(startStr);
+      const endMin   = timeStrToMin(endStr);
+      if (startMin == null || endMin == null || endMin <= startMin) return null;
+
+      return {
+        id: s.id || `slot_${idx}`,
+        startMin,
+        endMin,
+      };
+    }
+
+    const normSlots = [];
+    rawSlots.forEach((s, i) => {
+      const ns = normalizeSlot(s, i);
+      if (ns) normSlots.push(ns);
+    });
+
+    if (!normSlots.length) {
+      alert("時間帯の設定が読み取れませんでした。「時間帯設定」を一度保存してください。");
+      return;
+    }
+
+    // 各日ごとに slotsMap を作って /shifts/{営業日} に保存
+    for (const dateStr of currentWeekDates) {
+      /** @type {Record<string, string[]>} */
+      const slotsMap = {};
+
+      weekData.staff.forEach((staff) => {
+        const info = staff.days[dateStr];
+        if (!info || !info.start || !info.end) return;
+
+        const sMin = timeStrToMin(info.start);
+        const eMin = timeStrToMin(info.end);
+        if (sMin == null || eMin == null || eMin <= sMin) return;
+
+        normSlots.forEach((slot) => {
+          if (rangeOverlap(sMin, eMin, slot.startMin, slot.endMin)) {
+            if (!slotsMap[slot.id]) slotsMap[slot.id] = [];
+            const name = staff.name || "スタッフ";
+            if (!slotsMap[slot.id].includes(name)) {
+              slotsMap[slot.id].push(name);
+            }
+          }
+        });
+      });
+
+      // 誰も入ってない日ならスキップ
+      if (Object.keys(slotsMap).length === 0) {
+        console.log("⚪ この日はシフトなしのため /shifts への書き込みスキップ:", dateStr);
+        continue;
+      }
+
+      // "YYYY-MM-DD" で saveShiftForChecklist に投げる
+      await saveShiftForChecklist(slotsMap, dateStr);
+      console.log("🔥 週シフト → checklist 連携:", dateStr, slotsMap);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   // 1ヶ月ボタン（ダミー）
   viewMonthBtn?.addEventListener("click", () => {
     setViewMode("month");
