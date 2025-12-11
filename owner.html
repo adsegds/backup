@@ -2506,19 +2506,27 @@
 
             <!-- 保存＆日別 / 週別 / 月別 詳細 -->
 <div class="shift-week-footer">
+  <!-- 週の保存（ローカル） -->
   <button id="shiftWeekSaveBtn" type="button" class="primary">
     この週のシフトを保存（ブラウザ）
   </button>
 
-  <!-- ★ チェックリスト連携テスト用ボタン（あとで消してOK） -->
-  <div style="margin-top: 8px; margin-bottom: 8px;">
-    <button type="button" id="testShiftLinkBtn" class="sub-btn">
-      今日のシフトをチェックリストに流す（テスト）
+  <!-- 週ナビ + 週連携ボタン -->
+  <div class="shift-week-nav" style="margin-top: 8px; margin-bottom: 8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+    <button type="button" id="shiftWeekPrevBtn" class="sub-btn">
+      ← 前の週
+    </button>
+
+    <button type="button" id="shiftWeekSyncBtn" class="primary">
+      👉 この週をチェックリスト連携
+    </button>
+
+    <button type="button" id="shiftWeekNextBtn" class="sub-btn">
+      次の週 →
     </button>
   </div>
 
   <div class="day-detail">
-
     <!-- ビュー切り替え（日別 / 1週間 / 1ヶ月） -->
     <div class="shiftboard-view-toggle">
       <button id="shiftViewDayBtn"   type="button" class="sub-btn is-active">日別</button>
@@ -2536,9 +2544,9 @@
         詳細（shiftboard）を開く
       </button>
     </div>
-
   </div>
 </div>
+
 
 
 
