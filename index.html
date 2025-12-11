@@ -2128,6 +2128,45 @@ if (loginStoreIdInput) {
 
 
 
+
+
+
+
+// =============================
+// 📅 シフト表メニュー → shiftboard.html を開く
+// =============================
+function openShiftBoard() {
+  if (!STORE_ID) {
+    alert("店舗情報が取得できていません。ログインし直してください。");
+    return;
+  }
+
+  // シフト表（shiftboard.html）を別タブで開く
+  const url = `shiftboard.html?store=${encodeURIComponent(STORE_ID)}`;
+  window.open(url, "_blank");
+}
+
+// メニュー内の「開く」ボタン
+const openShiftFromMenu = document.getElementById("openShiftFromMenu");
+if (openShiftFromMenu) {
+  openShiftFromMenu.addEventListener("click", () => {
+    openShiftBoard();
+  });
+}
+
+// （必要ならヘッダーの📅ボタンも同じ動きにできる）
+const openShiftBtn = document.getElementById("openShiftBtn");
+if (openShiftBtn) {
+  openShiftBtn.addEventListener("click", () => {
+    openShiftBoard();
+  });
+}
+
+
+
+
+         
+
       
 
 
