@@ -1945,6 +1945,14 @@ async function loadTodayShiftStaff() {
 
 
     document.addEventListener("DOMContentLoaded", () => {
+
+// === ✅ チェックリスト用の変数をここに置く ===
+  const checkboxMap = new Map();
+  let latestCheckedIds = new Set();
+  let taskDocRef = null;
+  let applyingRemote = false;
+
+      
   const loginScreen = document.getElementById("loginScreen");
   const appEl = document.querySelector(".app");
   const loginStoreIdInput = document.getElementById("loginStoreId");
@@ -2570,13 +2578,7 @@ function initJumpBanner() {
 
 
          
-        // タスク定義 & チェック状態
-const checkboxMap = new Map();
-let latestCheckedIds = new Set();
-
-// ★ ここでは「入れ物」だけ作っておく（ログイン後に中身を入れる）
-let taskDocRef = null;
-let applyingRemote = false;
+    
 
 
          
