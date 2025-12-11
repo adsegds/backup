@@ -5707,7 +5707,7 @@ activateView("news");
     renderWeekBody();
   });
 
-  // 「この週のシフトを保存」ボタン
+    // 「この週のシフトを保存」ボタン
   saveBtn?.addEventListener("click", async () => {
     if (!weekData) return;
 
@@ -5715,7 +5715,6 @@ activateView("news");
     saveWeekData(STORAGE_KEY, weekData);
     saveWeekData(LAST_WEEK_KEY, weekData);
 
-    // Firestore にも保存
     try {
       if (!storeRef) {
         alert("店舗IDが未設定のため、Firestoreには保存できません。（一度ログアウトしてログインし直してください）");
@@ -5735,17 +5734,22 @@ activateView("news");
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       };
 
+      // ① 週シフト（shiftWeeks）を保存
       await storeRef
         .collection("shiftWeeks")
         .doc(weekStartStr)
         .set(payload, { merge: true });
 
-      alert("この週のシフトをブラウザ ＋ Firestore に保存しました！（スタッフ用シフト表に反映されます）");
+      // ② チェックリスト用 /shifts にも連携
+      await syncWeekToChecklist();
+
+      alert("この週のシフトを保存し、チェックリスト用 /shifts にも連携しました！");
     } catch (err) {
-      console.error("Firestore 保存エラー:", err);
-      alert("Firestoreへの保存に失敗しました… コンソールを確認してください。");
+      console.error("週シフト保存 or 連携エラー:", err);
+      alert("週シフトの保存 or 連携中にエラーが発生しました。コンソールを確認してください。");
     }
   });
+
 
   // 「詳細（shiftboard）を開く」→ 日別で開く
   openDayDetailBtn?.addEventListener("click", () => {
