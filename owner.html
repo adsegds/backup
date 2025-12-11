@@ -4988,6 +4988,12 @@ activateView("news");
       }
     }
 
+
+
+
+
+
+       // 集計実行ボタン
     analyticsRunBtn.addEventListener("click", () => {
       runAnalytics();
     });
@@ -4995,7 +5001,30 @@ activateView("news");
     // activateView から呼べるように参照を渡しておく
     runAnalyticsRef = runAnalytics;
     analyticsDateInputRef = analyticsDateInput;
-  });
+
+    // =============================
+    // ✅ チェックリスト連携テストボタン
+    // =============================
+    const testShiftLinkBtn = document.getElementById("testShiftLinkBtn");
+    if (testShiftLinkBtn) {
+      testShiftLinkBtn.addEventListener("click", async () => {
+        // ↓ ここはとりあえずテスト用のダミー
+        const slotsMap = {
+          "t6-8": ["田中", "佐藤"],
+          "t12-14": ["田中"],
+        };
+
+        try {
+          await saveShiftForChecklist(slotsMap);
+          alert("テスト用シフトを /shifts に書き込みました！");
+        } catch (e) {
+          console.error(e);
+          alert("書き込みに失敗しました…コンソールを確認してください。");
+        }
+      });
+    }
+
+  }); // ★ここでやっと DOMContentLoaded 終了
 
 
 
@@ -5006,10 +5035,6 @@ activateView("news");
 
 
 
-
-
-
-    
 // ====================================
 // ⑦ シフト作成（手動）＋日別 / 週別 shiftboard
 // ====================================
@@ -5700,6 +5725,7 @@ activateView("news");
 
     
   </script>
+
 
 
 
