@@ -1952,6 +1952,12 @@ async function loadTodayShiftStaff() {
   let taskDocRef = null;
   let applyingRemote = false;
 
+
+
+
+　// ★ 時間帯IDリスト（どこからでも使う用）
+  let timeSlotIds = [];
+
       
   const loginScreen = document.getElementById("loginScreen");
   const appEl = document.querySelector(".app");
@@ -2420,7 +2426,7 @@ if (openShiftBtn) {
           { id: "t3-5",  label: "3:00〜5:00",  note: "早朝",         fromHour: 3,  toHour: 5  }
         ];
 
-         let timeSlotIds = [];
+    
 
         timeSlotIds = timeSlotConfigs.map((s) => s.id);
 
