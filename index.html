@@ -2000,6 +2000,84 @@ if (loginStoreIdInput) {
 
 
 
+
+
+
+
+// =============================
+        // スタッフ選択モーダル
+        // =============================
+        const staffSelectModal  = document.getElementById("staffSelectModal");
+        const staffModalList    = document.getElementById("staffModalList");
+        const staffModalInfo    = document.getElementById("staffModalInfo");
+        const staffModalCancel  = document.getElementById("staffModalCancel");
+        const staffModalBackdrop = staffSelectModal?.querySelector(".staff-modal-backdrop");
+
+        let pendingStaffResolve = null;
+
+        // モーダルを閉じる
+        function closeStaffSelectModal(result = null) {
+          if (!staffSelectModal) return;
+          staffSelectModal.classList.add("hidden");
+          if (staffModalList) staffModalList.innerHTML = "";
+
+          if (pendingStaffResolve) {
+            pendingStaffResolve(result);
+            pendingStaffResolve = null;
+          }
+        }
+
+        // モーダルを開く（Promise で誰を選んだか返す）
+        function openStaffSelectModal(slotId, taskLabel) {
+          return new Promise((resolve) => {
+            const names = Array.isArray(shiftStaffBySlot[slotId])
+              ? shiftStaffBySlot[slotId]
+              : [];
+
+            // その時間帯に誰もシフト入ってなければスキップ
+            if (!names.length) {
+              resolve(null);
+              return;
+            }
+
+            if (!staffSelectModal || !staffModalList) {
+              resolve(null);
+              return;
+            }
+
+            staffModalList.innerHTML = "";
+
+            if (staffModalInfo) {
+              staffModalInfo.textContent = `${taskLabel}（${slotId}）`;
+            }
+
+            names.forEach((name) => {
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "staff-modal-item";
+              btn.textContent = name;
+              btn.addEventListener("click", () => {
+                closeStaffSelectModal(name);
+              });
+              staffModalList.appendChild(btn);
+            });
+
+            pendingStaffResolve = resolve;
+            staffSelectModal.classList.remove("hidden");
+          });
+        }
+
+        staffModalCancel?.addEventListener("click", () => {
+          closeStaffSelectModal(null);
+        });
+        staffModalBackdrop?.addEventListener("click", () => {
+          closeStaffSelectModal(null);
+        });
+
+
+         
+
+
         
         
         // 店舗ID / パスワード表示（※ index.html には非表示だけど一応）
