@@ -2540,13 +2540,13 @@ function initJumpBanner() {
 
          
         // タスク定義 & チェック状態
-        const checkboxMap = new Map();
-        let latestCheckedIds = new Set();
+const checkboxMap = new Map();
+let latestCheckedIds = new Set();
 
+// ★ ここでは「入れ物」だけ作っておく（ログイン後に中身を入れる）
+let taskDocRef = null;
+let applyingRemote = false;
 
-　　　　// ★ ここでは null にしておく（storeRef セット前なので）
-        let taskDocRef = null;
-        let applyingRemote = false;
 
          
 
