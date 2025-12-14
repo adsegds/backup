@@ -1838,10 +1838,12 @@ function normalizeSlotsMap(slots) {
   const out = {};
   Object.entries(slots || {}).forEach(([k, v]) => {
     const nk = SLOT_ID_ALIAS[k] || k;
-    out[nk] = Array.isArray(v) ? v : [];
+    out[nk] = (out[nk] || []).concat(Array.isArray(v) ? v : []);
+    out[nk] = [...new Set(out[nk])]; // 重複防止
   });
   return out;
 }
+
 
 
 
