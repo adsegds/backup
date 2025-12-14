@@ -382,7 +382,7 @@ function renderBoard(week) {
       // 全部空き
       const tdEmpty = document.createElement("td");
       tdEmpty.className = "shiftboard-empty";
-      tdEmpty.colSpan = TOTAL_COLS;
+      tdEmpty.colSpan = HOUR_COLS;
       tr.appendChild(tdEmpty);
 
       tbody.appendChild(tr);
