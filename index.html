@@ -1992,7 +1992,9 @@ function getCurrentSlotIdByHour(hour) {
   let taskDocRef = null;
   let applyingRemote = false;
 
-
+ // 👇👇👇 ここに追加する
+  let checklistListenersBound = false;
+  let unsubscribeTaskSnapshot = null;
 
 
 　// ★ 時間帯IDリスト（どこからでも使う用）
@@ -2940,11 +2942,19 @@ async function loadTaskDefinitions() {
           }
         }
 
-        // チェック → Firestore + ログ
-        document.body.addEventListener("change", (e) => {
+       
+
+
+          
+// =============================
+// 1) チェックボックス change（モーダル制御）
+// =============================
+
+// チェック → Firestore + ログ +（必要なら）スタッフ選択モーダル
+document.body.addEventListener("change", (e) => {
   const target = e.target;
 
-  // ① 入口フィルター（絶対残す）
+  // ① 入口フィルター
   if (!target.matches('input[type="checkbox"][data-task-id]')) return;
 
   // ② 写真必須ロック
@@ -2955,9 +2965,10 @@ async function loadTaskDefinitions() {
     return;
   }
 
+  // リモート反映中は無視
   if (applyingRemote) return;
 
-  // ③ li限定で拾う（label事故防止）
+  // ③ li限定
   const li = target.closest("li.task-item");
   if (!li) return;
 
@@ -2965,7 +2976,8 @@ async function loadTaskDefinitions() {
   const taskLabel =
     li.dataset.taskLabel ||
     li.querySelector(".task-text")?.textContent ||
-    null;
+    "";
+
   const taskId = target.dataset.taskId || null;
 
   // ④ 保存・UI更新
@@ -2976,16 +2988,12 @@ async function loadTaskDefinitions() {
   logChecklistAction({
     taskId,
     taskLabel,
-    action: target.checked ? "check" : "uncheck"
+    action: target.checked ? "check" : "uncheck",
+    extra: { slotId }
   });
 
-  // ⑥ 写真アップ由来の自動チェックならモーダル出さない
-  if (target.dataset.autoChecked === "1") {
-    delete target.dataset.autoChecked;
-    return;
-  }
 
-  // ⑦ 手動チェックのみスタッフ選択
+  // ✅ 手動でチェックした時だけスタッフ選択
   if (target.checked && slotId) {
     openStaffSelectModal(slotId, taskLabel || "").then((staffName) => {
       if (!staffName) return;
@@ -3001,90 +3009,165 @@ async function loadTaskDefinitions() {
 });
 
 
+         
+
+ 
 
 
 
 
-
-// 🆕 写真アップロードボタンの処理 ←★★ ここを今から追加
+// =============================
+// 写真アップロードボタン（イベントデリゲーション）
+// =============================
 document.body.addEventListener("click", async (e) => {
   const btn = e.target.closest(".task-photo-upload-btn");
   if (!btn) return;
 
+  // 二重実行ガード（連打対策）
+  if (btn.dataset.busy === "1") return;
+  btn.dataset.busy = "1";
+
   const li = btn.closest(".task-item");
-  if (!li) return;
+  if (!li) {
+    btn.dataset.busy = "0";
+    return;
+  }
 
   const fileInput  = li.querySelector(".task-photo-input");
   const statusEl   = li.querySelector(".task-photo-status");
   const checkbox   = li.querySelector('input[type="checkbox"][data-task-id]');
   const taskTextEl = li.querySelector(".task-text");
 
-  if (!fileInput || !checkbox || !taskTextEl) return;
+  if (!fileInput || !checkbox || !taskTextEl) {
+    btn.dataset.busy = "0";
+    return;
+  }
 
-  const file = fileInput.files[0];
+  const file = fileInput.files?.[0];
   if (!file) {
     alert("先に写真を選択してください。");
+    btn.dataset.busy = "0";
     return;
   }
 
   if (!STORE_ID || !storeRef) {
     alert("店舗情報が取得できていません。ログインし直してください。");
+    btn.dataset.busy = "0";
     return;
   }
 
-  const slotId      = li.dataset.slotId || "unknown";
-  const taskLabel   = li.dataset.taskLabel || taskTextEl.textContent || "";
+  // ---- task情報 ----
+  const taskId    = checkbox.dataset.taskId || null;
+  const slotId    = li.dataset.slotId || null;
+  const taskLabel = li.dataset.taskLabel || taskTextEl.textContent || "";
+
+  // ---- パス生成 ----
   const businessKey = getCurrentBusinessKey();
+  const now = new Date();
+  const ts  = now.toISOString().replace(/[:.]/g, "-");
 
-  try {
-    btn.disabled = true;
-    btn.textContent = "アップロード中...";
-    if (statusEl) statusEl.textContent = "アップロード中...";
+  const safeTaskId = `${slotId || "noslot"}_${String(taskId || "unknown").replace(/[^\w\-]/g, "_")}`;
 
-    // === Storage にアップロード ===
-    const path = `stores/${STORE_ID}/photoTasks/${businessKey}/${slotId}/${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`;
-    const storageRefPath = storage.ref().child(path);
+  // 拡張子は実ファイルに合わせる（.jpg固定の事故防止）
+  const ext = (file.name.includes(".") ? file.name.split(".").pop() : "jpg").toLowerCase();
+  const path = `stores/${STORE_ID}/checklistPhotos/${businessKey}/${safeTaskId}_${ts}.${ext}`;
 
-    await storageRefPath.put(file);
-    const downloadUrl = await storageRefPath.getDownloadURL();
+ // ---- UI ----
+btn.disabled = true;
+if (statusEl) statusEl.textContent = "アップロード中…";
 
-    // === Firestore にも記録（notice.html 用） ===
-    await storeRef.collection("photoReports").add({
-      slotId,
-      taskLabel,
-      photoUrl: downloadUrl,
-      businessKey,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      deviceLabel: currentDeviceLabel || "未設定",
+try {
+  // 1) Storageへアップロード
+  const ref = storage.ref().child(path);
+
+  const snap = await new Promise((resolve, reject) => {
+    const uploadTask = ref.put(file, {
+      contentType: file.type || "application/octet-stream"
     });
 
-    // === チェックを解禁＆自動チェック ===
-    checkbox.dataset.photoUploaded = "1";
-    checkbox.dataset.photoLock = "0";
-    checkbox.checked = true;
+    uploadTask.on(
+      "state_changed",
+      (s) => {
+        const pct = s.totalBytes
+          ? Math.round((s.bytesTransferred / s.totalBytes) * 100)
+          : 0;
+        if (statusEl) statusEl.textContent = `アップロード中… ${pct}%`;
+      },
+      reject,
+      () => resolve(uploadTask.snapshot)
+    );
+  });
 
-    saveTasksToFirestore();
-    updateCompletionUI();
+  const downloadURL = await snap.ref.getDownloadURL();
 
-    logChecklistAction({
-      taskId: checkbox.dataset.taskId || null,
-      taskLabel,
-      action: "photoUploaded",
-      extra: { photoUrl: downloadUrl },
-    });
+  // 2) Firestoreに記録（写真ログ）
+  await storeRef.collection("photoReports").add({
+    businessKey,
+    slotId,
+    taskId,
+    taskLabel,
+    deviceLabel: localStorage.getItem("nb_lawson_device_label") || "未設定",
+    storagePath: path,
+    downloadURL,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    clientTimeISO: now.toISOString()
+  });
 
-    fileInput.value = "";
-    if (statusEl) statusEl.textContent = "アップロード完了";
-    btn.textContent = "再アップロード";
 
-  } catch (err) {
-    console.error("写真アップロードエラー", err);
-    alert("写真のアップロードに失敗しました。通信環境を確認してください。");
-    if (statusEl) statusEl.textContent = "アップロード失敗";
-  } finally {
-    btn.disabled = false;
+
+ // 3) 写真必須ロック解除 → 自動チェック
+  checkbox.dataset.photoUploaded = "1";
+  checkbox.dataset.photoLock = "0";
+  checkbox.checked = true;
+
+  // ✅ 写真アップロードした事実ログ（先に残す）
+  await logChecklistAction({
+    taskId,
+    taskLabel,
+    action: "photoUploaded",
+    extra: { slotId, storagePath: path }
+  });
+
+  // ✅ change発火 → 保存・進捗・checkログ・モーダル
+  checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+
+  // ✅ 成功表示（3秒で消す）
+  if (statusEl) {
+    clearTimeout(statusEl._clearTimer);
+    statusEl.textContent = "✅ アップロード完了！";
+    statusEl._clearTimer = setTimeout(() => {
+      statusEl.textContent = "";
+    }, 3000);
   }
+
+  // ファイル選択状態をリセット（運用事故防止）
+  fileInput.value = "";
+
+} catch (err) {
+  console.error("写真アップロード失敗:", err);
+  alert("写真アップロードに失敗しました。通信状態を確認してもう一度試してください。");
+
+  // 失敗時はロック維持
+  checkbox.dataset.photoUploaded = "0";
+  checkbox.dataset.photoLock = "1";
+  checkbox.checked = false;
+
+  if (statusEl) {
+    clearTimeout(statusEl._clearTimer);
+    statusEl.textContent = "❌ 失敗。もう一度試してください。";
+    statusEl._clearTimer = setTimeout(() => {
+      statusEl.textContent = "";
+    }, 3000);
+  }
+
+} finally {
+  // ✅ ボタン＆busy解除は絶対ここで戻す
+  btn.disabled = false;
+  btn.dataset.busy = "0";
+}
 });
+
+
 
 
 
