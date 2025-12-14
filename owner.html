@@ -3152,6 +3152,35 @@ async function saveShiftForChecklist(slotsMap, targetDate) {
     }
   }
 
+
+
+   
+// ▼ スタッフ画面を「クリックで確実に開く」保険
+  const openBtn = document.getElementById("openStaffIndexLink");
+  if (openBtn && currentStoreId) {
+
+    // <button> だった場合の事故防止
+    if (openBtn.tagName !== "A") {
+      openBtn.type = "button";
+    }
+
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      const staffIndexUrl =
+        `https://shiftask-pro.web.app/?store=${encodeURIComponent(currentStoreId)}`;
+
+      const w = window.open(staffIndexUrl, "_blank", "noopener");
+      if (!w) {
+        alert("ポップアップがブロックされています。ブラウザで許可してください。");
+      }
+    });
+  }
+
+
+
+   
+
  // ▼ スタッフ用お知らせセンタープレビュー（notice.html）
 const staffPreviewLink = document.getElementById("staffNoticePreviewLink");
 if (staffPreviewLink && typeof currentStoreId !== "undefined" && currentStoreId) {
