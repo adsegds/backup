@@ -250,7 +250,7 @@ function calcBarSegments(startMin, endMin) {
   if (eA <= 1440) {
     segs.push({ startIndex: Math.floor(sA / 60), endIndex: Math.ceil(eA / 60) });
   } else {
-    segs.push({ startIndex: Math.floor(sA / 60), endIndex: 24 });
+    segs.push({ startIndex: Math.floor(sA / 60), endIndex: HOUR_COLS });
     segs.push({ startIndex: 0, endIndex: Math.ceil((eA - 1440) / 60) });
   }
 
@@ -360,6 +360,15 @@ function renderHeader() {
     tr.appendChild(th);
   });
 
+  // ★ ここから右端の集計列
+  const thMH = document.createElement("th");
+  thMH.textContent = "M/H";
+  tr.appendChild(thMH);
+
+  const thCnt = document.createElement("th");
+  thCnt.textContent = "役員人数";
+  tr.appendChild(thCnt);
+
   thead.appendChild(tr);
 }
 
@@ -372,22 +381,33 @@ function renderBoard(week) {
     const members = week.map[ymd] || [];
 
     // その日1行（複数スタッフは縦に行追加）
-    if (!members.length) {
-      const tr = document.createElement("tr");
-      const tdDay = document.createElement("td");
-      tdDay.className = "shiftboard-day";
-      tdDay.innerHTML = `${ymd}<small>${jpDow(day)}</small>`;
-      tr.appendChild(tdDay);
+   if (!members.length) {
+  const tr = document.createElement("tr");
 
-      // 全部空き
-      const tdEmpty = document.createElement("td");
-      tdEmpty.className = "shiftboard-empty";
-      tdEmpty.colSpan = HOUR_COLS;
-      tr.appendChild(tdEmpty);
+  const tdDay = document.createElement("td");
+  tdDay.className = "shiftboard-day";
+  tdDay.innerHTML = `${ymd}<small>${jpDow(day)}</small>`;
+  tr.appendChild(tdDay);
 
-      tbody.appendChild(tr);
-      return;
-    }
+  // 全部空き（時間24列）
+  const tdEmpty = document.createElement("td");
+  tdEmpty.className = "shiftboard-empty";
+  tdEmpty.colSpan = HOUR_COLS;
+  tr.appendChild(tdEmpty);
+
+  // 右端の集計列（空日）
+  const tdMH = document.createElement("td");
+  tdMH.textContent = "-";
+  tr.appendChild(tdMH);
+
+  const tdCnt = document.createElement("td");
+  tdCnt.textContent = "0";
+  tr.appendChild(tdCnt);
+
+  tbody.appendChild(tr);
+  return;
+}
+
 
     members.forEach((m, mIndex) => {
       const tr = document.createElement("tr");
@@ -407,6 +427,10 @@ function renderBoard(week) {
 
       // ★分割セグメント計算
       const segments = calcBarSegments(startMin, endMin);
+
+      if (!segments.length) {
+  console.warn("segments empty:", ymd, m.name, m.start, m.end, startMin, endMin);
+}
 
       // segments を startIndex順で描画（最大2本）
       const segs = (segments || []).slice().sort((a,b)=>a.startIndex-b.startIndex);
@@ -460,6 +484,18 @@ function renderBoard(week) {
         tr.appendChild(tdAfter);
       }
 
+// ★追加（右端2列）
+const tdMH = document.createElement("td");
+tdMH.textContent = "-";
+tr.appendChild(tdMH);
+
+const tdCnt = document.createElement("td");
+tdCnt.textContent = "1";
+tr.appendChild(tdCnt);
+
+
+
+      
       tbody.appendChild(tr);
     });
   });
