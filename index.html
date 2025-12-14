@@ -2502,8 +2502,19 @@ let timeSlotConfigs = [
 
 
 
+ 
+
+
+
+
+
+
+
+
+
+
 // =============================
-// 今の時間＋今の時間帯ジャンプ
+// 今の時間＋今の時間帯ジャンプ（安定版）
 // =============================
 function initJumpBanner() {
   const timeDisplayEl = document.getElementById("time-display");
@@ -2516,6 +2527,15 @@ function initJumpBanner() {
   const weekNames = ["日", "月", "火", "水", "木", "金", "土"];
   const z2 = (n) => String(n).padStart(2, "0");
 
+  // ✅ ヘッダー高さ（ズレの原因になるので毎回取り直す）
+  function getHeaderHeight() {
+    const header =
+      document.querySelector(".top-bar") ||
+      document.querySelector("header");
+    return header ? Math.ceil(header.getBoundingClientRect().height) : 80;
+  }
+
+  // ✅ 表示エリア更新（今の時刻など）
   function updateTimeArea() {
     const now = new Date();
 
@@ -2530,9 +2550,8 @@ function initJumpBanner() {
 
     // 今日の営業日（7:00切替）
     const biz = new Date(now);
-    if (now.getHours() < RESET_HOUR_FOR_BANNER) {
-      biz.setDate(biz.getDate() - 1);
-    }
+    if (now.getHours() < RESET_HOUR_FOR_BANNER) biz.setDate(biz.getDate() - 1);
+
     const by = biz.getFullYear();
     const bm = z2(biz.getMonth() + 1);
     const bd = z2(biz.getDate());
@@ -2541,6 +2560,7 @@ function initJumpBanner() {
     const nextReset = new Date(biz);
     nextReset.setDate(nextReset.getDate() + 1);
     nextReset.setHours(RESET_HOUR_FOR_BANNER, 0, 0, 0);
+
     const nrM = z2(nextReset.getMonth() + 1);
     const nrD = z2(nextReset.getDate());
     const nrW = weekNames[nextReset.getDay()];
@@ -2556,10 +2576,33 @@ function initJumpBanner() {
   updateTimeArea();
   setInterval(updateTimeArea, 1000);
 
-  // ⭐ ここだけ差し替え（この中に全部まとめる）
-  jumpBtn.addEventListener("click", () => {
-    const now = new Date();
-    const hour = now.getHours();
+  // ✅ スクロール安定化（2段階補正）
+  function scrollToSlotStable(slotId) {
+    const target = document.getElementById(slotId); // ← これだけに統一
+    if (!target) return false;
+
+// ✅ 先に target を画面基準に寄せて “rectのブレ” を減らす
+    target.scrollIntoView({ behavior: "auto", block: "start" });
+
+    const offset = getHeaderHeight() + 12;
+
+    // ① まず1回目（smooth）
+    const y1 = window.scrollY + target.getBoundingClientRect().top - offset;
+    window.scrollTo({ top: Math.max(0, y1), behavior: "smooth" });
+
+    // ② ヘッダー高さ変化やDOM描画でズレることがあるので補正（auto）
+    setTimeout(() => {
+      const offset2 = getHeaderHeight() + 12;
+      const y2 = window.scrollY + target.getBoundingClientRect().top - offset2;
+      window.scrollTo({ top: Math.max(0, y2), behavior: "auto" });
+    }, 350);
+
+    return true;
+  }
+
+  // ✅ ジャンプボタン（多重登録防止）
+  const onJumpClick = () => {
+    const hour = new Date().getHours();
     const slotId = getCurrentSlotIdByHour(hour);
 
     if (!slotId) {
@@ -2567,29 +2610,13 @@ function initJumpBanner() {
       return;
     }
 
-    const target =
-      document.querySelector(`[data-slot="${slotId}"]`) ||
-      document.getElementById(slotId);
-
-    if (!target) {
-      alert("今の時間帯の欄がまだ作られていません。");
-      return;
-    }
-
-    // ⭐ ヘッダーの高さを自動取得
-    const header =
-      document.querySelector(".top-bar") ||
-      document.querySelector("header");
-    const headerHeight = header ? header.offsetHeight : 80;
-
-    const rect = target.getBoundingClientRect();
-    const targetY = rect.top + window.scrollY - headerHeight - 10; // ここは好みで調整
-
-    window.scrollTo({
-      top: targetY,
-      behavior: "smooth",
+    requestAnimationFrame(() => {
+      const ok = scrollToSlotStable(slotId);
+      if (!ok) alert("今の時間帯の欄がまだ作られていません。");
     });
-  });
+  };
+
+jumpBtn.onclick = onJumpClick; // ←これが必要
 }
 
 
@@ -2597,15 +2624,13 @@ function initJumpBanner() {
 
 
 
-         
-    
 
 
-         
 
-    
 
-        // 完了率バー作成
+
+
+// 完了率バー作成
         function initializeProgressBars() {
           timeSlotIds.forEach((slotId) => {
             const section = document.getElementById(slotId);
