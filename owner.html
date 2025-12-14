@@ -2757,7 +2757,7 @@
 
   function getSavedSession() {
     try {
-      const raw = localStorage.getItem(SESSION_KEY);
+      const raw = sessionStorage.getItem(SESSION_KEY); // ✅ここ
       if (!raw) return null;
       const data = JSON.parse(raw);
       if (!data || !data.storeId || !data.loggedAt) return null;
@@ -2769,7 +2769,7 @@
   }
 
   function saveSession(storeId) {
-    localStorage.setItem(
+    sessionStorage.setItem( // ✅ここ
       SESSION_KEY,
       JSON.stringify({ storeId, loggedAt: Date.now() })
     );
