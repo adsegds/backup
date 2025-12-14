@@ -3145,9 +3145,8 @@ try {
 
 } catch (err) {
   console.error("写真アップロード失敗:", err);
-  alert("写真アップロードに失敗しました。通信状態を確認してもう一度試してください。");
+  alert(`写真アップロード失敗: ${err?.code || ""}\n${err?.message || err}`);
 
-  // 失敗時はロック維持
   checkbox.dataset.photoUploaded = "0";
   checkbox.dataset.photoLock = "1";
   checkbox.checked = false;
@@ -3161,10 +3160,10 @@ try {
   }
 
 } finally {
-  // ✅ ボタン＆busy解除は絶対ここで戻す
   btn.disabled = false;
   btn.dataset.busy = "0";
 }
+
 });
 
 
