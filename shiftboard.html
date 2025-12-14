@@ -4,825 +4,523 @@
   <meta charset="UTF-8" />
   <title>シフト表（スタッフ用）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: #f5f5f5;
-    color: #111;
-    line-height: 1.6;
-    font-size: 14px;
-  }
-
-  .app {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 16px 12px 40px;
-  }
-
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  header h1 {
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  .meta {
-    font-size: 12px;
-    color: #666;
-  }
-
-  .controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-  }
-
-  .controls input[type="date"] {
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    background: #fff;
-    font-size: 13px;
-  }
-
-  .controls button {
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: none;
-    background: #111;
-    color: #fff;
-    font-size: 12px;
-    cursor: pointer;
-  }
-
-  .controls button:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  .card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
-    padding: 10px 10px 12px;
-    overflow-x: auto;  /* 画面が狭いPCだけ横スクロール */
-  }
-
-  .card h2 {
-    font-size: 15px;
-    margin-bottom: 4px;
-  }
-
-  .card-sub {
-    font-size: 12px;
-    color: #555;
-    margin-bottom: 8px;
-  }
-
-  .hint {
-    font-size: 11px;
-    color: #666;
-  }
-
-  .error {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #b00020;
-  }
-
-  /* ========== シフト表ツールバー ========== */
-
-  .shiftboard-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 8px 0 10px;
-    font-size: 12px;
-  }
-
-  .shiftboard-week-control {
-    display: flex;
-    gap: 4px;
-  }
-
-  .shiftboard-week-control button {
-    padding: 4px 8px;
-    border-radius: 999px;
-    border: 1px solid #ddd;
-    background: #f9fafb;
-    font-size: 11px;
-    cursor: pointer;
-  }
-
-  .shiftboard-week-control button:hover {
-    background: #fff;
-  }
-
-  .shiftboard-meta {
-    font-size: 12px;
-    color: #555;
-  }
-
-  .shiftboard-actions {
-    margin-left: auto;
-  }
-
-  .shiftboard-actions button {
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid #ddd;
-    background: #f9fafb;
-    font-size: 11px;
-    cursor: pointer;
-  }
-
-  .shiftboard-actions button:hover {
-    background: #fff;
-  }
-
-  /* ========== シフト表 本体 ========== */
-
-  .shiftboard-shell {
-    border-top: 1px solid #e2e2e2;
-    border-bottom: 1px solid #e2e2e2;
-    border-left: none;      /* 左枠なし */
-    border-right: none;     /* 右枠なし */
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-  }
-
-  .shiftboard-table {
-    width: 100%;            /* ★ カードの横幅いっぱいに広げる */
-    min-width: 1158px;      /* 狭い画面ではスクロール */
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: 11px;
-  }
-
-  .shiftboard-table thead {
-    background: linear-gradient(to bottom, #fafafa, #f3f4f6);
-  }
-
-  /* セルのボーダーだけでグリッドを作る（背景グリッドは無し） */
-  .shiftboard-table th,
-  .shiftboard-table td {
-    border-top: 1px solid #e5e7eb;
-    border-bottom: 1px solid #e5e7eb;
-    border-right: 1px solid #e5e7eb;
-    border-left: none;
-    padding: 4px 3px;
-    text-align: center;
-    background: transparent;
-  }
-
-  /* 一番右の列は右ボーダーも消す → 外側の線が消える */
-  .shiftboard-table th:last-child,
-  .shiftboard-table td:last-child {
-    border-right: none;
-  }
-
-  .shiftboard-col-date {
-    width: 78px;
-    background: #fafafa;
-    font-weight: 600;
-    vertical-align: top;
-  }
-
-  .shiftboard-date-main {
-    font-size: 12px;
-  }
-
-  .shiftboard-date-week {
-    font-size: 11px;
-    color: #555;
-  }
-
-  .shiftboard-date-week.sat {
-    color: #2563eb;
-  }
-
-  .shiftboard-date-week.sun {
-    color: #ef4444;
-  }
-
-  .shiftboard-col-hour {
-    width: 40px;              /* 1時間 = 40px */
-    font-weight: 500;
-    color: #4b5563;
-  }
-
-  /* 右側2列を少し広めにして、全体の余白を吸収させる */
-  .shiftboard-col-mh,
-  .shiftboard-col-people {
-    width: 80px;              /* ★ ちょい広げる */
-    background: #fafafa;
-    font-weight: 600;
-  }
-
-  .shiftboard-empty {
-    background: transparent;
-  }
-
-  .shiftboard-bar-cell {
-    padding: 0;
-    background: transparent;
-    height: 34px;
-  }
-
-  /* ★ ここで縦グリッド背景は一切なし（削除） */
-  /* （何も書かないことで縦線ゼロ） */
-
-  /* ========== 棒（シフトバー） ========== */
-
-  .shiftboard-bar {
-    height: 26px;
-    margin: 1px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #eef2ff, #e0f2fe);
-    border: 1px solid rgba(129, 140, 248, 0.45);
-    display: flex;
-    flex-direction: column;      /* 名前↑ 時間↓ */
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 0 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-    font-size: 11px;
-  }
-
-  .shiftboard-bar-name {
-    display: block;
-    font-weight: 600;
-    line-height: 1.1;
-    color: #111827;
-  }
-
-  .shiftboard-bar-time {
-    display: block;
-    font-size: 10px;
-    line-height: 1.1;
-    color: #4b5563;
-  }
-
-  @media (max-width: 640px) {
-    header h1 {
-      font-size: 16px;
-    }
-    .app {
-      padding-inline: 8px;
-    }
-  }
-
-  /* ========== 印刷用レイアウト ========== */
-  @media print {
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #fff;
-      font-size: 11px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f6f8;
+      color: #111;
+      line-height: 1.6;
+      font-size: 14px;
     }
 
     .app {
-      max-width: none;
-      margin: 0;
-      padding: 0;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 16px 12px 40px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    header h1 {
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .meta {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 10px 0 14px;
+    }
+    .btn {
+      border: 1px solid #ddd;
+      background: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary {
+      border-color: #c7d2fe;
+      background: #eef2ff;
+    }
+    .pill {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #ddd;
+      font-size: 12px;
+      color: #444;
     }
 
     .card {
-      box-shadow: none;
-      border-radius: 0;
-      overflow: visible;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
     }
 
-    .shiftboard-shell {
-      box-shadow: none;
-      border-radius: 0;
+    .table-wrap {
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
     }
 
-    .shiftboard-table {
+    table.shiftboard {
+      border-collapse: collapse;
+      min-width: 980px;
       width: 100%;
-      min-width: 0;
+    }
+    table.shiftboard th, table.shiftboard td {
+      border: 1px solid #eef0f3;
+      padding: 6px;
+      text-align: center;
+      white-space: nowrap;
     }
 
+    /* 左端（日付 / 曜日） */
+    .shiftboard-day {
+      position: sticky;
+      left: 0;
+      background: #fff;
+      z-index: 2;
+      min-width: 130px;
+      text-align: left !important;
+      padding-left: 10px !important;
+      font-weight: 800;
+    }
+    .shiftboard-day small { display: block; font-weight: 600; color: #666; }
+
+    /* ヘッダー行 */
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: #fafafa;
+      font-size: 12px;
+      color: #444;
+    }
+    thead th.shiftboard-day { z-index: 4; }
+
+    .shiftboard-empty {
+      background: #fff;
+    }
+
+    .shiftboard-bar-cell {
+      padding: 4px !important;
+      background: #fff;
+    }
     .shiftboard-bar {
-      height: 22px;
-      padding: 0 6px;
-      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: #111827;
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
     }
-  }
+    .shiftboard-bar-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+    .shiftboard-bar-time {
+      font-weight: 700;
+      color: rgba(255,255,255,.85);
+      font-size: 11px;
+    }
 
+    .notice {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+    }
+    .error {
+      color: #b91c1c;
+      font-weight: 800;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
 
-
-  /* ===== ここから追加：M/H と 複員人数の左に必ず縦線を出す ===== */
-  .shiftboard-table th.shiftboard-col-mh,
-  .shiftboard-table td.shiftboard-col-mh,
-  .shiftboard-table th.shiftboard-col-people,
-  .shiftboard-table td.shiftboard-col-people {
-    border-left: 1px solid #e5e7eb;
-  }
-  /* ===== ここまで追加 ===== */
-
-
-
-
-/* ===== 時間の「目印の柱」：6時・12時・18時・0時 ===== */
-/* ヘッダー行（時間ラベル） */
-.shiftboard-table thead th:nth-child(2),   /* 6時 */
-.shiftboard-table thead th:nth-child(8),   /* 12時 */
-.shiftboard-table thead th:nth-child(14),  /* 18時 */
-.shiftboard-table thead th:nth-child(20) { /* 0時 */
-  background-color: #f3f4f6;
-}
-
-/* 本文側のマス（バーが乗るところ） */
-.shiftboard-table tbody td:nth-child(2),
-.shiftboard-table tbody td:nth-child(8),
-.shiftboard-table tbody td:nth-child(14),
-.shiftboard-table tbody td:nth-child(20) {
-  background-color: #f9fafb;
-}
-
-/* ===== バーがあるセルだけ背景を白に戻す ===== */
-.shiftboard-bar-cell:has(.shiftboard-bar) {
-  background-color: #fff !important;
-}
-
-
-
-
-  
-</style>
-
-
-
-
-
-
-
-
-
+  <!-- Firebase SDK（compat） -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 </head>
+
 <body>
   <div class="app">
     <header>
       <div>
         <h1>シフト表</h1>
-        <div class="meta" id="storeLabel"></div>
+        <div class="meta" id="metaText">読み込み中...</div>
       </div>
-      <div class="meta" id="weekLabel"></div>
+      <div class="controls">
+        <button class="btn" id="prevBtn">◀ 前の週</button>
+        <button class="btn primary" id="thisBtn">今週</button>
+        <button class="btn" id="nextBtn">次の週 ▶</button>
+        <span class="pill" id="weekLabel">----</span>
+      </div>
     </header>
 
-    <div class="controls">
-      <label>
-        週の開始日：
-        <input type="date" id="weekStartInput" />
-      </label>
-      <button id="reloadBtn">読み込み</button>
-    </div>
-
-    <section class="card" id="shiftCard" style="display:none;">
-      <h2>1週間シフト（予定表スタイル）</h2>
-      <p class="card-sub">
-        オーナー画面「シフト作成（手動）」で登録した内容を、
-        ローソン端末のような横棒シフト表で表示します。
-      </p>
-
-      <div class="shiftboard-toolbar">
-        <div class="shiftboard-week-control">
-          <button type="button" id="prevWeekBtn">◀ 先週</button>
-          <button type="button" id="thisWeekBtn">今週</button>
-          <button type="button" id="nextWeekBtn">翌週 ▶</button>
-        </div>
-        <div class="shiftboard-meta">
-          対象週：<span id="shiftWeekRangeLabel"></span>
-        </div>
-        <div class="shiftboard-actions">
-          <button type="button" id="printBtn">印刷</button>
-        </div>
-      </div>
-
-      <div class="shiftboard-shell">
-        <table class="shiftboard-table">
-          <thead>
-            <tr>
-              <th class="shiftboard-col-date">勤務日付</th>
-              <!-- 6〜23, 0〜5 -->
-              <th class="shiftboard-col-hour">6</th>
-              <th class="shiftboard-col-hour">7</th>
-              <th class="shiftboard-col-hour">8</th>
-              <th class="shiftboard-col-hour">9</th>
-              <th class="shiftboard-col-hour">10</th>
-              <th class="shiftboard-col-hour">11</th>
-              <th class="shiftboard-col-hour">12</th>
-              <th class="shiftboard-col-hour">13</th>
-              <th class="shiftboard-col-hour">14</th>
-              <th class="shiftboard-col-hour">15</th>
-              <th class="shiftboard-col-hour">16</th>
-              <th class="shiftboard-col-hour">17</th>
-              <th class="shiftboard-col-hour">18</th>
-              <th class="shiftboard-col-hour">19</th>
-              <th class="shiftboard-col-hour">20</th>
-              <th class="shiftboard-col-hour">21</th>
-              <th class="shiftboard-col-hour">22</th>
-              <th class="shiftboard-col-hour">23</th>
-              <th class="shiftboard-col-hour">0</th>
-              <th class="shiftboard-col-hour">1</th>
-              <th class="shiftboard-col-hour">2</th>
-              <th class="shiftboard-col-hour">3</th>
-              <th class="shiftboard-col-hour">4</th>
-              <th class="shiftboard-col-hour">5</th>
-              <th class="shiftboard-col-mh">M/H</th>
-              <th class="shiftboard-col-people">複員人数</th>
-            </tr>
-          </thead>
-          <tbody id="shiftboardBody">
-            <!-- JSで行を描画 -->
-          </tbody>
+    <div class="card">
+      <div class="table-wrap">
+        <table class="shiftboard" id="shiftTable">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
         </table>
       </div>
-
-      <p class="hint" style="margin-top:8px;">
-        ※ 横の時間軸は「6〜23時 → 0〜5時」の順になっています（ローソン端末と同じイメージ）。<br>
-        ※ 夜勤帯（22:00〜翌5:00など）は、日付またぎでも横棒がつながるように表示します。
-      </p>
-    </section>
-
-    <div class="error" id="errorBox" style="display:none;"></div>
+      <div class="notice">
+        表示軸：06:00 → 05:00（24列） / 日跨ぎシフトは最大2本に分割して表示
+      </div>
+      <div class="error" id="errorBox" style="display:none;"></div>
+    </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+/* =============================
+   設定（ここだけ自分のに！）
+============================= */
+// ✅ 1) Firebase config を自分のに置換
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+};
 
-  <script>
-    // =============================
-    // Firebase 設定
-    // =============================
-    const firebaseConfig = {
-      apiKey: "AIzaSyAPBMvTpzKCcPxLETncBqVR8fzf0cqKirc",
-      authDomain: "lawson-workflow.firebaseapp.com",
-      projectId: "lawson-workflow",
-      storageBucket: "lawson-workflow.firebasestorage.app",
-      messagingSenderId: "335371795694",
-      appId: "1:335371795694:web:3b0950a616d368b284c7ff",
-      measurementId: "G-BGENZNZMRC"
-    };
+// ✅ 2) storeId（Firestore の stores/{storeId} のやつ）
+const STORE_ID = "nambucho"; // 例：nambucho
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+/* =============================
+   初期化
+============================= */
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    // =============================
-    // ユーティリティ
-    // =============================
-    function getQueryParam(name) {
-      const params = new URLSearchParams(location.search);
-      return params.get(name) || "";
+/* =============================
+   表示軸（6時始まり）
+============================= */
+const AXIS_START_HOUR = 6;
+const AXIS_START = AXIS_START_HOUR * 60;   // 06:00 を 0 とする
+const TOTAL_COLS = 24;                     // 1時間刻み24列
+const DISPLAY_HOURS = Array.from({length: 24}, (_,i)=> (AXIS_START_HOUR + i) % 24);
+
+/* ===== 6時始まりの軸でバーを分割して返す ===== */
+function toAxisMin(min) {
+  return (min - AXIS_START + 1440) % 1440; // 0..1439
+}
+
+// start/end(通常の0..1439) → 6時軸での「セル範囲」に分割（最大2本）
+function calcBarSegments(startMin, endMin) {
+  if (startMin == null || endMin == null) return [];
+
+  let e = endMin;
+
+  // 日跨ぎ補正（22:00-05:00など）
+  if (e <= startMin) e += 1440;
+
+  // 6時軸へ変換
+  let sA = toAxisMin(startMin);
+  let eA = toAxisMin(e % 1440);
+
+  // e が翌日側なら、軸上でも翌日扱い
+  if (e > 1440 && eA <= sA) eA += 1440;
+  if (eA <= sA) eA += 1440;
+
+  const segs = [];
+  if (eA <= 1440) {
+    segs.push({ startIndex: Math.floor(sA / 60), endIndex: Math.ceil(eA / 60) });
+  } else {
+    segs.push({ startIndex: Math.floor(sA / 60), endIndex: 24 });
+    segs.push({ startIndex: 0, endIndex: Math.ceil((eA - 1440) / 60) });
+  }
+
+  return segs
+    .map(s => ({ startIndex: s.startIndex, span: Math.max(1, s.endIndex - s.startIndex) }))
+    .filter(s => s.startIndex >= 0 && s.startIndex < 24 && s.span > 0);
+}
+
+/* =============================
+   ユーティリティ
+============================= */
+function pad2(n){ return String(n).padStart(2,"0"); }
+
+function parseHHMM(str) {
+  if (!str) return null;
+  const m = String(str).trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  const h = Number(m[1]), mi = Number(m[2]);
+  if (Number.isNaN(h) || Number.isNaN(mi)) return null;
+  return ((h % 24) * 60 + (mi % 60));
+}
+
+// YYYY-MM-DD（JST）で週の月曜を取る
+function getMonday(d) {
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = (date.getDay() + 6) % 7; // Mon=0
+  date.setDate(date.getDate() - day);
+  return date;
+}
+function addDays(d, n) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() + n);
+  return x;
+}
+function toYMD(d) {
+  const y = d.getFullYear();
+  const m = pad2(d.getMonth()+1);
+  const da = pad2(d.getDate());
+  return `${y}-${m}-${da}`;
+}
+function jpDow(d) {
+  return ["日","月","火","水","木","金","土"][d.getDay()];
+}
+
+/* =============================
+   データ取得（柔軟に吸収）
+   Firestore 例：
+   stores/{storeId}/shifts/{YYYY-MM-DD}
+   1) { members:[{name,start,end}, ...] }
+   2) { staff:[{name,start,end}, ...] }
+   3) { shifts:[{name,start,end}, ...] }
+============================= */
+function normalizeMembers(data) {
+  const arr =
+    (Array.isArray(data?.members) && data.members) ||
+    (Array.isArray(data?.staff) && data.staff) ||
+    (Array.isArray(data?.shifts) && data.shifts) ||
+    [];
+
+  return arr.map(x => ({
+    name: x?.name || x?.staffName || "スタッフ",
+    start: x?.start || x?.startTime || x?.from || "",
+    end: x?.end || x?.endTime || x?.to || "",
+  })).filter(x => x.start && x.end);
+}
+
+async function fetchWeekShifts(mondayDate) {
+  const days = Array.from({length: 7}, (_,i)=> addDays(mondayDate, i));
+  const ymds = days.map(toYMD);
+
+  // shifts コレクション想定
+  const col = db.collection("stores").doc(STORE_ID).collection("shifts");
+
+  // 7日分まとめて取得
+  const snaps = await Promise.all(ymds.map(id => col.doc(id).get().catch(()=>null)));
+
+  const map = {};
+  snaps.forEach((snap, idx) => {
+    const ymd = ymds[idx];
+    if (!snap || !snap.exists) {
+      map[ymd] = [];
+      return;
+    }
+    const data = snap.data() || {};
+    map[ymd] = normalizeMembers(data);
+  });
+
+  return { days, ymds, map };
+}
+
+/* =============================
+   描画
+============================= */
+function renderHeader() {
+  const thead = document.getElementById("thead");
+  thead.innerHTML = "";
+  const tr = document.createElement("tr");
+
+  const th0 = document.createElement("th");
+  th0.className = "shiftboard-day";
+  th0.textContent = "日付";
+  tr.appendChild(th0);
+
+  DISPLAY_HOURS.forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = `${pad2(h)}時`;
+    tr.appendChild(th);
+  });
+
+  thead.appendChild(tr);
+}
+
+function renderBoard(week) {
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  week.days.forEach((day, idx) => {
+    const ymd = week.ymds[idx];
+    const members = week.map[ymd] || [];
+
+    // その日1行（複数スタッフは縦に行追加）
+    if (!members.length) {
+      const tr = document.createElement("tr");
+      const tdDay = document.createElement("td");
+      tdDay.className = "shiftboard-day";
+      tdDay.innerHTML = `${ymd}<small>${jpDow(day)}</small>`;
+      tr.appendChild(tdDay);
+
+      // 全部空き
+      const tdEmpty = document.createElement("td");
+      tdEmpty.className = "shiftboard-empty";
+      tdEmpty.colSpan = TOTAL_COLS;
+      tr.appendChild(tdEmpty);
+
+      tbody.appendChild(tr);
+      return;
     }
 
-    function addDays(iso, add) {
-      const d = new Date(iso);
-      d.setDate(d.getDate() + add);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate(), 10).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    }
+    members.forEach((m, mIndex) => {
+      const tr = document.createElement("tr");
 
-    function formatDateShort(iso) {
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return iso;
-      const m = d.getMonth() + 1;
-      const day = d.getDate();
-      return `${m}/${day}`;
-    }
-
-    function getWeekday(d) {
-      const labels = ["日","月","火","水","木","金","土"];
-      return labels[d.getDay()] || "";
-    }
-
-    function timeStrToMin(str) {
-      if (!str) return null;
-      const [h, m] = str.split(":").map(n => parseInt(n, 10));
-      if (Number.isNaN(h) || Number.isNaN(m)) return null;
-      return h * 60 + m;
-    }
-
-    // 6〜23,0〜5 の並び（ローソン端末風）
-    const DISPLAY_HOURS = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,1,2,3,4,5];
-    const HOUR_TO_INDEX = {};
-    DISPLAY_HOURS.forEach((h, i) => { HOUR_TO_INDEX[h] = i; });
-    const TOTAL_COLS = DISPLAY_HOURS.length; // 24
-
-    function calcBarRange(startMin, endMin) {
-      if (startMin == null || endMin == null || endMin <= startMin) return null;
-
-      // 0〜24h の範囲で扱う（跨ぎにも一応対応）
-      const startHour = Math.floor(startMin / 60);
-      const endHour = Math.ceil(endMin / 60);
-
-      const indices = [];
-      for (let h = startHour; h < endHour; h++) {
-        const hMod = ((h % 24) + 24) % 24;
-        const idx = HOUR_TO_INDEX[hMod];
-        if (idx != null) indices.push(idx);
+      // 日付セル（最初のスタッフ行だけ表示、他は空にするならここで調整）
+      const tdDay = document.createElement("td");
+      tdDay.className = "shiftboard-day";
+      if (mIndex === 0) {
+        tdDay.innerHTML = `${ymd}<small>${jpDow(day)}</small>`;
+      } else {
+        tdDay.innerHTML = `<small style="opacity:.0">.</small>`;
       }
-      if (!indices.length) return null;
+      tr.appendChild(tdDay);
 
-      indices.sort((a, b) => a - b);
-      const startIndex = indices[0];
-      const endIndex = indices[indices.length - 1] + 1;
-      return {
-        startIndex,
-        span: Math.max(1, endIndex - startIndex)
-      };
-    }
+      const startMin = parseHHMM(m.start);
+      const endMin   = parseHHMM(m.end);
 
-    function createDateCellContent(iso) {
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) {
-        return { html: `<div class="shiftboard-date-main">${iso}</div>`, wclass: "" };
-      }
-      const label = formatDateShort(iso);
-      const w = getWeekday(d);
-      const wd = d.getDay();
-      let wclass = "";
-      if (wd === 0) wclass = "sun";
-      else if (wd === 6) wclass = "sat";
-      const html = `
-        <div class="shiftboard-date-main">${label}</div>
-        <div class="shiftboard-date-week ${wclass}">${w}</div>
-      `;
-      return { html, wclass };
-    }
+      // ★分割セグメント計算
+      const segments = calcBarSegments(startMin, endMin);
 
-    // =============================
-    // メイン処理
-    // =============================
-    document.addEventListener("DOMContentLoaded", () => {
-      const storeId = getQueryParam("store");
-      const storeLabel = document.getElementById("storeLabel");
-      const weekLabel = document.getElementById("weekLabel");
-      const weekStartInput = document.getElementById("weekStartInput");
-      const reloadBtn = document.getElementById("reloadBtn");
-      const errorBox = document.getElementById("errorBox");
-      const shiftCard = document.getElementById("shiftCard");
-      const shiftWeekRangeLabel = document.getElementById("shiftWeekRangeLabel");
-      const tbody = document.getElementById("shiftboardBody");
-      const prevWeekBtn = document.getElementById("prevWeekBtn");
-      const nextWeekBtn = document.getElementById("nextWeekBtn");
-      const thisWeekBtn = document.getElementById("thisWeekBtn");
-      const printBtn = document.getElementById("printBtn");
+      // segments を startIndex順で描画（最大2本）
+      const segs = (segments || []).slice().sort((a,b)=>a.startIndex-b.startIndex);
 
-      if (!storeId) {
-        errorBox.style.display = "block";
-        errorBox.textContent = "URLに ?store=店舗ID を付けてアクセスしてください。";
-        reloadBtn.disabled = true;
-        return;
-      }
+      let cursor = 0;
+      segs.forEach((seg, sidx) => {
+        const before = Math.max(0, seg.startIndex - cursor);
+        const barSpan = Math.max(1, seg.span);
 
-      storeLabel.textContent = `店舗ID: ${storeId}`;
-
-      // 初期値：今日を含む週の月曜
-      const today = new Date();
-      const dow = today.getDay(); // 0=日
-      const diffToMon = (dow + 6) % 7; // 月=0
-      today.setDate(today.getDate() - diffToMon);
-      const y = today.getFullYear();
-      const m = String(today.getMonth() + 1).padStart(2, "0");
-      const d = String(today.getDate(), 10).padStart(2, "0");
-      const defaultWeek = `${y}-${m}-${d}`;
-      weekStartInput.value = defaultWeek;
-
-      function updateWeekLabels(weekStartIso) {
-        const firstIso = addDays(weekStartIso, 0);
-        const lastIso  = addDays(weekStartIso, 6);
-        weekLabel.textContent =
-          `${formatDateShort(firstIso)}〜${formatDateShort(lastIso)}`;
-        shiftWeekRangeLabel.textContent =
-          `${formatDateShort(firstIso)}〜${formatDateShort(lastIso)}`;
-      }
-
-      async function loadWeek(storeId, weekStart) {
-        errorBox.style.display = "none";
-        shiftCard.style.display = "none";
-        reloadBtn.disabled = true;
-        reloadBtn.textContent = "読み込み中…";
-
-        try {
-          const snap = await db
-            .collection("stores")
-            .doc(storeId)
-            .collection("shiftWeeks")
-            .doc(weekStart)
-            .get();
-
-          if (!snap.exists) {
-            throw new Error("この週のシフトはまだ登録されていません。");
-          }
-
-          const data = snap.data() || {};
-          renderBoard(data, weekStart);
-          updateWeekLabels(weekStart);
-          shiftCard.style.display = "block";
-        } catch (err) {
-          console.error(err);
-          errorBox.style.display = "block";
-          errorBox.textContent = err.message || "シフトの読み込みに失敗しました。";
-        } finally {
-          reloadBtn.disabled = false;
-          reloadBtn.textContent = "読み込み";
+        if (before > 0) {
+          const tdBefore = document.createElement("td");
+          tdBefore.className = "shiftboard-empty";
+          tdBefore.colSpan = before;
+          tr.appendChild(tdBefore);
+          cursor += before;
         }
+
+        const tdBar = document.createElement("td");
+        tdBar.className = "shiftboard-bar-cell";
+        tdBar.colSpan = barSpan;
+
+        const barDiv = document.createElement("div");
+        barDiv.className = "shiftboard-bar";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "shiftboard-bar-name";
+        nameSpan.textContent = m.name || "スタッフ";
+
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "shiftboard-bar-time";
+        timeSpan.textContent = `${m.start}〜${m.end}`;
+
+        // ✅ もし「2本目は名前いらん」ならここだけ一瞬で変えられる：
+        // if (sidx === 1) nameSpan.textContent = "";
+        // if (sidx === 1) timeSpan.textContent = ""; などもOK
+
+        barDiv.appendChild(nameSpan);
+        barDiv.appendChild(timeSpan);
+        tdBar.appendChild(barDiv);
+        tr.appendChild(tdBar);
+
+        cursor += barSpan;
+      });
+
+      // 残りの空きを埋める
+      const after = Math.max(0, TOTAL_COLS - cursor);
+      if (after > 0) {
+        const tdAfter = document.createElement("td");
+        tdAfter.className = "shiftboard-empty";
+        tdAfter.colSpan = after;
+        tr.appendChild(tdAfter);
       }
 
-      function renderBoard(data, weekStart) {
-        const members = data.members || [];
-        tbody.innerHTML = "";
-
-        const dayIsos = [];
-        for (let i = 0; i < 7; i++) {
-          dayIsos.push(addDays(weekStart, i));
-        }
-
-        dayIsos.forEach(dayIso => {
-          const shifts = [];
-          let totalMinutes = 0;
-
-          members.forEach(m => {
-            const dayInfo =
-              (m.days && m.days[dayIso]) ||
-              (m.days && m.days[dayIso.replace(/-/g, "/")]) ||
-              null;
-
-            if (!dayInfo || !dayInfo.start || !dayInfo.end) return;
-
-            const startMin = timeStrToMin(dayInfo.start);
-            const endMin   = timeStrToMin(dayInfo.end);
-            if (startMin == null || endMin == null || endMin <= startMin) return;
-
-            const range = calcBarRange(startMin, endMin);
-            if (!range) return;
-
-            totalMinutes += (endMin - startMin);
-
-            shifts.push({
-              name: m.name || "スタッフ",
-              startTime: dayInfo.start,
-              endTime: dayInfo.end,
-              startIndex: range.startIndex,
-              span: range.span
-            });
-          });
-
-          const rowCount = Math.max(1, shifts.length);
-          const { html: dateHtml } = createDateCellContent(dayIso);
-          const peopleCount = shifts.length;
-          const mhHours = Math.floor(totalMinutes / 60);
-          const mhMin   = totalMinutes % 60;
-          const mhLabel = totalMinutes
-            ? `${mhHours}:${String(mhMin).padStart(2, "0")}`
-            : "-";
-
-          if (!shifts.length) {
-            // シフトなしの日：空行1本
-            const tr = document.createElement("tr");
-
-            const tdDate = document.createElement("td");
-            tdDate.className = "shiftboard-col-date";
-            tdDate.innerHTML = dateHtml;
-            tr.appendChild(tdDate);
-
-            const tdEmpty = document.createElement("td");
-            tdEmpty.className = "shiftboard-empty";
-            tdEmpty.colSpan = TOTAL_COLS;
-            tr.appendChild(tdEmpty);
-
-            const tdMh = document.createElement("td");
-            tdMh.className = "shiftboard-col-mh";
-            tdMh.textContent = "-";
-            tr.appendChild(tdMh);
-
-            const tdPeople = document.createElement("td");
-            tdPeople.className = "shiftboard-col-people";
-            tdPeople.textContent = "0";
-            tr.appendChild(tdPeople);
-
-            tbody.appendChild(tr);
-            return;
-          }
-
-          shifts.forEach((shift, idx) => {
-            const tr = document.createElement("tr");
-
-            if (idx === 0) {
-              const tdDate = document.createElement("td");
-              tdDate.className = "shiftboard-col-date";
-              tdDate.rowSpan = rowCount;
-              tdDate.innerHTML = dateHtml;
-              tr.appendChild(tdDate);
-            }
-
-            // 空き → バー → 空き の3セルで 24時間を表現
-            const before = Math.max(0, shift.startIndex);
-            const barSpan = Math.max(1, shift.span);
-            const after = Math.max(0, TOTAL_COLS - before - barSpan);
-
-            if (before > 0) {
-              const tdBefore = document.createElement("td");
-              tdBefore.className = "shiftboard-empty";
-              tdBefore.colSpan = before;
-              tr.appendChild(tdBefore);
-            }
-
-            const tdBar = document.createElement("td");
-            tdBar.className = "shiftboard-bar-cell";
-            tdBar.colSpan = barSpan;
-            const barDiv = document.createElement("div");
-            barDiv.className = "shiftboard-bar";
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "shiftboard-bar-name";
-            nameSpan.textContent = shift.name;
-            const timeSpan = document.createElement("span");
-            timeSpan.className = "shiftboard-bar-time";
-            timeSpan.textContent = `${shift.startTime}〜${shift.endTime}`;
-            barDiv.appendChild(nameSpan);
-            barDiv.appendChild(timeSpan);
-            tdBar.appendChild(barDiv);
-            tr.appendChild(tdBar);
-
-            if (after > 0) {
-              const tdAfter = document.createElement("td");
-              tdAfter.className = "shiftboard-empty";
-              tdAfter.colSpan = after;
-              tr.appendChild(tdAfter);
-            }
-
-            if (idx === 0) {
-              const tdMh = document.createElement("td");
-              tdMh.className = "shiftboard-col-mh";
-              tdMh.rowSpan = rowCount;
-              tdMh.textContent = mhLabel;
-              tr.appendChild(tdMh);
-
-              const tdPeople = document.createElement("td");
-              tdPeople.className = "shiftboard-col-people";
-              tdPeople.rowSpan = rowCount;
-              tdPeople.textContent = String(peopleCount);
-              tr.appendChild(tdPeople);
-            }
-
-            tbody.appendChild(tr);
-          });
-        });
-      }
-
-      // イベント
-      reloadBtn.addEventListener("click", () => {
-        const weekStart = weekStartInput.value;
-        if (!weekStart) {
-          alert("週の開始日を選択してください。");
-          return;
-        }
-        loadWeek(storeId, weekStart);
-      });
-
-      prevWeekBtn.addEventListener("click", () => {
-        const base = weekStartInput.value || defaultWeek;
-        const prev = addDays(base, -7);
-        weekStartInput.value = prev;
-        loadWeek(storeId, prev);
-      });
-
-      nextWeekBtn.addEventListener("click", () => {
-        const base = weekStartInput.value || defaultWeek;
-        const next = addDays(base, 7);
-        weekStartInput.value = next;
-        loadWeek(storeId, next);
-      });
-
-      thisWeekBtn.addEventListener("click", () => {
-        weekStartInput.value = defaultWeek;
-        loadWeek(storeId, defaultWeek);
-      });
-
-      printBtn.addEventListener("click", () => {
-        window.print();
-      });
-
-      // 初回ロード
-      loadWeek(storeId, weekStartInput.value);
+      tbody.appendChild(tr);
     });
-  </script>
+  });
+}
+
+/* =============================
+   週ナビ
+============================= */
+let currentMonday = getMonday(new Date());
+
+function setWeekLabel() {
+  const from = toYMD(currentMonday);
+  const to = toYMD(addDays(currentMonday, 6));
+  document.getElementById("weekLabel").textContent = `${from} 〜 ${to}`;
+}
+
+function setMeta(text) {
+  document.getElementById("metaText").textContent = text;
+}
+function showError(err) {
+  const box = document.getElementById("errorBox");
+  box.style.display = "block";
+  box.textContent = String(err?.stack || err || "");
+}
+function clearError() {
+  const box = document.getElementById("errorBox");
+  box.style.display = "none";
+  box.textContent = "";
+}
+
+async function reload() {
+  clearError();
+  setMeta("読み込み中...");
+  setWeekLabel();
+  renderHeader();
+
+  try {
+    const week = await fetchWeekShifts(currentMonday);
+    renderBoard(week);
+    setMeta(`storeId: ${STORE_ID} / ${toYMD(currentMonday)}週`);
+  } catch (e) {
+    showError(e);
+    setMeta("読み込み失敗");
+  }
+}
+
+document.getElementById("prevBtn").addEventListener("click", () => {
+  currentMonday = addDays(currentMonday, -7);
+  reload();
+});
+document.getElementById("nextBtn").addEventListener("click", () => {
+  currentMonday = addDays(currentMonday, 7);
+  reload();
+});
+document.getElementById("thisBtn").addEventListener("click", () => {
+  currentMonday = getMonday(new Date());
+  reload();
+});
+
+reload();
+</script>
+
 </body>
 </html>
