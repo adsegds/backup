@@ -221,8 +221,8 @@ const db = firebase.firestore();
 ============================= */
 const AXIS_START_HOUR = 6;
 const AXIS_START = AXIS_START_HOUR * 60;   // 06:00 を 0 とする
-const HOUR_COLS = DISPLAY_HOURS.length; // 24
 const DISPLAY_HOURS = Array.from({length: 24}, (_,i)=> (AXIS_START_HOUR + i) % 24);
+const HOUR_COLS = DISPLAY_HOURS.length; // 24
 
 /* ===== 6時始まりの軸でバーを分割して返す ===== */
 function toAxisMin(min) {
