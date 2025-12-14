@@ -1921,50 +1921,47 @@ async function loadTodayShiftStaff() {
     }
 
     // =============================
-    // 時間帯ID 判定（owner.html の timeSlots にも対応）
-    // =============================
-    let dynamicTimeSlots = null; // [{id,label,fromHour,toHour,note}, …]
+// 時間帯ID 判定（owner.html の timeSlots にも対応）
+// =============================
+let dynamicTimeSlots = null; // [{id,label,fromHour,toHour,note}, …]
 
-    function setDynamicTimeSlots(configs) {
-      dynamicTimeSlots = Array.isArray(configs) && configs.length ? configs : null;
-    }
-
-    function getCurrentSlotIdByHour(hour) {
-      const h = ((hour % 24) + 24) % 24;
-
-      // ★ カスタム timeSlots がある場合はこちらを優先
-      if (dynamicTimeSlots && dynamicTimeSlots.length) {
-        for (const s of dynamicTimeSlots) {
-          const from = Number(
-            s.fromHour ?? s.startHour ?? s.from ?? s.start ?? 0
-          );
-          const to = Number(
-            s.toHour ?? s.endHour ?? s.to ?? s.end ?? 0
-          );
-          if (Number.isNaN(from) || Number.isNaN(to)) continue;
-
-          if (from === to) continue; // 無効
-
-          if (from < to) {
-            // 通常パターン（例：9〜12）
-            if (h >= from && h < to) return s.id;
-          } else {
-            // 0時またぎ（例：21〜3）
-            if (h >= from || h < to) return s.id;
-          }
-        }
-        // どれにも当てはまらなければ先頭を返す
-return dynamicTimeSlots[0]?.id || "t6-9";
+function setDynamicTimeSlots(configs) {
+  dynamicTimeSlots = Array.isArray(configs) && configs.length ? configs : null;
 }
 
-// ★ カスタムなし → 新固定ロジック（7枠）
-if (h >= 6 && h < 9)    return "t6-9";
-if (h >= 9 && h < 12)   return "t9-12";
-if (h >= 12 && h < 14)  return "t12-14";
-if (h >= 14 && h < 15)  return "t14-15";
-if (h >= 15 && h < 18)  return "t15-18";
-if (h >= 18 && h < 21)  return "t18-21";
-return "t21-7";
+function getCurrentSlotIdByHour(hour) {
+  const h = ((hour % 24) + 24) % 24;
+
+  // ★ カスタム timeSlots がある場合はこちらを優先
+  if (dynamicTimeSlots && dynamicTimeSlots.length) {
+    for (const s of dynamicTimeSlots) {
+      const from = Number(s.fromHour ?? s.startHour ?? s.from ?? s.start ?? 0);
+      const to   = Number(s.toHour   ?? s.endHour   ?? s.to   ?? s.end   ?? 0);
+      if (Number.isNaN(from) || Number.isNaN(to)) continue;
+      if (from === to) continue; // 無効
+
+      if (from < to) {
+        // 通常パターン（例：9〜12）
+        if (h >= from && h < to) return s.id;
+      } else {
+        // 0時またぎ（例：21〜3）
+        if (h >= from || h < to) return s.id;
+      }
+    }
+    // どれにも当てはまらなければ先頭を返す
+    return dynamicTimeSlots[0]?.id || "t6-9";
+  }
+
+  // ★ カスタムなし → 新固定ロジック（7枠）
+  if (h >= 6 && h < 9)    return "t6-9";
+  if (h >= 9 && h < 12)   return "t9-12";
+  if (h >= 12 && h < 14)  return "t12-14";
+  if (h >= 14 && h < 15)  return "t14-15";
+  if (h >= 15 && h < 18)  return "t15-18";
+  if (h >= 18 && h < 21)  return "t18-21";
+  return "t21-7";
+}
+
 
 
     function scrollToCurrentTimeSlot() {
@@ -2946,9 +2943,11 @@ async function loadTaskDefinitions() {
         // チェック → Firestore + ログ
         document.body.addEventListener("change", (e) => {
   const target = e.target;
+
+  // ① 入口フィルター（絶対残す）
   if (!target.matches('input[type="checkbox"][data-task-id]')) return;
 
-  // 🆕 写真必須タスクは、写真アップロードが終わるまでロック
+  // ② 写真必須ロック
   if (target.dataset.photoLock === "1" && target.dataset.photoUploaded !== "1") {
     e.preventDefault?.();
     target.checked = false;
@@ -2958,40 +2957,49 @@ async function loadTaskDefinitions() {
 
   if (applyingRemote) return;
 
-  const li = target.closest(".task-item");
-  const slotId = li?.dataset.slotId || null;
+  // ③ li限定で拾う（label事故防止）
+  const li = target.closest("li.task-item");
+  if (!li) return;
+
+  const slotId = li.dataset.slotId || null;
   const taskLabel =
-    li?.dataset.taskLabel ||
-    li?.querySelector(".task-text")?.textContent ||
+    li.dataset.taskLabel ||
+    li.querySelector(".task-text")?.textContent ||
     null;
   const taskId = target.dataset.taskId || null;
 
-  // ★ 先に保存・完了率更新
+  // ④ 保存・UI更新
   saveTasksToFirestore();
   updateCompletionUI();
 
-  // ★ まずチェックしたログ（共通）
+  // ⑤ 共通ログ
   logChecklistAction({
     taskId,
     taskLabel,
     action: target.checked ? "check" : "uncheck"
   });
 
-  // ★ チェックが ON になったときだけ、スタッフ選択モーダル
+  // ⑥ 写真アップ由来の自動チェックならモーダル出さない
+  if (target.dataset.autoChecked === "1") {
+    delete target.dataset.autoChecked;
+    return;
+  }
+
+  // ⑦ 手動チェックのみスタッフ選択
   if (target.checked && slotId) {
     openStaffSelectModal(slotId, taskLabel || "").then((staffName) => {
-      if (!staffName) return; // キャンセル or シフトなし
+      if (!staffName) return;
 
-      // 追加ログ：誰がやったか
       logChecklistAction({
         taskId,
         taskLabel,
         action: "checkedByStaff",
-        extra: { staffName, slotId },
+        extra: { staffName, slotId }
       });
     });
   }
 });
+
 
 
 
@@ -3513,14 +3521,20 @@ document.body.addEventListener("click", async (e) => {
         }
 
         // ★ ここで timeSlots を読み込み → その後にバーとタスクを構築
-        // ★ ここで timeSlots を読み込み → その後にバーとタスクを構築
-loadTimeSlotsConfig().then(() => {
+       loadTimeSlotsConfig().then(() => {
   initializeProgressBars();
   loadTaskDefinitions().then(() => {
     updateCompletionUI();
-    initJumpBanner();   // ← ここでジャンプバナーを動かす
+    initJumpBanner();
+
+    // ★ デバッグ用（今だけ）
+    console.log(
+      "current slotId =",
+      getCurrentSlotIdByHour(new Date().getHours())
+    );
   });
 });
+
 
 setupDailyResetAt7AM();
       } // startApp ここまで
