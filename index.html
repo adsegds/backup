@@ -1954,19 +1954,18 @@ async function loadTodayShiftStaff() {
           }
         }
         // どれにも当てはまらなければ先頭を返す
-        return dynamicTimeSlots[0]?.id || "t6-8";
-      }
+return dynamicTimeSlots[0]?.id || "t6-9";
+}
 
-      // ★ カスタムなし → 旧固定ロジック
-      if (h >= 6 && h < 9)  return "t6-8";
-      if (h >= 9 && h < 12) return "t9-11";
-      if (h >= 12 && h < 15) return "t12-14";
-      if (h >= 15 && h < 18) return "t15-17";
-      if (h >= 18 && h < 21) return "t18-20";
-      if (h >= 21 && h < 24) return "t21-23";
-      if (h >= 0 && h < 3)   return "t0-2";
-      return "t3-5";
-    }
+// ★ カスタムなし → 新固定ロジック（7枠）
+if (h >= 6 && h < 9)    return "t6-9";
+if (h >= 9 && h < 12)   return "t9-12";
+if (h >= 12 && h < 14)  return "t12-14";
+if (h >= 14 && h < 15)  return "t14-15";
+if (h >= 15 && h < 18)  return "t15-18";
+if (h >= 18 && h < 21)  return "t18-21";
+return "t21-7";
+
 
     function scrollToCurrentTimeSlot() {
       const now = new Date();
