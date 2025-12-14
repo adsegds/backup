@@ -1941,9 +1941,7 @@
           </div>
 
           <!-- ★ ログアウトボタン -->
-          <button id="ownerLogoutBtn" class="btn-logout" type="button">
-            ログアウト
-          </button>
+          <button id="logoutBtn" type="button">ログアウト</button>
         </header>
 
         <!-- ① お知らせ管理 -->
@@ -3188,17 +3186,31 @@ if (staffPreviewLink && typeof currentStoreId !== "undefined" && currentStoreId)
   staffPreviewLink.href = `notice.html?store=${encodeURIComponent(currentStoreId)}`;
 }
 
-// ★ ログアウト（イベント委譲で確実に拾う）
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("#logoutBtn");
-  if (!btn) return;
+// ★ログアウトは「一番上」に置く（DOMContentLoaded の外でもOK）
+(function bindLogout() {
+  function doLogout(e) {
+    const btn = e.target && e.target.closest ? e.target.closest("#logoutBtn") : null;
+    if (!btn) return;
 
-  sessionStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(STORE_KEY);
+    // ★ form送信・リンク遷移・他ハンドラ全部止める
+    e.preventDefault?.();
+    e.stopPropagation?.();
+    e.stopImmediatePropagation?.();
 
-  // ★ 完全初期化（これが一番大事）
-  location.replace(location.pathname);
-});
+    // ★ submit事故を潰す
+    if (btn.tagName === "BUTTON") btn.type = "button";
+
+    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(STORE_KEY);
+
+    // 念のためURLパラメータも消して完全初期化
+    location.replace(location.pathname);
+  }
+
+  // ★ capture=true で「先に」拾う
+  document.addEventListener("click", doLogout, true);
+})();
+
 
 
 
