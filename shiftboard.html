@@ -452,7 +452,7 @@ function renderBoard(week) {
       });
 
       // 残りの空きを埋める
-      const after = Math.max(0, TOTAL_COLS - cursor);
+      const after = Math.max(0, HOUR_COLS - cursor);
       if (after > 0) {
         const tdAfter = document.createElement("td");
         tdAfter.className = "shiftboard-empty";
