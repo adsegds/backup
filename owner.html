@@ -3246,25 +3246,22 @@ if (staffPreviewLink && typeof currentStoreId !== "undefined" && currentStoreId)
 // ★ログアウトは「一番上」に置く（DOMContentLoaded の外でもOK）
 (function bindLogout() {
   function doLogout(e) {
-    const btn = e.target && e.target.closest ? e.target.closest("#logoutBtn") : null;
+    const btn = e.target?.closest?.("#ownerLogoutBtn, #logoutBtn"); // ★両対応
     if (!btn) return;
 
-    // ★ form送信・リンク遷移・他ハンドラ全部止める
-    e.preventDefault?.();
-    e.stopPropagation?.();
-    e.stopImmediatePropagation?.();
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
 
-    // ★ submit事故を潰す
+    // submit事故防止
     if (btn.tagName === "BUTTON") btn.type = "button";
 
     sessionStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(STORE_KEY);
 
-    // 念のためURLパラメータも消して完全初期化
     location.replace(location.pathname);
   }
 
-  // ★ capture=true で「先に」拾う
   document.addEventListener("click", doLogout, true);
 })();
 
