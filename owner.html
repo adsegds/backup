@@ -5246,8 +5246,19 @@ activateView("news");
     return;
   }
 
-  const STORAGE_KEY = "shiftask_weekly_shift_v1";
-  const LAST_WEEK_KEY = "shiftask_weekly_shift_last_v1";
+  // ★店舗ID（ownerログイン時に入れてるやつ）を取得
+const storeId =
+  localStorage.getItem("lw_ownerStoreId")
+  || localStorage.getItem("ownerStoreId")
+  || localStorage.getItem("storeId")
+  || "no_store";
+
+// ★店舗ごとに分離された保存キー
+const STORAGE_KEY   = `shiftask_weekly_shift_${storeId}_v1`;
+const LAST_WEEK_KEY = `shiftask_weekly_shift_last_${storeId}_v1`;
+
+console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
+
 
   // weekData = {
   //   weekStart: "YYYY-MM-DD",
@@ -6076,9 +6087,17 @@ async function syncWeekToChecklist() {
     alert("月別シフトビューは、あとで Firestore から複数週を集計する形で実装しよう💡\nまずは『1週間ビュー』を試してみてね！");
   });
 
-  // ---------- 初期ロード ----------
+   // ---------- 初期ロード ----------
   (function init() {
-    const stored = loadWeekData(STORAGE_KEY);
+  // ★旧仕様（全店舗共通キー）を掃除（1回だけ）
+  const migratedKey = "shiftask_weekly_shift_migrated_v1";
+  if (!localStorage.getItem(migratedKey)) {
+    localStorage.removeItem("shiftask_weekly_shift_v1");
+    localStorage.removeItem("shiftask_weekly_shift_last_v1");
+    localStorage.setItem(migratedKey, "1");
+  }
+
+  const stored = loadWeekData(STORAGE_KEY);
     if (stored && stored.weekStart) {
       weekData = stored;
       const d = toDate(stored.weekStart);
