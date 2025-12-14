@@ -3152,22 +3152,22 @@ async function saveShiftForChecklist(slotsMap, targetDate) {
     }
   }
 
-  // ▼ スタッフ用お知らせセンタープレビュー（notice.html）
-  const staffPreviewLink = document.getElementById("staffNoticePreviewLink");
-  if (staffPreviewLink && currentStoreId) {
-    staffPreviewLink.href =
-      `notice.html?store=${encodeURIComponent(currentStoreId)}`;
-  }
+ // ▼ スタッフ用お知らせセンタープレビュー（notice.html）
+const staffPreviewLink = document.getElementById("staffNoticePreviewLink");
+if (staffPreviewLink && typeof currentStoreId !== "undefined" && currentStoreId) {
+  staffPreviewLink.href = `notice.html?store=${encodeURIComponent(currentStoreId)}`;
+}
 
-  // ★ ログアウトボタン
-  const logoutBtn = document.getElementById("ownerLogoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(STORE_KEY);
-      location.reload();
-    });
-  }
+// ★ ログアウト（最終・確定版）
+const logoutBtn = document.getElementById("logoutBtn");
+logoutBtn?.addEventListener("click", () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(STORE_KEY);
+
+  // ★ これが一番大事：全部初期化
+  location.replace(location.pathname);
+});
+
 
   
 
