@@ -3054,8 +3054,14 @@ const PHOTO_COLLECTION = "photoReports";
 
 
 
- firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
+ if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+
 
 
 
@@ -3098,7 +3104,7 @@ const PHOTO_COLLECTION = "photoReports";
     storeRef = db.collection("stores").doc(existingSession.storeId);
   }
 
- // 6:00切り替えの「今日の営業日」
+ // 7:00切り替えの「今日の営業日」
 function getCurrentBusinessKey() {
   const now = new Date();
   const y = now.getFullYear();
@@ -5314,8 +5320,12 @@ const storeId =
 
 // ★店舗ごとに分離された保存キー
 const STORAGE_KEY   = `shiftask_weekly_shift_${storeId}_v1`;
-const LAST_WEEK_KEY = `shiftask_weekly_shift_last_${storeId}_v1`;
 
+// ★週ごとの保存キー（← 新規追加）
+function getWeekKey(weekStartYmd) {
+  return `shiftask_weekly_shift_${storeId}_${weekStartYmd}`;
+}
+  
 console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
 
 
@@ -5861,34 +5871,39 @@ console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
   });
 
  copyLastWeekBtn?.addEventListener("click", () => {
-  const last = loadWeekData(LAST_WEEK_KEY);
-  if (!last || !Array.isArray(last.staff)) {
-    alert("先週のデータが見つかりません。");
+  if (!weekData?.weekStart) {
+    alert("週の開始日が不正です");
     return;
   }
 
-  // 今表示している週の開始日
-  const curStart  = weekData.weekStart || weekStartInput.value;
-  // 保存されている先週の開始日
-  const lastStart = last.weekStart;
+  // 今見ている週の開始日
+  const curStart = toDate(weekData.weekStart);
 
-  // ずらす日数（基本は +7 日）
-  let diffDays = 7;
-  if (curStart && lastStart) {
-    diffDays = Math.round(
-      (toDate(curStart) - toDate(lastStart)) / 86400000
-    );
+  // 先週（-7日）
+  const prevStart = new Date(curStart);
+  prevStart.setDate(prevStart.getDate() - 7);
+
+  // 先週の保存キー
+  const prevKey = getWeekKey(formatDate(prevStart));
+
+  // 先週データを読む
+  const last = loadWeekData(prevKey);
+
+  if (!last || !Array.isArray(last.staff)) {
+    alert("先週のデータが見つかりません（先週を一度保存してね）");
+    return;
   }
 
-  // ★ここが一番重要：days の日付キーをずらす
+  // ★先週 → 今週へ日付を +7 してコピー
   weekData.staff = last.staff.map((s) => ({
     ...s,
-    days: shiftDaysMap(s.days, diffDays),
+    days: shiftDaysMap(s.days || {}, 7),
   }));
 
   renderWeekHeader();
   renderWeekBody();
 });
+
 
 
     // 「この週のシフトを保存」ボタン
@@ -5898,9 +5913,11 @@ console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
     return;
   }
 
-    // ローカル保存
-    saveWeekData(STORAGE_KEY, weekData);
-    saveWeekData(LAST_WEEK_KEY, weekData);
+    // ローカル保存（週ごと）
+const wk = getWeekKey(weekData.weekStart);
+saveWeekData(wk, weekData);
+
+   
 
     try {
       if (!storeRef) {
