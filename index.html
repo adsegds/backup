@@ -1874,6 +1874,7 @@ async function loadTodayShiftStaff() {
 
   if (!STORE_ID || !storeRef) {
     console.warn("storeRef 未設定のためシフト読み込みスキップ");
+    shiftLoaded = true;
     return;
   }
 
@@ -1899,9 +1900,13 @@ async function loadTodayShiftStaff() {
     }
 
     console.log("シフトなし（どちらにも存在しない） businessKey=", businessKey);
+
   } catch (e) {
     console.error("シフト情報読み込みエラー", e);
     shiftStaffBySlot = {};
+
+  } finally {
+    shiftLoaded = true;   // ← ★ここ1か所だけ！！
   }
 }
 
