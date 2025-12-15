@@ -1853,7 +1853,7 @@ function normalizeSlotsMap(slots) {
 // シフト（今日の担当者一覧）
 // =============================
 let shiftStaffBySlot = {};  // 例：{ "t12-14": ["田中", "佐藤"], ... }
-
+let shiftLoaded = false;
 
 // ✅ 「今この瞬間に勤務中のスタッフ」を返す
 async function getWorkingStaffNow() {
