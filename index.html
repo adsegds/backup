@@ -1344,6 +1344,85 @@ section[id^="t"]:active {
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* =========================
+   App-like "質感" を統一（色は変えない）
+   ========================= */
+
+/* 1) 全体の質感トークン（影・角・枠を統一） */
+:root{
+  --card-radius: 14px;
+  --card-border: rgba(0,0,0,.06);
+  --card-shadow: 0 6px 18px rgba(0,0,0,.06);
+  --card-shadow-strong: 0 10px 26px rgba(0,0,0,.10);
+  --tap-scale: 0.995;
+}
+
+/* 2) 背景を “ただの#f5f5f5” から少しだけアプリっぽく（色味は維持） */
+body{
+  background:
+    radial-gradient(1200px 500px at 50% -120px, rgba(0,0,0,.03), transparent 60%),
+    #f5f5f5;
+}
+
+/* 3) カード共通の見た目を slot に寄せて統一（section[id^="t"]もslotも同じ質感に） */
+.slot,
+section[id^="t"]{
+  border-radius: var(--card-radius);
+  background: #fff;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+}
+
+/* 4) “触った感” を統一（hover/active） */
+.slot,
+section[id^="t"]{
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+@media (hover:hover){
+  .slot:hover,
+  section[id^="t"]:hover{
+    box-shadow: 0 10px 22px rgba(0,0,0,.08);
+  }
+}
+
+.slot:active,
+section[id^="t"]:active{
+  transform: scale(var(--tap-scale));
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+
+/* 5) NOW枠：強い影だけ “トークン” に寄せる（見た目そのまま維持） */
+.now-slot{
+  box-shadow: var(--card-shadow-strong);
+}
+
+/* 6) チェックボックスをちょいだけ綺麗に（色は変えない） */
+.task-item input[type="checkbox"]{
+  transform: translateY(1px);
+  accent-color: #1f7aec; /* 既にバーで使ってる青に合わせる */
+}
+
+
+
+
+
+
+
+
+
+
+    
     
 
 
