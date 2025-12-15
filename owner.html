@@ -4902,15 +4902,13 @@ activateView("news");
             snapshot.forEach((doc) => docs.push(doc));
 
             // createdAt 降順ソート
+            // createdAt 降順ソート
             docs.sort((a, b) => {
-              const da = a.data().createdAt
-                ? a.data().createdAt.toMillis()
-                : 0;
-              const bMillis = b.data().createdAt
-  ? b.data().createdAt.toMillis()
-  : 0;
-return bMillis - da;
+              const aMillis = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+              const bMillis = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+              return bMillis - aMillis; // 新しい方が先
             });
+
 
             // ① 端末ラベルでフィルタ
             if (deviceFilter) {
