@@ -3781,14 +3781,15 @@ try {
             );
         }
 
-        // ★ ここで timeSlots を読み込み → その後にバーとタスクを構築
-       loadTimeSlotsConfig().then(() => {
+       // ★ timeSlots を読み込み → UI構築
+loadTimeSlotsConfig().then(() => {
   initializeProgressBars();
+
+  // ✅ NOW表示は timeSlots が決まったら即スタート
+  startNowTicker();
+
   loadTaskDefinitions().then(() => {
     updateCompletionUI();
-    initJumpBanner();
-
-    startNowTicker(); // ✅ これ追加！（NOW表示スタート）
 
     // ★ デバッグ用（今だけ）
     console.log(
@@ -3797,6 +3798,7 @@ try {
     );
   });
 });
+
 
 
 setupDailyResetAt7AM();
