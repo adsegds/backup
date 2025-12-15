@@ -135,12 +135,13 @@ html, body {
     padding: 10px 14px 8px;
   }
 
-  .app-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-  }
+  .app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:4px;
+}
 
   .top-bar h1 {
     font-size: 1.45em;
@@ -248,12 +249,9 @@ html, body {
 
   /* ===== スロット（時間帯カード）周り ===== */
   .slot {
-    margin-bottom: 12px;
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px 10px 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-  }
+  margin-bottom: 12px;
+  padding: 10px 10px 8px;
+}
 
   .slot-header {
     display: flex;
@@ -1121,12 +1119,6 @@ body.app-ready .app {
 
 
 
-/* 上の黒ヘッダーの右端に出すボタン */
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
 .staff-logout-btn {
   margin-left: auto;
@@ -1273,22 +1265,11 @@ button[data-size].is-active {
 
 
 /* ===== アプリっぽい質感（色は変えない） ===== */
-.section-card, .time-slot, section[id^="t"] {
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0,0,0,.06);
-  border: 1px solid rgba(0,0,0,.06);
-}
-
-section[id^="t"] {
+section[id^="t"]{
   margin: 10px 0;
   padding: 12px 12px 10px;
-  transition: transform .12s ease, box-shadow .12s ease;
 }
 
-section[id^="t"]:active {
-  transform: scale(0.995);
-}
 
 /* ===== NOW枠の強調 ===== */
 .now-slot {
@@ -1405,6 +1386,8 @@ section[id^="t"]:active{
 /* 5) NOW枠：強い影だけ “トークン” に寄せる（見た目そのまま維持） */
 .now-slot{
   box-shadow: var(--card-shadow-strong);
+  border: 1px solid rgba(60,120,255,.25);
+  position: relative;
 }
 
 /* 6) チェックボックスをちょいだけ綺麗に（色は変えない） */
