@@ -1289,6 +1289,93 @@ button[data-size].is-active {
 
 
 
+
+    
+
+
+
+
+
+
+/* ===== アプリっぽい質感（色は変えない） ===== */
+.section-card, .time-slot, section[id^="t"] {
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+section[id^="t"] {
+  margin: 10px 0;
+  padding: 12px 12px 10px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+section[id^="t"]:active {
+  transform: scale(0.995);
+}
+
+/* ===== NOW枠の強調 ===== */
+.now-slot {
+  box-shadow: 0 10px 26px rgba(0,0,0,.10);
+  border: 1px solid rgba(60,120,255,.25);
+  position: relative;
+}
+
+/* 左の細ライン（色は今の青寄せでOK） */
+.now-slot::before{
+  content:"";
+  position:absolute;
+  left:-1px;
+  top:10px;
+  bottom:10px;
+  width:4px;
+  border-radius: 999px;
+  background: rgba(60,120,255,.95);
+}
+
+/* NOWバッジ */
+.now-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(60,120,255,.28);
+  background: rgba(60,120,255,.10);
+  user-select:none;
+}
+
+.now-dot{
+  width:7px; height:7px;
+  border-radius:999px;
+  background: rgba(60,120,255,.95);
+  display:inline-block;
+}
+
+/* タイトル行を “右にバッジ置ける” レイアウトに */
+.slot-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom: 8px;
+}
+
+
+
+
+
+
+    
+
+
+    
+
+
+
   </style>
 </head>
   
