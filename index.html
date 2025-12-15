@@ -1895,42 +1895,6 @@ async function loadTodayShiftStaff() {
 
 
 
-function openStaffSelectModal(slotId, taskLabel) {
-  return new Promise(async (resolve) => {
-    // ✅「今この時刻に勤務中」を取得（時刻判定）
-    const names = await getWorkingStaffNow();
-
-    // その時刻に誰も勤務中じゃなければスキップ
-    if (!names.length) {
-      resolve(null);
-      return;
-    }
-
-    if (!staffSelectModal || !staffModalList) {
-      resolve(null);
-      return;
-    }
-
-    staffModalList.innerHTML = "";
-
-    if (staffModalInfo) {
-      // slotIdは表示だけ残す（任意）
-      staffModalInfo.textContent = `${taskLabel}（${slotId}）`;
-    }
-
-    names.forEach((name) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "staff-modal-item";
-      btn.textContent = name;
-      btn.addEventListener("click", () => closeStaffSelectModal(name));
-      staffModalList.appendChild(btn);
-    });
-
-    pendingStaffResolve = resolve;
-    staffSelectModal.classList.remove("hidden");
-  });
-}
 
 
 
@@ -2076,6 +2040,10 @@ if (loginStoreIdInput) {
       // 本体初期化（STORE_ID / storeRef がセット済みで呼ぶ）
       // =============================
        async function startApp() {
+         if (unsubscribeTaskSnapshot) {
+  try { unsubscribeTaskSnapshot(); } catch(e) {}
+  unsubscribeTaskSnapshot = null;
+}
   // ★ storeRef がなければ何もしない（安全ガード）
   if (!STORE_ID || !storeRef) {
     console.warn("STORE_ID / storeRef 未設定のため、startApp を中止します。");
@@ -2088,7 +2056,7 @@ if (loginStoreIdInput) {
   taskDocRef = storeRef.collection("tasks").doc("main");
 
   // ★ さっき切り取った onSnapshot をここに貼る
-  taskDocRef.onSnapshot((doc) => {
+  unsubscribeTaskSnapshot = taskDocRef.onSnapshot((doc) => {
     const data = doc.exists ? doc.data() : {};
     const storedKey  = data.businessKey;
     const currentKey = getCurrentBusinessKey();
@@ -2201,51 +2169,47 @@ if (loginStoreIdInput) {
         }
 
         // モーダルを開く（Promise で誰を選んだか返す）
-        function openStaffSelectModal(slotId, taskLabel) {
-          return new Promise((resolve) => {
-            const names = Array.isArray(shiftStaffBySlot[slotId])
-              ? shiftStaffBySlot[slotId]
-              : [];
+       function openStaffSelectModal(slotId, taskLabel) {
+  return new Promise(async (resolve) => {
+    // ✅ 今この時刻に勤務中の人を取得
+    const names = await getWorkingStaffNow();
 
-            // その時間帯に誰もシフト入ってなければスキップ
-            if (!names.length) {
-              resolve(null);
-              return;
-            }
+    if (!names.length) {
+      resolve(null);
+      return;
+    }
 
-            if (!staffSelectModal || !staffModalList) {
-              resolve(null);
-              return;
-            }
+    if (!staffSelectModal || !staffModalList) {
+      resolve(null);
+      return;
+    }
 
-            staffModalList.innerHTML = "";
+    staffModalList.innerHTML = "";
 
-            if (staffModalInfo) {
-              staffModalInfo.textContent = `${taskLabel}（${slotId}）`;
-            }
+    if (staffModalInfo) {
+      staffModalInfo.textContent = `${taskLabel}（${slotId}）`;
+    }
 
-            names.forEach((name) => {
-              const btn = document.createElement("button");
-              btn.type = "button";
-              btn.className = "staff-modal-item";
-              btn.textContent = name;
-              btn.addEventListener("click", () => {
-                closeStaffSelectModal(name);
-              });
-              staffModalList.appendChild(btn);
-            });
+    names.forEach((name) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "staff-modal-item";
+      btn.textContent = name;
+      btn.addEventListener("click", () => closeStaffSelectModal(name));
+      staffModalList.appendChild(btn);
+    });
 
-            pendingStaffResolve = resolve;
-            staffSelectModal.classList.remove("hidden");
-          });
-        }
+    pendingStaffResolve = resolve;
+    staffSelectModal.classList.remove("hidden");
+  });
+}
 
-        staffModalCancel?.addEventListener("click", () => {
-          closeStaffSelectModal(null);
-        });
-        staffModalBackdrop?.addEventListener("click", () => {
-          closeStaffSelectModal(null);
-        });
+
+staffModalCancel?.addEventListener("click", () => closeStaffSelectModal(null));
+staffModalBackdrop?.addEventListener("click", () => closeStaffSelectModal(null));
+
+
+           
 
 
          
@@ -3726,7 +3690,7 @@ async function handleLogin() {
 
     showApp();
     setAppReady();
-    startApp();
+    startApp().catch(err => console.error("startApp error:", err));
 
   } catch (err) {
     console.error("ログイン処理エラー:", err);
@@ -3764,25 +3728,24 @@ async function handleLogin() {
 
 
 // ★ スタッフ用 ログアウト（店舗切り替え）
-      const staffLogoutBtn = document.getElementById("staffLogoutBtn");
-      if (staffLogoutBtn) {
-        staffLogoutBtn.addEventListener("click", () => {
-          try {
-            // ログイン関連のキャッシュを消す
-            localStorage.removeItem(STORE_ID_CACHE_KEY);
-            localStorage.removeItem(STORE_ID_TIME_KEY);
+      // ★ スタッフ用 ログアウト（店舗切り替え）
+const staffLogoutBtn = document.getElementById("staffLogoutBtn");
+if (staffLogoutBtn) {
+  staffLogoutBtn.addEventListener("click", () => {
+    try {
+      if (unsubscribeTaskSnapshot) { try { unsubscribeTaskSnapshot(); } catch(e) {} }
 
-            // 端末ラベルや文字サイズも一旦リセットしたいなら clear
-            // ※残したいなら上の2行だけでもOK
-            localStorage.clear();
-          } catch (e) {
-            console.warn("localStorage clear error:", e);
-          }
+      localStorage.removeItem(STORE_ID_CACHE_KEY);
+      localStorage.removeItem(STORE_ID_TIME_KEY);
+      localStorage.removeItem(STORE_PASS_CACHE_PREFIX + (STORE_ID || ""));
+    } catch (e) {
+      console.warn("localStorage clear error:", e);
+    }
+    location.reload();
+  });
+}
 
-          // 画面をリロード → ログイン画面に戻る
-          location.reload();
-        });
-      }
+
 
 
 
@@ -3819,7 +3782,7 @@ if (urlStoreId && urlStoreId !== cachedId) {
 
   showApp();
   setAppReady();
-  startApp();
+  startApp().catch(err => console.error("startApp error:", err));
 } else {
   // キャッシュもない → ふつうにログイン画面
   showLogin();
@@ -3831,6 +3794,8 @@ if (urlStoreId && urlStoreId !== cachedId) {
 
 
     });
+
+
   </script>
 </body>
 </html>
