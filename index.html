@@ -1855,6 +1855,18 @@ function normalizeSlotsMap(slots) {
 let shiftStaffBySlot = {};  // 例：{ "t12-14": ["田中", "佐藤"], ... }
 
 
+// ✅ 「今この瞬間に勤務中のスタッフ」を返す
+async function getWorkingStaffNow() {
+  try {
+    // shiftStaffBySlot は loadTodayShiftStaff() が埋める前提
+    const slotId = getCurrentSlotIdByHour(new Date().getHours());
+    const names = shiftStaffBySlot?.[slotId] || [];
+    return Array.isArray(names) ? names : [];
+  } catch (e) {
+    console.warn("getWorkingStaffNow error:", e);
+    return [];
+  }
+}
 
 
 async function loadTodayShiftStaff() {
