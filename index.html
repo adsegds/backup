@@ -1895,6 +1895,42 @@ async function loadTodayShiftStaff() {
 
 
 
+function openStaffSelectModal(slotId, taskLabel) {
+  return new Promise(async (resolve) => {
+    // ✅「今この時刻に勤務中」を取得（時刻判定）
+    const names = await getWorkingStaffNow();
+
+    // その時刻に誰も勤務中じゃなければスキップ
+    if (!names.length) {
+      resolve(null);
+      return;
+    }
+
+    if (!staffSelectModal || !staffModalList) {
+      resolve(null);
+      return;
+    }
+
+    staffModalList.innerHTML = "";
+
+    if (staffModalInfo) {
+      // slotIdは表示だけ残す（任意）
+      staffModalInfo.textContent = `${taskLabel}（${slotId}）`;
+    }
+
+    names.forEach((name) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "staff-modal-item";
+      btn.textContent = name;
+      btn.addEventListener("click", () => closeStaffSelectModal(name));
+      staffModalList.appendChild(btn);
+    });
+
+    pendingStaffResolve = resolve;
+    staffSelectModal.classList.remove("hidden");
+  });
+}
 
 
 
