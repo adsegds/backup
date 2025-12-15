@@ -2804,8 +2804,11 @@ select:focus {
 
   <script>
 
-// ★① ここに置く（ファイル内で1回だけ）
-  let db, storage;
+  // ★① ここに置く（ファイル内で1回だけ）
+  // Firestore / storeRef はここで宣言だけしておく（あとで中身入れる）
+  let db = null;
+  let storage = null;
+  let storeRef = null;
 
 
     
@@ -2837,10 +2840,7 @@ select:focus {
     localStorage.setItem(STORE_KEY, storeId);
   }
 
-  // Firestore / storeRef はここで宣言だけしておく（あとで中身入れる）
-  let db = null;
-  let storage = null;
-  let storeRef = null;
+
 
 
 
