@@ -5213,6 +5213,65 @@ activateView("news");
 // ⑦ シフト作成（手動）＋日別 / 週別 shiftboard
 // ====================================
 (function setupShiftCreate() {
+
+
+// ===== 日付ユーティリティ（ズレ防止）=====
+  function toDate(dateStr) {
+    const [y, m, d] = String(dateStr).split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  }
+
+  function formatDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dd}`;
+  }
+
+  function addDays(dateStr, diffDays) {
+    const d = toDate(dateStr);
+    d.setDate(d.getDate() + diffDays);
+    return formatDate(d);
+  }
+
+  function shiftDaysMap(daysMap, diffDays) {
+    const out = {};
+    Object.keys(daysMap || {}).forEach((k) => {
+      out[addDays(k, diffDays)] = daysMap[k];
+    });
+    return out;
+  }
+
+  // ---------- 週データ初期化 ----------
+  function initWeek(date) {
+    const weekStartDate = getWeekStart(date);
+    const weekStartStr = formatDate(weekStartDate);
+
+    if (!weekData || weekData.weekStart !== weekStartStr) {
+      weekData = {
+        weekStart: weekStartStr,
+        staff: [{ id: "s_1", name: "スタッフ1", hourly: 1100, days: {} }]
+      };
+    }
+
+    // その週の7日分を作る
+    currentWeekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStartDate);
+      d.setDate(d.getDate() + i);
+      currentWeekDates.push(formatDate(d));
+    }
+
+    weekStartInput.value = weekStartStr;
+    renderWeekHeader();
+    renderWeekBody();
+    renderDaySelect();
+
+    dayBoardArea.style.display = "none";
+    lastOpenedDateStr = null;
+  }
+
+  
   const weekStartInput = document.getElementById("shiftWeekStart");
   const weekTodayBtn = document.getElementById("shiftWeekTodayBtn");
   const templateSelect = document.getElementById("shiftTemplateSelect");
@@ -5277,17 +5336,7 @@ console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
   let lastOpenedDateStr = null; // ★今どの日付の「日別」を開いているか
 
   // ---------- 日付ヘルパ ----------
-  function toDate(str) {
-    const [y, m, d] = str.split("-").map(n => parseInt(n, 10));
-    return new Date(y, m - 1, d);
-  }
-
-  function formatDate(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  }
+ 
 
   function getWeekStart(date) {
     const day = date.getDay(); // 0=日
@@ -5811,16 +5860,36 @@ console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
     renderWeekBody();
   });
 
-  copyLastWeekBtn?.addEventListener("click", () => {
-    const last = loadWeekData(LAST_WEEK_KEY);
-    if (!last) {
-      alert("先週のデータが見つかりません。");
-      return;
-    }
-    weekData.staff = last.staff || [];
-    renderWeekHeader();
-    renderWeekBody();
-  });
+ copyLastWeekBtn?.addEventListener("click", () => {
+  const last = loadWeekData(LAST_WEEK_KEY);
+  if (!last || !Array.isArray(last.staff)) {
+    alert("先週のデータが見つかりません。");
+    return;
+  }
+
+  // 今表示している週の開始日
+  const curStart  = weekData.weekStart || weekStartInput.value;
+  // 保存されている先週の開始日
+  const lastStart = last.weekStart;
+
+  // ずらす日数（基本は +7 日）
+  let diffDays = 7;
+  if (curStart && lastStart) {
+    diffDays = Math.round(
+      (toDate(curStart) - toDate(lastStart)) / 86400000
+    );
+  }
+
+  // ★ここが一番重要：days の日付キーをずらす
+  weekData.staff = last.staff.map((s) => ({
+    ...s,
+    days: shiftDaysMap(s.days, diffDays),
+  }));
+
+  renderWeekHeader();
+  renderWeekBody();
+});
+
 
     // 「この週のシフトを保存」ボタン
   saveBtn?.addEventListener("click", async () => {
