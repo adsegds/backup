@@ -4904,10 +4904,10 @@ activateView("news");
               const da = a.data().createdAt
                 ? a.data().createdAt.toMillis()
                 : 0;
-              const db = b.data().createdAt
-                ? b.data().createdAt.toMillis()
-                : 0;
-              return db - da;
+              const bMillis = b.data().createdAt
+  ? b.data().createdAt.toMillis()
+  : 0;
+return bMillis - da;
             });
 
             // ① 端末ラベルでフィルタ
