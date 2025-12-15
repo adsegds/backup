@@ -3060,12 +3060,13 @@ const PHOTO_COLLECTION = "photoReports";
 
 
 
- if (!firebase.apps.length) {
+if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-const db = firebase.firestore();
-const storage = firebase.storage();
+db = firebase.firestore();
+storage = firebase.storage();
+
 
 
 
