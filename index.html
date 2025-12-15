@@ -2002,6 +2002,57 @@ async function loadTodayShiftStaff() {
 
 
 
+
+// =============================
+  // NOW表示（現在時間帯の強調）
+  // =============================
+  function applyNowHighlight() {
+    document.querySelectorAll("section[id^='t']").forEach(sec => {
+      sec.classList.remove("now-slot");
+      const badge = sec.querySelector(".now-badge");
+      if (badge) badge.remove();
+    });
+
+    const h = new Date().getHours();
+    const nowSlotId = getCurrentSlotIdByHour(h);
+    const nowEl = document.getElementById(nowSlotId);
+    if (!nowEl) return;
+
+    nowEl.classList.add("now-slot");
+
+    let title = nowEl.querySelector(".slot-title, h2, h3, .time-title");
+    if (!title) return;
+
+    let row = title.closest(".slot-title-row");
+    if (!row) {
+      row = document.createElement("div");
+      row.className = "slot-title-row";
+      title.parentNode.insertBefore(row, title);
+      row.appendChild(title);
+    }
+
+    const badge = document.createElement("span");
+    badge.className = "now-badge";
+    badge.innerHTML = `<span class="now-dot"></span>NOW`;
+    row.appendChild(badge);
+  }
+
+  function startNowTicker() {
+    applyNowHighlight();
+    if (window.__nowTicker) clearInterval(window.__nowTicker);
+    window.__nowTicker = setInterval(applyNowHighlight, 60 * 1000);
+  }
+
+
+
+
+
+
+
+
+    
+
+
     
 
     // =============================
