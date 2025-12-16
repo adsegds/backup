@@ -2794,7 +2794,7 @@ const PHOTO_COLLECTION = "photoReports";
         );
         if (loginForm)    loginForm.style.display    = mode === "login"    ? "block" : "none";
         if (registerForm) registerForm.style.display = mode === "register" ? "block" : "none";
-        errorLabel.textContent = "";
+        if (errorLabel) errorLabel.textContent = "";
       });
     });
 
@@ -2862,7 +2862,7 @@ const PHOTO_COLLECTION = "photoReports";
 
         saveSession(storeId);
         storeRef = storeDocRef;
-        errorLabel.textContent = "";
+        if (errorLabel) errorLabel.textContent = "";
 
         // 他の処理（taskSlots とか）がこの storeId で動くようにリロード
         location.reload();
@@ -2916,7 +2916,7 @@ const PHOTO_COLLECTION = "photoReports";
 
         saveSession(storeId);
         storeRef = storeDocRef;
-        errorLabel.textContent = "";
+        if (errorLabel) errorLabel.textContent = "";
         location.reload();
       } catch (err) {
         console.error(err);
@@ -3105,7 +3105,9 @@ async function saveShiftForChecklist(slotsMap, targetDate) {
     if (openStaffIndexLink) {
       openStaffIndexLink.href = staffIndexUrl;
       openStaffIndexLink.target = "_blank";
+      openStaffIndexLink.rel = "noopener noreferrer";
     }
+
 
     const staffIndexQrBox = document.getElementById("staffIndexQrBox");
     if (staffIndexQrBox && window.QRCode) {
@@ -3120,29 +3122,7 @@ async function saveShiftForChecklist(slotsMap, targetDate) {
 
 
 
-   
-// ▼ スタッフ画面を「クリックで確実に開く」保険
-  const openBtn = document.getElementById("openStaffIndexLink");
-  if (openBtn && currentStoreId) {
-
-    // <button> だった場合の事故防止
-    if (openBtn.tagName !== "A") {
-      openBtn.type = "button";
-    }
-
-    openBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-
-      const staffIndexUrl =
-        `https://shiftask-pro.web.app/?store=${encodeURIComponent(currentStoreId)}`;
-
-      const w = window.open(staffIndexUrl, "_blank", "noopener");
-      if (!w) {
-        alert("ポップアップがブロックされています。ブラウザで許可してください。");
-        location.href = staffIndexUrl; // ←フォールバック
-      }
-    });
-  }
+ 
 
 
 
@@ -4555,7 +4535,7 @@ activateView("news");
     const shiftDocRef = storeRef.collection("settings").doc("shiftSheet");
 
     // Storage の参照を用意
-    const storage = firebase.storage();
+    
     const shiftImageFileInput = document.getElementById("shiftImageFileInput");
 
     // 画像アップロード → Storage → Firestore → 画面反映
@@ -5144,16 +5124,7 @@ activateView("news");
   }
 
   // ---------- 週データ初期化 ----------
-  function initWeek(date) {
-    const weekStartDate = getWeekStart(date);
-    const weekStartStr = formatDate(weekStartDate);
-
-    if (!weekData || weekData.weekStart !== weekStartStr) {
-      weekData = {
-        weekStart: weekStartStr,
-        staff: [{ id: "s_1", name: "スタッフ1", hourly: 1100, days: {} }]
-      };
-    }
+  
 
     // その週の7日分を作る
     currentWeekDates = [];
