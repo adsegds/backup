@@ -5123,12 +5123,27 @@ activateView("news");
     return out;
   }
 
-  // ---------- 週データ初期化 ----------
+ 
   
 
-    // その週の7日分を作る
-    function initWeek(weekStartStr) {
-  const weekStartDate = toDate(weekStartStr);
+    // ---------- 週データ初期化 ----------
+function initWeek(date) {
+  const weekStartDate = getWeekStart(date);
+  const weekStartStr = formatDate(weekStartDate);
+
+  if (!weekData || weekData.weekStart !== weekStartStr) {
+    weekData = {
+      weekStart: weekStartStr,
+      staff: [
+        {
+          id: "s_1",
+          name: "スタッフ1",
+          hourly: 1100,
+          days: {}
+        }
+      ]
+    };
+  }
 
   currentWeekDates = [];
   for (let i = 0; i < 7; i++) {
@@ -5146,6 +5161,17 @@ activateView("news");
   lastOpenedDateStr = null;
 }
 
+
+// ---------- 週データ読み込み（localStorage） ----------
+function loadWeekForDate(date) {
+  const weekStart = formatDate(getWeekStart(date));
+  const key = getWeekKey(weekStart);
+
+  const stored = loadWeekData(key);
+  if (stored && stored.weekStart === weekStart) {
+    weekData = stored;
+  }
+}
 
   
   const weekStartInput = document.getElementById("shiftWeekStart");
@@ -5251,41 +5277,7 @@ console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
     }
   }
 
-  // ---------- 週データ初期化 ----------
-  function initWeek(date) {
-    const weekStartDate = getWeekStart(date);
-    const weekStartStr = formatDate(weekStartDate);
-
-    if (!weekData || weekData.weekStart !== weekStartStr) {
-      weekData = {
-        weekStart: weekStartStr,
-        staff: [
-          {
-            id: "s_1",
-            name: "スタッフ1",
-            hourly: 1100,
-            days: {}
-          }
-        ]
-      };
-    }
-
-    // その週の7日分を作る
-    currentWeekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(weekStartDate);
-      d.setDate(d.getDate() + i);
-      currentWeekDates.push(formatDate(d));
-    }
-
-    weekStartInput.value = weekStartStr;
-    renderWeekHeader();
-    renderWeekBody();
-    renderDaySelect();
-
-    dayBoardArea.style.display = "none";
-    lastOpenedDateStr = null;
-  }
+ 
 
   function renderWeekHeader() {
     while (headerRow.children.length > 2) {
@@ -5719,15 +5711,23 @@ console.log("🧩 shift localStorage storeId =", storeId, STORAGE_KEY);
 
   // ---------- イベント ----------
   weekTodayBtn?.addEventListener("click", () => {
-    initWeek(new Date());
-  });
+  const d = new Date();
+  initWeek(d);
+  loadWeekForDate(d);
+  renderWeekHeader();
+  renderWeekBody();
+});
 
   weekStartInput.addEventListener("change", () => {
-    const val = weekStartInput.value;
-    if (!val) return;
-    const d = toDate(val);
-    initWeek(d);
-  });
+  const val = weekStartInput.value;
+  if (!val) return;
+  const d = toDate(val);
+  initWeek(d);
+  loadWeekForDate(d);
+  renderWeekHeader();
+  renderWeekBody();
+});
+
 
   addStaffBtn?.addEventListener("click", () => {
     const id = "s_" + (weekData.staff.length + 1);
