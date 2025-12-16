@@ -5127,21 +5127,25 @@ activateView("news");
   
 
     // その週の7日分を作る
-    currentWeekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(weekStartDate);
-      d.setDate(d.getDate() + i);
-      currentWeekDates.push(formatDate(d));
-    }
+    function initWeek(weekStartStr) {
+  const weekStartDate = toDate(weekStartStr);
 
-    weekStartInput.value = weekStartStr;
-    renderWeekHeader();
-    renderWeekBody();
-    renderDaySelect();
-
-    dayBoardArea.style.display = "none";
-    lastOpenedDateStr = null;
+  currentWeekDates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStartDate);
+    d.setDate(d.getDate() + i);
+    currentWeekDates.push(formatDate(d));
   }
+
+  weekStartInput.value = weekStartStr;
+  renderWeekHeader();
+  renderWeekBody();
+  renderDaySelect();
+
+  dayBoardArea.style.display = "none";
+  lastOpenedDateStr = null;
+}
+
 
   
   const weekStartInput = document.getElementById("shiftWeekStart");
