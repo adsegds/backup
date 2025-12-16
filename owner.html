@@ -1881,10 +1881,7 @@ select:focus {
 
     <!-- ② 本体アプリ（ログイン後に表示） -->
   <div id="ownerApp" style="display:none;">
-    <!-- 👇ここにAIボタンを追加 -->
-    <button id="aiOptimizeBtn" class="ai-btn">
-      🤖 AI最適化
-    </button>
+    
 
     <!-- ★モバイル用トップバー -->
     <div class="mobile-topbar">
@@ -1973,12 +1970,7 @@ select:focus {
             </span>
           </button>
 
-          <button type="button" data-view="shiftai">
-            <span class="label">
-              <span class="label-icon">🧠</span>
-              <span class="label-text">シフト作成</span>
-            </span>
-          </button>
+          
         </nav>
 
         <div class="sidebar-footer">
@@ -2642,103 +2634,7 @@ select:focus {
 
 
         
-        <!-- ⑦ シフト作成（AI） -->
-        <section id="view-shiftai" class="view-panel">
-          <div class="shiftai-layout">
-            <!-- ヘッダー -->
-            <header class="shiftai-header">
-              <div>
-                <h1 class="shiftai-title">シフト作成（AI補助）</h1>
-                <p class="shiftai-subtitle">
-                  対象期間を選んで「AI最適化」を実行すると、この下にAI提案シフトが表示されます。
-                </p>
-              </div>
-              <div class="shiftai-tag">β版</div>
-            </header>
-
-            <!-- 条件入力エリア -->
-            <section class="shiftai-card">
-              <h2 class="shiftai-card-title">対象期間と条件</h2>
-
-              <!-- 期間の種類：週 / 月 -->
-              <div class="shiftai-row">
-                <div class="shiftai-label">対象</div>
-                <div class="shiftai-field">
-                  <label class="shiftai-radio">
-                    <input type="radio" name="shiftaiRangeType" value="week" checked>
-                    <span>週単位</span>
-                  </label>
-                  <label class="shiftai-radio">
-                    <input type="radio" name="shiftaiRangeType" value="month">
-                    <span>月単位</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- 基準日 / 基準月 -->
-              <div class="shiftai-row">
-                <div class="shiftai-label">
-                  <span data-shiftai-date-label>基準日</span>
-                </div>
-                <div class="shiftai-field">
-                  <input
-                    type="date"
-                    id="shiftaiBaseDate"
-                    class="shiftai-date-input"
-                  >
-                  <p class="shiftai-help">
-                    週の場合：この日を含む1週間をAIで最適化します。<br>
-                    月の場合：この日が属する月をAIで最適化します。
-                  </p>
-                </div>
-              </div>
-
-              <!-- AIが考えるときの優先度（今はダミーだけど将来使う） -->
-              <div class="shiftai-row">
-                <div class="shiftai-label">AIの優先度</div>
-                <div class="shiftai-field shiftai-chips">
-                  <label class="shiftai-chip">
-                    <input type="checkbox" checked>
-                    <span>売上・客数を重視</span>
-                  </label>
-                  <label class="shiftai-chip">
-                    <input type="checkbox" checked>
-                    <span>スタッフの負担バランス</span>
-                  </label>
-                  <label class="shiftai-chip">
-                    <input type="checkbox">
-                    <span>人件費を抑える</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- メインボタン -->
-              <div class="shiftai-actions">
-                <button id="shiftaiPrimaryBtn" class="shiftai-primary-btn">
-                  <span id="shiftaiPrimaryBtnLabel">この週をAIで最適化</span>
-                </button>
-                <p class="shiftai-note">
-                  まずはテスト版として OpenAI を直接呼び出す予定です。<br>
-                  安定したら Cloud Functions 経由に切り替えます。
-                </p>
-              </div>
-            </section>
-
-            <!-- AIの結果プレビュー（今は空っぽ） -->
-            <section class="shiftai-card">
-              <h2 class="shiftai-card-title">AIのシフト提案プレビュー</h2>
-              <p class="shiftai-empty" id="shiftaiPreviewEmpty">
-                まだAIは実行されていません。上の「AI最適化」ボタンを押すと、
-                ここに <strong>1週間 or 1ヶ月分のシフト案</strong> がカード形式で表示されます。
-              </p>
-
-              <!-- 後でJSで中身を埋めるエリア -->
-              <div id="shiftaiPreviewArea" class="shiftai-preview-area">
-                <!-- 例：日別カード・時間帯別の表をここに生成する -->
-              </div>
-            </section>
-          </div>
-        </section>
+      
       </main>
 
 
@@ -3944,15 +3840,7 @@ function activateView(viewId) {
     runAnalyticsRef();
   }
 
-  // ★ AIボタン制御
-  const aiBtn = document.getElementById("aiOptimizeBtn");
-  if (aiBtn) {
-    if (viewId === "shiftai") {
-      aiBtn.style.display = "block";
-    } else {
-      aiBtn.style.display = "none";
-    }
-  }
+ 
 }
 
 // 左メニューボタンにクリックイベントを付与
