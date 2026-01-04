@@ -35,6 +35,85 @@
       padding: 22px 14px 80px;
     }
 
+    /* ===== HERO ===== */
+    .hero{
+      position:relative;
+      border-radius: 28px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      border:1px solid var(--stroke);
+      background:#0b0e14;
+    }
+    .hero .bg{
+      position:absolute; inset:0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.75) 70%, rgba(0,0,0,.88)),
+        url("./lp-hero.jpg") center/cover no-repeat;
+      filter: saturate(1.02) contrast(1.02);
+      transform: scale(1.03);
+    }
+    .hero .inner{
+      position:relative;
+      padding: 26px 18px 22px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(88,177,200,.18);
+      border:1px solid rgba(88,177,200,.25);
+      color: rgba(255,255,255,.92);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing:.02em;
+      backdrop-filter: blur(8px);
+    }
+    .title{
+      margin: 14px 0 10px;
+      font-size: clamp(26px, 4.8vw, 44px);
+      line-height: 1.18;
+      font-weight: 900;
+      text-shadow: 0 8px 40px rgba(0,0,0,.65);
+    }
+    .lead{
+      margin: 0;
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: 16px;
+      text-shadow: 0 6px 26px rgba(0,0,0,.65);
+    }
+    .ctaRow{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding: 14px 18px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      background: rgba(20,24,34,.55);
+      backdrop-filter: blur(10px);
+      text-decoration:none;
+      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      transition: transform .08s ease, filter .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.04); }
+    .btn.primary{
+      background: linear-gradient(180deg, var(--gold1), var(--gold2));
+      color: #151515;
+      border-color: rgba(255,255,255,.15);
+    }
+    .btn .arrow{ opacity:.85; font-weight:900; }
+
+    /* ===== GRID CARDS ===== */
     .section{
       margin-top: 18px;
       border-radius: var(--radius);
@@ -43,7 +122,131 @@
       border:1px solid var(--stroke);
       box-shadow: 0 18px 55px rgba(0,0,0,.45);
     }
+    .grid{
+      display:grid;
+      gap: 14px;
+    }
+    @media (min-width: 820px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+      .hero .inner{ padding: 30px 26px 26px; }
+      .section{ padding: 18px; }
+    }
+    .card{
+      border-radius: 18px;
+      overflow:hidden;
+      background: rgba(12,15,22,.55);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 20px 55px rgba(0,0,0,.35);
+    }
+    .card .thumb{
+      height: 190px;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.70)),
+        url("./lp-card-chat.jpg") center/cover no-repeat;
+      position:relative;
+    }
+    .card.beta .thumb{
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.70)),
+        url("./lp-card-beta.jpg") center/cover no-repeat;
+    }
+    .card .thumb .label{
+      position:absolute;
+      left: 14px; bottom: 12px;
+      font-weight: 900;
+      font-size: 20px;
+      text-shadow: 0 8px 24px rgba(0,0,0,.7);
+    }
+    .card .body{ padding: 14px; }
+    .plan{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      margin-top: 10px;
+    }
+    .plan b{ display:block; font-size: 16px; }
+    .plan .meta{
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+    .price{
+      font-weight: 900;
+      font-size: 22px;
+      color: rgba(255,220,135,.98);
+      white-space:nowrap;
+      margin-left: 10px;
+    }
+    .bullets{
+      margin: 10px 0 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .bullets li{ margin: 6px 0; }
 
+    /* ===== STORY BLOCK ===== */
+    .story{
+      margin-top: 14px;
+      display:grid;
+      gap: 12px;
+      align-items: start;
+    }
+    @media (min-width: 820px){
+      .story{ grid-template-columns: 1fr 1fr; }
+    }
+    .story .big{
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+    .chip{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+    }
+    .chip .icon{
+      width: 26px; height: 26px;
+      border-radius: 8px;
+      background: rgba(255,220,135,.16);
+      border:1px solid rgba(255,220,135,.22);
+      display:flex; align-items:center; justify-content:center;
+      color: rgba(255,220,135,.95);
+      font-weight:900;
+      flex: 0 0 auto;
+    }
+    .chip b{ color: var(--text); }
+
+    /* ===== TARGET LIST ===== */
+    .targetBox{
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+    }
+    .targetBox .tTitle{
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .targetBox ul{
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+
+    /* ===== BOTTOM CTA ===== */
     .bottomCta{
       margin-top: 16px;
       border-radius: var(--radius);
@@ -58,42 +261,162 @@
       margin-top: 10px;
       font-size: 13px;
     }
-
-    /* ===== TERMS ===== */
-    .terms{
-      margin-top: 18px;
-      padding: 16px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .terms h3{
-      margin: 0 0 8px;
-      font-size: 15px;
-      font-weight: 900;
-      color: var(--text);
-    }
-    .terms ul{
-      margin: 0;
-      padding-left: 18px;
-    }
-    .terms li{
-      margin: 6px 0;
-    }
-    .terms .note{
-      margin-top: 10px;
-      font-size: 12px;
-      opacity: .85;
-    }
   </style>
 </head>
 
 <body>
   <div class="wrap">
 
-    <!-- （中略：ここは良太が貼ってくれたLP本文そのまま） -->
+    <!-- HERO -->
+    <section class="hero">
+      <div class="bg" aria-hidden="true"></div>
+      <div class="inner">
+        <div class="pill">現場運営 × 自動化 × 人間関係</div>
+
+        <h1 class="title">
+          人に疲れやすい現場担当が、<br>
+          仕組みで逃げ道を作る
+        </h1>
+
+        <p class="lead">
+          通話なし。チャットで、今日の不安を今日軽くする。<br>
+          業界は違っても「疲れ方の構造」は似てる。そこに仕組みで逃げ道を作る。
+        </p>
+
+        <div class="ctaRow">
+          <!-- ★ここを自分の導線に変更（X/LINE/Discord） -->
+          <a class="btn primary" href="https://x.com/messages/compose?text=チャット相談（ライト/スタンダード/7日サポート）を希望します">チャット相談を申し込む <span class="arrow">›</span></a>
+          <a class="btn" href="https://x.com/messages/compose?text=Shiftask Pro βテスター（7日/30日）に参加したいです">βテスターに参加する <span class="arrow">›</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANS -->
+    <section class="section">
+      <div class="grid">
+
+        <!-- Chat card -->
+        <div class="card">
+          <div class="thumb">
+            <div class="label">チャット相談（即日OK）</div>
+          </div>
+          <div class="body">
+
+            <div class="plan">
+              <div>
+                <b>ライト（30分）</b>
+                <div class="meta">チャットのみ／通話なし</div>
+                <ul class="bullets">
+                  <li>状況整理 → 今週の「逃げ道」を作る</li>
+                  <li>最後に「今日からの3手」まとめ</li>
+                </ul>
+              </div>
+              <div class="price">1,000円</div>
+            </div>
+
+            <div class="plan">
+              <div>
+                <b>スタンダード（60分）</b>
+                <div class="meta">深掘り・仕組み設計まで</div>
+                <ul class="bullets">
+                  <li>タスク／人間関係の“詰まり”を言語化</li>
+                  <li>現場で回る形に落とし込む</li>
+                </ul>
+              </div>
+              <div class="price">2,000円</div>
+            </div>
+
+            <div class="plan">
+              <div>
+                <b>7日サポート</b>
+                <div class="meta">1日1往復まで（短文）</div>
+                <ul class="bullets">
+                  <li>詰んだ時の“安全策”を一緒に作る</li>
+                </ul>
+              </div>
+              <div class="price">3,000円</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Beta card -->
+        <div class="card beta">
+          <div class="thumb">
+            <div class="label">Shiftask Pro β（現場で育てる）</div>
+          </div>
+          <div class="body">
+
+            <p style="margin:0; color:var(--muted); font-size:13px;">
+              現場で消耗しないための「仕組み化ツール」を開発中。<br>
+              完成品じゃなく、現場で一緒に育てるβ版です。
+            </p>
+
+            <div class="plan">
+              <div>
+                <b>β参加（7日・1店舗）</b>
+                <div class="meta">導入チャット30分つき</div>
+                <ul class="bullets">
+                  <li>現場で“実運用”してフィードバック</li>
+                  <li>改善要望を優先反映（可能な範囲）</li>
+                </ul>
+              </div>
+              <div class="price">3,000円</div>
+            </div>
+
+            <div class="plan">
+              <div>
+                <b>β参加（30日・1店舗）</b>
+                <div class="meta">1ヶ月テスト運用</div>
+                <ul class="bullets">
+                  <li>運用上の詰まりを一緒に潰す</li>
+                </ul>
+              </div>
+              <div class="price">5,000円</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- STORY + TARGET -->
+    <section class="section">
+      <div class="story">
+        <div>
+          <div class="big">だから、<br>“仕組み”に逃げました。</div>
+          <p style="color:var(--muted); margin:10px 0 0;">
+            人の機嫌・空気・テンポに削られるタイプでも、現場を回せる方法を作っています。<br>
+            強くなるんじゃなく、<b>仕組みで「考える量」と「感情の摩耗」を減らす</b>。
+          </p>
+
+          <div class="targetBox">
+            <div class="tTitle">対象：</div>
+            <ul>
+              <li>コンビニ／小売</li>
+              <li>工場／物流／倉庫</li>
+              <li>飲食／宿泊</li>
+              <li>医療／介護／福祉</li>
+              <li>コールセンター／サポート職 など</li>
+            </ul>
+          </div>
+
+          <p style="color:var(--muted); margin:10px 0 0;">
+            業界は違っても「疲れ方の構造」は似てる。<br>
+            だから、業界論じゃなく<b>現場が回る仕組み</b>を作っています。
+          </p>
+        </div>
+
+        <div style="display:grid; gap:10px;">
+          <div class="chip"><div class="icon">…</div><div><b>他人の感情</b>に気を使いすぎて疲れる</div></div>
+          <div class="chip"><div class="icon">…</div><div><b>会話のテンポ</b>で迷子になって消耗する</div></div>
+          <div class="chip"><div class="icon">✓</div><div><b>仕組み化</b>で「考える量」を減らしていく</div></div>
+          <div class="chip"><div class="icon">✓</div><div><b>現場用ツール</b>としてShiftask Proを開発中</div></div>
+          <div class="chip"><div class="icon">✓</div><div><b>親の店で専従者</b>として現場を回しながら作ってる</div></div>
+        </div>
+      </div>
+    </section>
 
     <!-- Bottom CTA -->
     <section class="bottomCta">
@@ -101,21 +424,6 @@
         チャット相談を申し込む <span class="arrow">›</span>
       </a>
       <div class="sub">通話なし。チャットでOK。今日の不安を、今日軽くする。</div>
-    </section>
-
-    <!-- TERMS -->
-    <section class="terms">
-      <h3>利用規約</h3>
-      <ul>
-        <li>本サービスはチャット相談およびβ版サービスの提供です</li>
-        <li>医療・法律・投資等の専門的助言を目的としたものではありません</li>
-        <li>支払い完了をもって契約成立とします</li>
-        <li>サービス開始後の返金はできません</li>
-        <li>提供内容の無断転載・転載は禁止します</li>
-      </ul>
-      <div class="note">
-        ※ 本ページからの申し込み・決済をもって、上記内容に同意したものとみなします。
-      </div>
     </section>
 
   </div>
