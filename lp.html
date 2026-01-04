@@ -7,8 +7,6 @@
   <style>
     :root{
       --bg:#07090d;
-      --panel: rgba(18,22,30,.72);
-      --panel2: rgba(14,18,25,.62);
       --stroke: rgba(255,255,255,.10);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.68);
@@ -16,14 +14,15 @@
       --gold2:#f2b543;
       --shadow: 0 18px 60px rgba(0,0,0,.55);
       --radius: 22px;
-      --radius2: 18px;
     }
     *{box-sizing:border-box}
+    html,body{height:auto}
     body{
       margin:0;
-      background: radial-gradient(1200px 800px at 50% -10%, rgba(88,177,200,.20), transparent 60%),
-                  radial-gradient(900px 700px at 10% 10%, rgba(255,221,140,.12), transparent 60%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 800px at 50% -10%, rgba(88,177,200,.20), transparent 60%),
+        radial-gradient(900px 700px at 10% 10%, rgba(255,221,140,.12), transparent 60%),
+        var(--bg);
       color:var(--text);
       font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
       line-height:1.55;
@@ -42,19 +41,22 @@
       overflow:hidden;
       box-shadow: var(--shadow);
       border:1px solid var(--stroke);
-      background:#0b0e14;
+      background: #0b0e14;
     }
     .hero .bg{
       position:absolute; inset:0;
       background:
-        linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.75) 70%, rgba(0,0,0,.88)),
-        url("./lp-hero.jpg") center/cover no-repeat;
-      filter: saturate(1.02) contrast(1.02);
+        radial-gradient(900px 500px at 20% 10%, rgba(255,221,140,.10), transparent 60%),
+        radial-gradient(700px 520px at 70% 30%, rgba(88,177,200,.12), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.80));
       transform: scale(1.03);
     }
     .hero .inner{
       position:relative;
       padding: 26px 18px 22px;
+    }
+    @media (min-width: 820px){
+      .hero .inner{ padding: 30px 26px 26px; }
     }
     .pill{
       display:inline-flex;
@@ -104,6 +106,7 @@
       font-weight: 800;
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
       transition: transform .08s ease, filter .12s ease;
+      cursor:pointer;
     }
     .btn:hover{ transform: translateY(-1px); filter: brightness(1.04); }
     .btn.primary{
@@ -113,7 +116,7 @@
     }
     .btn .arrow{ opacity:.85; font-weight:900; }
 
-    /* ===== GRID CARDS ===== */
+    /* ===== SECTIONS ===== */
     .section{
       margin-top: 18px;
       border-radius: var(--radius);
@@ -122,15 +125,17 @@
       border:1px solid var(--stroke);
       box-shadow: 0 18px 55px rgba(0,0,0,.45);
     }
+    @media (min-width: 820px){
+      .section{ padding: 18px; }
+    }
     .grid{
       display:grid;
       gap: 14px;
     }
     @media (min-width: 820px){
       .grid{ grid-template-columns: 1fr 1fr; }
-      .hero .inner{ padding: 30px 26px 26px; }
-      .section{ padding: 18px; }
     }
+
     .card{
       border-radius: 18px;
       overflow:hidden;
@@ -138,26 +143,23 @@
       border:1px solid rgba(255,255,255,.10);
       box-shadow: 0 20px 55px rgba(0,0,0,.35);
     }
-    .card .thumb{
-      height: 190px;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.70)),
-        url("./lp-card-chat.jpg") center/cover no-repeat;
+    .thumb{
+      height: 170px;
       position:relative;
-    }
-    .card.beta .thumb{
       background:
-        linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.70)),
-        url("./lp-card-beta.jpg") center/cover no-repeat;
+        radial-gradient(380px 220px at 25% 35%, rgba(88,177,200,.18), transparent 60%),
+        radial-gradient(420px 240px at 75% 50%, rgba(255,221,140,.14), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.78));
     }
-    .card .thumb .label{
+    .thumb .label{
       position:absolute;
       left: 14px; bottom: 12px;
       font-weight: 900;
       font-size: 20px;
       text-shadow: 0 8px 24px rgba(0,0,0,.7);
     }
-    .card .body{ padding: 14px; }
+    .body{ padding: 14px; }
+
     .plan{
       display:flex;
       align-items:flex-start;
@@ -170,7 +172,7 @@
       margin-top: 10px;
     }
     .plan b{ display:block; font-size: 16px; }
-    .plan .meta{
+    .meta{
       color: var(--muted);
       font-size: 13px;
       margin-top: 3px;
@@ -190,9 +192,8 @@
     }
     .bullets li{ margin: 6px 0; }
 
-    /* ===== STORY BLOCK ===== */
+    /* ===== STORY + TARGET ===== */
     .story{
-      margin-top: 14px;
       display:grid;
       gap: 12px;
       align-items: start;
@@ -200,7 +201,7 @@
     @media (min-width: 820px){
       .story{ grid-template-columns: 1fr 1fr; }
     }
-    .story .big{
+    .big{
       font-size: 26px;
       font-weight: 900;
       line-height: 1.25;
@@ -215,7 +216,7 @@
       border:1px solid rgba(255,255,255,.08);
       color: var(--muted);
     }
-    .chip .icon{
+    .icon{
       width: 26px; height: 26px;
       border-radius: 8px;
       background: rgba(255,220,135,.16);
@@ -227,7 +228,6 @@
     }
     .chip b{ color: var(--text); }
 
-    /* ===== TARGET LIST ===== */
     .targetBox{
       margin-top: 14px;
       padding: 12px;
@@ -236,17 +236,33 @@
       border:1px solid rgba(255,255,255,.08);
       color: var(--muted);
     }
-    .targetBox .tTitle{
+    .tTitle{
       font-weight: 900;
       color: var(--text);
       margin-bottom: 6px;
     }
-    .targetBox ul{
-      margin: 8px 0 0 18px;
+    .targetBox ul{ margin: 8px 0 0 18px; padding: 0; }
+
+    /* ===== TERMS ===== */
+    .terms h3{
+      margin: 0 0 8px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .terms ul{
+      margin: 0 0 8px 18px;
       padding: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .terms li{ margin: 6px 0; }
+    .terms .note{
+      color: rgba(255,255,255,.45);
+      font-size: 12px;
+      margin-top: 10px;
     }
 
-    /* ===== BOTTOM CTA ===== */
+    /* ===== Bottom CTA ===== */
     .bottomCta{
       margin-top: 16px;
       border-radius: var(--radius);
@@ -284,9 +300,13 @@
         </p>
 
         <div class="ctaRow">
-          <!-- ★ここを自分の導線に変更（X/LINE/Discord） -->
-          <a class="btn primary" href="https://x.com/messages/compose?text=チャット相談（ライト/スタンダード/7日サポート）を希望します">チャット相談を申し込む <span class="arrow">›</span></a>
-          <a class="btn" href="https://x.com/messages/compose?text=Shiftask Pro βテスター（7日/30日）に参加したいです">βテスターに参加する <span class="arrow">›</span></a>
+          <!-- ★ここを自分の導線に変更（X/LINE/Discord/フォーム） -->
+          <a class="btn primary" href="https://x.com/messages/compose?text=チャット相談（ライト/スタンダード/7日サポート）を希望します">
+            チャット相談を申し込む <span class="arrow">›</span>
+          </a>
+          <a class="btn" href="https://x.com/messages/compose?text=Shiftask Pro βテスター（7日/30日）に参加したいです">
+            βテスターに参加する <span class="arrow">›</span>
+          </a>
         </div>
       </div>
     </section>
@@ -341,13 +361,13 @@
         </div>
 
         <!-- Beta card -->
-        <div class="card beta">
+        <div class="card">
           <div class="thumb">
             <div class="label">Shiftask Pro β（現場で育てる）</div>
           </div>
           <div class="body">
 
-            <p style="margin:0; color:var(--muted); font-size:13px;">
+            <p style="margin:0; color:rgba(255,255,255,.68); font-size:13px;">
               現場で消耗しないための「仕組み化ツール」を開発中。<br>
               完成品じゃなく、現場で一緒に育てるβ版です。
             </p>
@@ -386,9 +406,9 @@
       <div class="story">
         <div>
           <div class="big">だから、<br>“仕組み”に逃げました。</div>
-          <p style="color:var(--muted); margin:10px 0 0;">
+          <p style="color:rgba(255,255,255,.68); margin:10px 0 0;">
             人の機嫌・空気・テンポに削られるタイプでも、現場を回せる方法を作っています。<br>
-            強くなるんじゃなく、<b>仕組みで「考える量」と「感情の摩耗」を減らす</b>。
+            強くなるんじゃなく、<b style="color:rgba(255,255,255,.92);">仕組みで「考える量」と「感情の摩耗」を減らす</b>。
           </p>
 
           <div class="targetBox">
@@ -402,9 +422,9 @@
             </ul>
           </div>
 
-          <p style="color:var(--muted); margin:10px 0 0;">
+          <p style="color:rgba(255,255,255,.68); margin:10px 0 0;">
             業界は違っても「疲れ方の構造」は似てる。<br>
-            だから、業界論じゃなく<b>現場が回る仕組み</b>を作っています。
+            だから、業界論じゃなく<b style="color:rgba(255,255,255,.92);">現場が回る仕組み</b>を作っています。
           </p>
         </div>
 
@@ -424,6 +444,19 @@
         チャット相談を申し込む <span class="arrow">›</span>
       </a>
       <div class="sub">通話なし。チャットでOK。今日の不安を、今日軽くする。</div>
+    </section>
+
+    <!-- TERMS -->
+    <section class="section terms" id="terms">
+      <h3>利用規約</h3>
+      <ul>
+        <li>本サービスはチャット相談およびβ提供です</li>
+        <li>医療／法律／投資の専門相談ではありません</li>
+        <li>支払い完了をもって契約成立とします</li>
+        <li>サービス開始後の返金はできません</li>
+        <li>内容の無断転載は禁止します</li>
+      </ul>
+      <div class="note">※ 本ページからの申込み・決済をもって、上記内容に同意したものとみなします。</div>
     </section>
 
   </div>
