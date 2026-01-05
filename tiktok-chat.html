@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TikTok Chat Screen (ChatGPT風)</title>
+  <style>
+    :root{
+      --bg:#0b0f16;
+      --panel:#101827;
+      --stroke: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --user:#1d4ed8;
+      --bot:#111827;
+      --bot2:#0f172a;
+      --accent:#22c55e;
+      --warn:#f59e0b;
+      --radius:22px;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 800px at 50% -20%, rgba(34,197,94,.18), transparent 60%),
+                  radial-gradient(900px 700px at 80% 20%, rgba(29,78,216,.16), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+
+    /* 9:16 縦動画フレーム */
+    .phone {
+      width: min(420px, 94vw);
+      aspect-ratio: 9 / 16;
+      background: rgba(16,24,39,.78);
+      border: 1px solid var(--stroke);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* 上部バー */
+    .topbar{
+      padding:14px 14px 10px;
+      border-bottom: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0));
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.22)}
+    .title{
+      display:flex;flex-direction:column;line-height:1.1;
+      margin-left:6px;
+    }
+    .title b{font-size:14px;letter-spacing:.2px}
+    .title span{font-size:12px;color:var(--muted)}
+    .chip{
+      margin-left:auto;
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      display:flex;align-items:center;gap:8px;
+    }
+    .rec{
+      width:8px;height:8px;border-radius:999px;background:#ef4444;
+      box-shadow: 0 0 0 6px rgba(239,68,68,.12);
+      animation:pulse 1.3s infinite;
+    }
+    @keyframes pulse{0%{transform:scale(.9)}50%{transform:scale(1.08)}100%{transform:scale(.9)}}
+
+    /* チャット領域 */
+    .chat{
+      flex:1;
+      padding:14px;
+      overflow:auto;
+      scroll-behavior:smooth;
+    }
+    .msg{
+      max-width: 92%;
+      margin: 10px 0;
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      position:relative;
+      backdrop-filter: blur(8px);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 18px;           /* TikTok用に大きめ */
+      line-height: 1.35;
+    }
+    .msg .meta{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .msg.user{
+      margin-left:auto;
+      background: linear-gradient(180deg, rgba(29,78,216,.55), rgba(29,78,216,.25));
+      border-color: rgba(59,130,246,.35);
+    }
+    .msg.bot{
+      margin-right:auto;
+      background: linear-gradient(180deg, rgba(17,24,39,.80), rgba(15,23,42,.55));
+      border-color: rgba(255,255,255,.10);
+    }
+    .badge{
+      font-family: var(--mono);
+      font-size:11px;
+      padding:3px 7px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.82);
+    }
+    .kbd{
+      font-family: var(--mono);
+      font-size:11px;
+      padding:3px 7px;
+      border-radius:8px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.78);
+    }
+
+    /* 入力エリア */
+    .composer{
+      padding:12px;
+      border-top: 1px solid var(--stroke);
+      background: rgba(0,0,0,.22);
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    textarea{
+      width:100%;
+      resize:none;
+      height:56px;
+      border-radius:18px;
+      border:1px solid var(--stroke);
+      outline:none;
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding:12px 12px;
+      font-size:16px;
+      line-height:1.25;
+    }
+    button{
+      border:none;
+      cursor:pointer;
+      border-radius: 16px;
+      padding: 12px 12px;
+      font-weight: 700;
+      color: #04120a;
+      background: linear-gradient(180deg, rgba(34,197,94,1), rgba(34,197,94,.75));
+      box-shadow: 0 10px 30px rgba(34,197,94,.22);
+      min-width: 74px;
+    }
+    button.secondary{
+      color: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--stroke);
+      box-shadow:none;
+      min-width: 54px;
+    }
+    .controls{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color: var(--muted);
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    /* タyping dots */
+    .typing{
+      display:inline-flex;
+      gap:5px;
+      align-items:center;
+      padding: 4px 0 0;
+    }
+    .typing span{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(255,255,255,.55);
+      opacity:.35;
+      animation: blink 1.2s infinite;
+    }
+    .typing span:nth-child(2){animation-delay:.15s}
+    .typing span:nth-child(3){animation-delay:.3s}
+    @keyframes blink{0%,100%{opacity:.25; transform:translateY(0)}50%{opacity:.9; transform:translateY(-2px)}}
+
+    /* 右下：撮影用ウォーターマークっぽい */
+    .water{
+      position:absolute;
+      right:12px;
+      bottom:84px;
+      font-size:12px;
+      color: rgba(255,255,255,.55);
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.25);
+      padding:6px 10px;
+      border-radius:999px;
+      backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="topbar">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="title">
+        <b>Chat — 撮影モード</b>
+        <span>縦動画 / 大文字 / 自動スクロール</span>
+      </div>
+      <div class="chip" title="録画っぽい表示（見た目用）">
+        <i class="rec"></i> REC
+      </div>
+    </div>
+
+    <div class="chat" id="chat"></div>
+
+    <div class="water">Shiftask Pro / TikTok UI</div>
+
+    <div class="composer">
+      <div class="row">
+        <textarea id="input" placeholder="ユーザーのセリフを入れて送信（Enterで送信 / Shift+Enterで改行）"></textarea>
+        <button id="send">送信</button>
+      </div>
+
+      <div class="controls">
+        <button class="secondary" id="bot">AI返事</button>
+        <button class="secondary" id="type">タイピングON/OFF</button>
+        <button class="secondary" id="clear">全消し</button>
+      </div>
+
+      <div class="hint">
+        <span class="badge">TikTok Tips</span>
+        <span class="kbd">Enter</span><span>送信</span>
+        <span class="kbd">Shift+Enter</span><span>改行</span>
+        <span class="kbd">Ctrl+L</span><span>入力欄フォーカス</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("input");
+    const sendBtn = document.getElementById("send");
+    const botBtn = document.getElementById("bot");
+    const clearBtn = document.getElementById("clear");
+    const typeBtn = document.getElementById("type");
+
+    let typingMode = true;
+
+    const demoReplies = [
+      "OK良太。結論からいく。\n『今のしんどさ』は根性不足じゃなくて、負荷の設計ミスだ。",
+      "やることを減らすんじゃない。\n“やらなくていい形”に変える。",
+      "この画面で撮って、字幕乗せるだけで伸びる。\n『現場→改善→結果』の順で話すと強い。",
+      "次の一手：\n①問題を一言\n②原因を1つ\n③解決策を1つ\n④視聴者に質問\nこの型でいこう。"
+    ];
+    let replyIndex = 0;
+
+    function nowTime() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      return `${hh}:${mm}`;
+    }
+
+    function addMessage(role, text) {
+      const wrap = document.createElement("div");
+      wrap.className = `msg ${role}`;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const who = document.createElement("span");
+      who.textContent = (role === "user") ? "You" : "AI";
+
+      const t = document.createElement("span");
+      t.className = "badge";
+      t.textContent = nowTime();
+
+      meta.appendChild(who);
+      meta.appendChild(t);
+
+      const body = document.createElement("div");
+      body.className = "body";
+      body.textContent = text;
+
+      wrap.appendChild(meta);
+      wrap.appendChild(body);
+
+      chat.appendChild(wrap);
+      chat.scrollTop = chat.scrollHeight;
+      return body;
+    }
+
+    function addTyping() {
+      const body = addMessage("bot", "");
+      const dots = document.createElement("div");
+      dots.className = "typing";
+      dots.innerHTML = "<span></span><span></span><span></span>";
+      body.appendChild(dots);
+      chat.scrollTop = chat.scrollHeight;
+      return { body, dots };
+    }
+
+    async function typeText(targetEl, text, speed=18) {
+      targetEl.textContent = "";
+      for (let i=0; i<text.length; i++) {
+        targetEl.textContent += text[i];
+        chat.scrollTop = chat.scrollHeight;
+        // 改行や句読点で少し間
+        const ch = text[i];
+        let delay = speed;
+        if (ch === "\n") delay = 60;
+        if ("。、！？".includes(ch)) delay = 90;
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+
+    async function sendUser() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage("user", text);
+      input.value = "";
+      input.focus();
+    }
+
+    async function sendBot(text) {
+      if (!text) return;
+      if (!typingMode) {
+        addMessage("bot", text);
+        return;
+      }
+      const { body, dots } = addTyping();
+      await new Promise(r => setTimeout(r, 450));
+      dots.remove();
+      await typeText(body, text);
+    }
+
+    sendBtn.addEventListener("click", sendUser);
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendUser();
+      }
+    });
+
+    botBtn.addEventListener("click", async () => {
+      const text = demoReplies[replyIndex % demoReplies.length];
+      replyIndex++;
+      await sendBot(text);
+    });
+
+    typeBtn.addEventListener("click", () => {
+      typingMode = !typingMode;
+      typeBtn.textContent = typingMode ? "タイピングON" : "タイピングOFF";
+    });
+
+    clearBtn.addEventListener("click", () => {
+      chat.innerHTML = "";
+      replyIndex = 0;
+      input.focus();
+    });
+
+    // ショートカット
+    window.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key.toLowerCase() === "l") {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+
+    // 初期デモ
+    addMessage("bot", "撮影用チャット画面、起動した。\n下でセリフ入れて、AI返事ボタンで“それっぽい会話”を量産できる。");
+    addMessage("user", "TikTok用に、ChatGPTっぽい画面が欲しい。");
+    sendBot("了解。縦動画向けに“文字大きめ・自動スクロール・タイピング演出”まで入れた。\nこのまま画面録画でOK。");
+  </script>
+</body>
+</html>
